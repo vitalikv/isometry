@@ -3,9 +3,11 @@ import * as THREE from 'three';
 import { controls, scene, renderer } from './index';
 import { LoaderModel } from './loader-model';
 import { SelectObj } from './select-obj';
+import { ConverterToSvg } from './svg';
 
 export class ConvertTubesToLines {
   loaderModel;
+  svgConverter = new ConverterToSvg();
 
   constructor() {
     this.loaderModel = new LoaderModel({ scene });
@@ -31,7 +33,19 @@ export class ConvertTubesToLines {
     for (let i = 0; i < meshes.length; i++) {
       const points = this.getPointsForLine(meshes[i]);
 
-      this.createLine({ points });
+      if (i === 0) this.createLine({ points });
+      for (let i2 = 0; i2 < points.length - 1; i2++) {
+        const line = this.svgConverter.createSvgLine({ x1: 0, y1: 0, x2: 0, y2: 0 });
+        this.svgConverter.updateSvgLine(controls.object, controls.domElement, line, [points[i2], points[i2 + 1]]);
+      }
+      if (points.length === 1) console.log(222);
+      if (points.length > 0) {
+        let circle = this.svgConverter.createSvgCircle();
+        this.svgConverter.updateSvgCircle(controls.object, controls.domElement, circle, points[0]);
+
+        circle = this.svgConverter.createSvgCircle();
+        this.svgConverter.updateSvgCircle(controls.object, controls.domElement, circle, points[points.length - 1]);
+      }
     }
 
     // if (covers.length > 0) {
@@ -189,7 +203,7 @@ export class ConvertTubesToLines {
       }
     }
 
-    console.log(1111, centerPos.length);
+    //console.log(1111, centerPos.length);
     const limitDist = 0.05; // расстояние, которое считается допустимым считать, что точка находится в тойже позиции
 
     // находим точки, которые находятся в одной позиции
@@ -216,7 +230,7 @@ export class ConvertTubesToLines {
       //this.helperBox({ pos: centerPos[i].pos, size: 0.1, color: 0x00ff00 });
     }
 
-    console.log(2222, centerPos.length);
+    //console.log(2222, centerPos.length);
 
     return points;
   }

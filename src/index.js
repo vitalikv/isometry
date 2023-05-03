@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { ConvertTubesToLines } from './path-line';
-import { createSvgLine } from './svg';
 
 export let renderer, camera, scene, controls, clock, gui, stats;
 let cameraP, cameraO;
@@ -65,7 +64,7 @@ function init() {
 
   camera = cameraP;
 
-  controls = new OrbitControls(camera, renderer.domElement);
+  controls = new OrbitControls(camera, document.body);
 
   const cttl = new ConvertTubesToLines();
 
@@ -116,6 +115,12 @@ function onKeyDown(event) {
 
   camera = camera === cameraP ? cameraO : cameraP;
 
+  if (camera === cameraO) {
+    const dist = controls.target.distanceTo(cameraP.position);
+
+    cameraO.zoom = 10 / dist;
+  }
+
   camera.position.copy(pos);
   camera.updateMatrixWorld();
   camera.updateProjectionMatrix();
@@ -130,5 +135,3 @@ function render() {
 
   renderer.render(scene, camera);
 }
-
-//createSvgLine({ count: 1, x1: 400, y1: 700, x2: 800, y2: 400 })[0];
