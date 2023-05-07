@@ -3,11 +3,12 @@ import * as THREE from 'three';
 import { controls, scene, renderer } from './index';
 import { LoaderModel } from './loader-model';
 import { SelectObj } from './select-obj';
-import { ConverterToSvg } from './svg';
+import { svgConverter } from './svg';
 
 export class ConvertTubesToLines {
   loaderModel;
-  svgConverter = new ConverterToSvg();
+  svgConverter = svgConverter;
+  lines = [];
 
   constructor() {
     this.loaderModel = new LoaderModel({ scene });
@@ -27,25 +28,45 @@ export class ConvertTubesToLines {
 
       this.getIsometry({ meshes });
     }
+
+    // создание svg
+    if (event.code === 'KeyS') {
+      console.log(this.lines);
+      this.svgConverter.deleteSvg();
+
+      for (let i = 0; i < this.lines.length; i++) {
+        const points = this.lines[i];
+
+        for (let i2 = 0; i2 < points.length - 1; i2++) {
+          const line = this.svgConverter.createSvgLine({ x1: 0, y1: 0, x2: 0, y2: 0 });
+          line.points = [points[i2], points[i2 + 1]];
+          //this.svgConverter.updateSvgLine(controls.object, controls.domElement, line);
+        }
+
+        if (points.length > 0) {
+          let circle = this.svgConverter.createSvgCircle();
+          circle.point = points[0];
+          //this.svgConverter.updateSvgCircle(controls.object, controls.domElement, circle);
+
+          circle = this.svgConverter.createSvgCircle();
+          circle.point = points[points.length - 1];
+          //this.svgConverter.updateSvgCircle(controls.object, controls.domElement, circle);
+        }
+      }
+
+      this.svgConverter.updateSvg(controls.object, controls.domElement);
+    }
   };
 
   getIsometry({ meshes }) {
+    this.lines = [];
+
     for (let i = 0; i < meshes.length; i++) {
       const points = this.getPointsForLine(meshes[i]);
 
-      if (i === 0) this.createLine({ points });
-      for (let i2 = 0; i2 < points.length - 1; i2++) {
-        const line = this.svgConverter.createSvgLine({ x1: 0, y1: 0, x2: 0, y2: 0 });
-        this.svgConverter.updateSvgLine(controls.object, controls.domElement, line, [points[i2], points[i2 + 1]]);
-      }
-      if (points.length === 1) console.log(222);
-      if (points.length > 0) {
-        let circle = this.svgConverter.createSvgCircle();
-        this.svgConverter.updateSvgCircle(controls.object, controls.domElement, circle, points[0]);
+      this.createLine({ points });
 
-        circle = this.svgConverter.createSvgCircle();
-        this.svgConverter.updateSvgCircle(controls.object, controls.domElement, circle, points[points.length - 1]);
-      }
+      this.lines.push(points);
     }
 
     // if (covers.length > 0) {

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { ConvertTubesToLines } from './path-line';
+import { svgConverter } from './svg';
 
 export let renderer, camera, scene, controls, clock, gui, stats;
 let cameraP, cameraO;
@@ -57,7 +58,7 @@ function init() {
 
   let aspect = renderer.domElement.clientWidth / renderer.domElement.clientHeight;
   const d = 5;
-  cameraO = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 1000);
+  cameraO = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 10000);
   cameraO.position.copy(cameraP.position.clone());
   cameraO.updateMatrixWorld();
   cameraO.updateProjectionMatrix();
@@ -132,6 +133,7 @@ function render() {
   requestAnimationFrame(render);
 
   controls.update();
+  svgConverter.updateSvg(controls.object, controls.domElement);
 
   renderer.render(scene, camera);
 }

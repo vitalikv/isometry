@@ -1,12 +1,13 @@
 import * as THREE from 'three';
 
-export class ConverterToSvg {
+class ConverterToSvg {
   container;
   line;
 
+  arr = { line: [], circle: [] };
+
   constructor() {
     this.container = this.createSvgContainer();
-    this.createSvgCircle();
   }
 
   createSvgContainer() {
@@ -32,7 +33,8 @@ export class ConverterToSvg {
     svg.setAttribute('x2', x2);
     svg.setAttribute('y2', y2);
     svg.setAttribute('stroke-width', '2px');
-    svg.setAttribute('stroke', 'rgb(255, 162, 23)');
+    //svg.setAttribute('stroke', 'rgb(255, 162, 23)');
+    svg.setAttribute('stroke', 'rgb(0, 0, 0)');
     //svg.setAttribute('display', 'none');
 
     if (params.dasharray) {
@@ -55,6 +57,8 @@ export class ConverterToSvg {
     line.points = [new THREE.Vector3(), new THREE.Vector3()];
 
     container.appendChild(svg);
+
+    this.arr.line.push(line);
 
     return line;
   }
@@ -84,13 +88,24 @@ export class ConverterToSvg {
 
     container.appendChild(svg);
 
+    this.arr.circle.push(circle);
+
     return circle;
   }
 
-  // обновляем положение svg на экране (конвертируем из 3D в screen)
-  updateSvgLine(camera, canvas, line, points) {
-    const el = line.svg;
+  updateSvg(camera, canvas) {
+    for (let i = 0; i < this.arr.line.length; i++) {
+      this.updateSvgLine(camera, canvas, this.arr.line[i]);
+    }
+    for (let i = 0; i < this.arr.circle.length; i++) {
+      this.updateSvgCircle(camera, canvas, this.arr.circle[i]);
+    }
+  }
 
+  // обновляем положение svg на экране (конвертируем из 3D в screen)
+  updateSvgLine(camera, canvas, line) {
+    const el = line.svg;
+    const points = line.points;
     //camera.updateProjectionMatrix();
 
     const pos1 = this.getPosition2D({ camera, canvas, pos: points[0] });
@@ -103,8 +118,9 @@ export class ConverterToSvg {
   }
 
   // обновляем положение svg на экране (конвертируем из 3D в screen)
-  updateSvgCircle(camera, canvas, circle, point) {
+  updateSvgCircle(camera, canvas, circle) {
     const el = circle.svg;
+    const point = circle.point;
 
     const pos = this.getPosition2D({ camera, canvas, pos: point });
 
@@ -120,4 +136,20 @@ export class ConverterToSvg {
 
     return { x, y };
   }
+
+  deleteSvg() {
+    for (let i = 0; i < this.arr.line.length; i++) {
+      const obj = this.arr.line[i];
+      obj.svg.remove();
+    }
+    for (let i = 0; i < this.arr.circle.length; i++) {
+      const obj = this.arr.circle[i];
+      obj.svg.remove();
+    }
+
+    this.arr.line = [];
+    this.arr.circle = [];
+  }
 }
+
+export const svgConverter = new ConverterToSvg();
