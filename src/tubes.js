@@ -46,6 +46,17 @@ export class ConvertTubesToLines {
     return points;
   }
 
+  // отображение линий по точкам
+  createLine({ points }) {
+    const material = new THREE.LineBasicMaterial({ color: 0x000000 });
+
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+
+    const line = new THREE.Line(geometry, material);
+
+    return line;
+  }
+
   // получаем массив с элементами в котором сохранены одинаковые точки по позиции
   getDataPoints({ geometry, obj }) {
     const position = geometry.getAttribute('position');
@@ -367,7 +378,7 @@ export class ConvertTubesToLines {
       posC = new THREE.Vector3(posC.x / 2, posC.y / 2, posC.z / 2);
       posC.add(pos1);
 
-      pointsHelp.push(this.helperSphere({ pos: posC, size: 0.1, color: 0x0000ff }));
+      //pointsHelp.push(this.helperSphere({ pos: posC, size: 0.1, color: 0x0000ff }));
 
       if (pid1 === 0) this.lines[listDist[i].lid1].unshift(posC);
       else this.lines[listDist[i].lid1].push(posC);
@@ -378,7 +389,7 @@ export class ConvertTubesToLines {
       count++;
     }
 
-    console.log(count, pointsHelp);
+    //console.log(count, pointsHelp);
     Main.setMeshes({ arr: pointsHelp });
   }
 

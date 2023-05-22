@@ -18,7 +18,7 @@ export class ConvertObjs {
     const fittingObjs = [];
 
     for (let i = 0; i < meshes.length; i++) {
-      meshes[i].visible = false;
+      meshes[i].visible = false; // todo - удалить
 
       const obj = this.fitting.obj.clone();
 
@@ -32,6 +32,9 @@ export class ConvertObjs {
 
       fittingObjs.push(obj);
     }
+
+    const pointsHelp = [];
+    let count = 0;
 
     for (let i = 0; i < fittingObjs.length; i++) {
       const obj = fittingObjs[i];
@@ -64,32 +67,55 @@ export class ConvertObjs {
       this.fitting.setRot({ obj, pos1: listDist[0].pos, pos2: listDist[1].pos });
 
       let dir = listDist[1].pos.clone().sub(listDist[0].pos).normalize();
-      dir.x *= 0.25;
-      dir.y *= 0.25;
-      dir.z *= 0.25;
+      dir.x *= obj.scale.x; // меняем размер
+      dir.y *= obj.scale.x;
+      dir.z *= obj.scale.x;
 
-      if (listDist[0].id === 0) listDist[0].points.unshift(posC.clone().sub(dir));
-      else listDist[0].points.push(posC.clone().sub(dir));
+      const pos1 = posC.clone().sub(dir);
+      const pos2 = posC.clone().add(dir);
 
-      if (listDist[1].id === 0) listDist[1].points.unshift(posC.clone().add(dir));
-      else listDist[1].points.push(posC.clone().add(dir));
+      if (listDist[0].id === 0) listDist[0].points.unshift(pos1);
+      else listDist[0].points.push(pos1);
 
-      obj.updateMatrixWorld();
+      if (listDist[1].id === 0) listDist[1].points.unshift(pos2);
+      else listDist[1].points.push(pos2);
 
-      for (let i2 = 0; i2 < obj.userData.shapes.length; i2++) {
-        for (let i3 = 0; i3 < obj.userData.shapes[i2].length; i3++) {
-          let point = obj.userData.shapes[i2][i3];
+      pointsHelp.push(this.helperSphere({ pos: pos1, size: 0.1, color: 0x00ff00 }));
+      pointsHelp.push(this.helperSphere({ pos: pos2, size: 0.1, color: 0x00ff00 }));
 
-          point.x *= obj.scale.x;
-          point.y *= obj.scale.x;
-          point.z *= obj.scale.x;
-
-          obj.userData.shapes[i2][i3] = point;
-          //obj.userData.shapes[i2][i3] = new THREE.Vector3(point.x, point.y, point.z).applyMatrix4(obj.matrixWorld);
-        }
-      }
+      this.upObjUserData({ obj });
     }
 
+    console.log('obj', count, pointsHelp);
+
     return fittingObjs;
+  }
+
+  // обновляем иформацию по которой будем строить фитинг
+  upObjUserData({ obj }) {
+    obj.updateMatrixWorld();
+
+    for (let i2 = 0; i2 < obj.userData.shapes.length; i2++) {
+      for (let i3 = 0; i3 < obj.userData.shapes[i2].length; i3++) {
+        let point = obj.userData.shapes[i2][i3];
+
+        point.x *= obj.scale.x;
+        point.y *= obj.scale.x;
+        point.z *= obj.scale.x;
+
+        obj.userData.shapes[i2][i3] = point;
+        //obj.userData.shapes[i2][i3] = new THREE.Vector3(point.x, point.y, point.z).applyMatrix4(obj.matrixWorld);
+      }
+    }
+  }
+
+  // todo удалить
+  // построение sphere для визуализиции
+  helperSphere({ pos, size, color = 0x0000ff }) {
+    const sphere = new THREE.Mesh(new THREE.SphereGeometry(size, 32, 16), new THREE.MeshStandardMaterial({ color, depthTest: false, transparent: true }));
+    sphere.position.copy(pos);
+    this.scene.add(sphere);
+
+    return sphere;
   }
 }

@@ -7,6 +7,7 @@ export class Gis {
   svgConverter = svgConverter;
   scene;
   isometry;
+  svgLines = [];
   lines = [];
   objs = [];
 
@@ -24,17 +25,20 @@ export class Gis {
 
     // создание svg
     if (event.code === 'KeyS') {
-      svgConverter.createSvgScheme({ lines: this.lines });
+      svgConverter.createSvgScheme({ lines: this.svgLines });
     }
   };
 
   init() {
     const { lines, objs } = this.isometry.getIsometry();
-    this.lines = lines;
 
     for (let i = 0; i < lines.length; i++) {
       const line = this.createLine({ points: lines[i] });
       this.scene.add(line);
+      this.svgLines.push(lines[i]);
+      this.lines = lines;
+
+      //this.helperSphere({ pos: lines[i][0], size: 0.1, color: 0x0000ff });
     }
 
     for (let i = 0; i < objs.length; i++) {
@@ -43,6 +47,7 @@ export class Gis {
       for (let i2 = 0; i2 < objs[i].userData.shapes.length; i2++) {
         const line = this.createLine({ points: objs[i].userData.shapes[i2] });
         obj.add(line);
+        //this.svgLines.push(objs[i].userData.shapes[i2]);
       }
       const pos = objs[i].userData.pos;
       const rot = objs[i].userData.rot;
@@ -62,5 +67,14 @@ export class Gis {
     const line = new THREE.Line(geometry, material);
 
     return line;
+  }
+
+  // построение sphere для визуализиции
+  helperSphere({ pos, size, color = 0x0000ff }) {
+    const sphere = new THREE.Mesh(new THREE.SphereGeometry(size, 32, 16), new THREE.MeshStandardMaterial({ color, depthTest: false, transparent: true }));
+    sphere.position.copy(pos);
+    this.scene.add(sphere);
+
+    return sphere;
   }
 }
