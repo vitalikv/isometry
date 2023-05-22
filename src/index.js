@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { ConvertTubesToLines } from './path-line';
 import { svgConverter } from './svg';
 import { LoaderModel } from './loader-model';
 import { SelectObj } from './select-obj';
+import { Gis } from './gis-page';
 
 export let renderer, camera, scene, controls, clock, gui, stats;
 let cameraP, cameraO;
@@ -102,7 +102,7 @@ function init() {
   }
 
   selectObj = new SelectObj({ controls, scene, canvas: renderer.domElement, meshes: [] });
-  isomety = new ConvertTubesToLines();
+  new Gis({ scene });
 
   window.addEventListener(
     'resize',

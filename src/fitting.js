@@ -9,7 +9,7 @@ export class Fitting {
     this.scene = scene;
     this.createValve();
 
-    this.crTestPointRot();
+    //this.crTestPointRot();
   }
 
   createValve() {
@@ -23,7 +23,16 @@ export class Fitting {
     const obj = new THREE.Line(geometry, material);
     obj.geometry.computeBoundingSphere();
     obj.geometry.computeBoundingBox();
-    this.scene.add(obj);
+    //this.scene.add(obj);
+
+    obj.userData = {};
+    obj.userData.pos = new THREE.Vector3();
+    obj.userData.rot = new THREE.Vector3();
+    obj.userData.scale = 1;
+    obj.userData.shapes = [];
+    geometries.forEach((g) => {
+      obj.userData.shapes.push(g.userData.points);
+    });
 
     this.obj = obj;
   }
@@ -37,6 +46,8 @@ export class Fitting {
     points.push(new THREE.Vector3(-1, -1, 0));
 
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    geometry.userData = {};
+    geometry.userData.points = points;
 
     return geometry;
   }
@@ -49,6 +60,8 @@ export class Fitting {
     points.push(new THREE.Vector3(1, 1.5, 0));
 
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    geometry.userData = {};
+    geometry.userData.points = points;
 
     return geometry;
   }
@@ -78,5 +91,9 @@ export class Fitting {
     obj.lookAt(dir);
     obj.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI / 2);
     obj.position.copy(pos);
+
+    obj.userData.pos = pos;
+    obj.userData.rot = new THREE.Vector3(obj.rotation.x, obj.rotation.y, obj.rotation.z);
+    obj.userData.scale = obj.scale.x;
   }
 }

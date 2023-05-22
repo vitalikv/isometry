@@ -1,132 +1,14 @@
 import * as THREE from 'three';
 
 import { controls, scene, renderer } from './index';
-import { svgConverter } from './svg';
-import { Fitting } from './fitting';
 import * as Main from './index';
 
 export class ConvertTubesToLines {
-  loaderModel;
-  svgConverter = svgConverter;
-  fitting;
+  scene;
   lines = [];
 
   constructor() {
-    this.fitting = new Fitting({ scene: Main.scene });
-
-    document.addEventListener('keydown', this.onKeyDown);
-  }
-
-  onKeyDown = (event) => {
-    if (event.code === 'Space') {
-      const meshes = Main.loaderModel.meshes;
-      const fittings = Main.loaderModel.fittings;
-
-      this.getIsometry({ meshes });
-      //this.getIsometryFittings({ meshes: fittings });
-    }
-
-    // создание svg
-    if (event.code === 'KeyS') {
-      console.log(this.lines);
-      this.svgConverter.deleteSvg();
-
-      for (let i = 0; i < this.lines.length; i++) {
-        const points = this.lines[i];
-
-        for (let i2 = 0; i2 < points.length - 1; i2++) {
-          const line = this.svgConverter.createSvgLine({ x1: 0, y1: 0, x2: 0, y2: 0 });
-          line.points = [points[i2], points[i2 + 1]];
-          //this.svgConverter.updateSvgLine(controls.object, controls.domElement, line);
-        }
-
-        if (points.length > 0) {
-          let circle = this.svgConverter.createSvgCircle();
-          circle.point = points[0];
-          //this.svgConverter.updateSvgCircle(controls.object, controls.domElement, circle);
-
-          circle = this.svgConverter.createSvgCircle();
-          circle.point = points[points.length - 1];
-          //this.svgConverter.updateSvgCircle(controls.object, controls.domElement, circle);
-        }
-      }
-
-      this.svgConverter.updateSvg(controls.object, controls.domElement);
-    }
-  };
-
-  getIsometryFittings({ meshes }) {
-    const fittingObjs = [];
-
-    for (let i = 0; i < meshes.length; i++) {
-      meshes[i].visible = false;
-
-      const obj = this.fitting.obj.clone();
-
-      if (!meshes[i].geometry.boundingSphere) meshes[i].geometry.computeBoundingSphere();
-      const position = meshes[i].geometry.boundingSphere.center.clone().applyMatrix4(meshes[i].matrixWorld);
-
-      const q = meshes[i].getWorldQuaternion(new THREE.Quaternion());
-      obj.position.copy(position);
-      obj.quaternion.copy(q);
-      scene.add(obj);
-
-      fittingObjs.push(obj);
-    }
-
-    for (let i = 0; i < fittingObjs.length; i++) {
-      const obj = fittingObjs[i];
-
-      const listDist = [];
-
-      for (let i2 = 0; i2 < this.lines.length; i2++) {
-        const points = this.lines[i2];
-
-        const dist1 = obj.position.distanceTo(points[0]);
-        const dist2 = obj.position.distanceTo(points[points.length - 1]);
-
-        listDist.push({ dist: dist1, pos: points[0], points, id: 0 });
-        listDist.push({ dist: dist2, pos: points[points.length - 1], points, id: points.length - 1 });
-      }
-
-      listDist.sort((a, b) => {
-        return a.dist - b.dist;
-      });
-
-      //console.log(listDist);
-
-      //this.helperBox({ pos: listDist[0].pos, size: 0.1, color: 0x0000ff });
-      //this.helperBox({ pos: listDist[1].pos, size: 0.1, color: 0xff0000 });
-
-      //const dist = listDist[0].pos.distanceTo(listDist[1].pos);
-      const dist = 0.5;
-      obj.scale.set(dist / 2, dist / 2, dist / 2);
-
-      let posC = listDist[1].pos.clone().sub(listDist[0].pos);
-      posC = new THREE.Vector3(posC.x / 2, posC.y / 2, posC.z / 2);
-      posC.add(listDist[0].pos);
-      obj.position.copy(posC);
-
-      this.fitting.setRot({ obj, pos1: listDist[0].pos, pos2: listDist[1].pos });
-
-      console.log(obj.geometry.boundingBox);
-
-      let dir = listDist[1].pos.clone().sub(listDist[0].pos).normalize();
-      dir.x *= 0.25;
-      dir.y *= 0.25;
-      dir.z *= 0.25;
-      this.createLine({ points: [listDist[0].pos, posC.clone().sub(dir)] });
-      this.createLine({ points: [listDist[1].pos, posC.clone().add(dir)] });
-
-      if (listDist[0].id === 0) listDist[0].points.unshift(posC.clone().sub(dir));
-      else listDist[0].points.push(posC.clone().sub(dir));
-
-      if (listDist[1].id === 0) listDist[1].points.unshift(posC.clone().add(dir));
-      else listDist[1].points.push(posC.clone().add(dir));
-
-      // listDist[0].points[listDist[0].id] = posC.clone().sub(dir);
-      // listDist[1].points[listDist[1].id] = posC.clone().add(dir);
-    }
+    this.scene = scene;
   }
 
   getIsometry({ meshes }) {
@@ -135,21 +17,18 @@ export class ConvertTubesToLines {
     for (let i = 0; i < meshes.length; i++) {
       const points = this.getPointsForLine(meshes[i]);
       if (points.length < 2) continue;
-      //this.createLine({ points });
 
       this.lines.push(points);
     }
 
     this.joinLine();
 
-    for (let i = 0; i < this.lines.length; i++) {
-      this.createLine({ points: this.lines[i] });
-    }
+    return this.lines;
   }
 
   // расчет для одного mesh
   getPointsForLine(obj) {
-    obj.visible = false;
+    obj.visible = false; // todo - удалить
     obj.updateMatrixWorld();
     obj.updateMatrix();
 
@@ -163,8 +42,6 @@ export class ConvertTubesToLines {
     this.delAbnormalDir({ arr: arrP });
 
     const points = this.getPointsIntersectionDirs(arrP);
-
-    //this.getFirstEndPoint({ arrP, obj });
 
     return points;
   }
@@ -354,55 +231,6 @@ export class ConvertTubesToLines {
     return { cross, pos: qnDet };
   }
 
-  createLine({ points }) {
-    const material = new THREE.LineBasicMaterial({ color: 0x000000 });
-
-    const geometry = new THREE.BufferGeometry().setFromPoints(points);
-
-    const line = new THREE.Line(geometry, material);
-    scene.add(line);
-  }
-
-  // находим стартовую и конечную точку у трубы
-  getFirstEndPoint({ arrP, obj }) {
-    const arrP_Id = [];
-
-    for (let i = 0; i < arrP.length; i++) {
-      const id = arrP[i].point[0];
-      const pos = arrP[i].pos[0];
-
-      if (arrP[i].point.length === 3 || arrP[i].dir.length === 3) {
-        arrP_Id.push({ id, pos });
-      }
-    }
-
-    if (arrP_Id.length === 0) return;
-
-    let path = this.getContourPoint({ arr: arrP_Id });
-    if (path.length === 0) return;
-    let c1 = this.getCenter({ path, posParentObj: obj.position });
-    covers.push({ minDist: c1.distanceTo(path[0].pos), center: c1, path, posParentObj: obj.position, id2: -1 });
-
-    let arrP_Id_2 = [];
-
-    for (let i = 0; i < arrP_Id.length; i++) {
-      let flag = false;
-      for (let i2 = 0; i2 < path.length; i2++) {
-        if (arrP_Id[i].id === path[i2].hit) {
-          flag = true;
-          break;
-        }
-      }
-
-      if (!flag) arrP_Id_2.push(arrP_Id[i]);
-    }
-
-    path = this.getContourPoint({ arr: arrP_Id_2 });
-    if (path.length === 0) return;
-    let c2 = this.getCenter({ path, posParentObj: obj.position });
-    covers.push({ minDist: c2.distanceTo(path[0].pos), center: c2, path, posParentObj: obj.position, id2: -1 });
-  }
-
   getClosestPoint({ arr, id1 = 0 }) {
     let minDist = Infinity;
     let id2 = 0;
@@ -464,7 +292,7 @@ export class ConvertTubesToLines {
     return path;
   }
 
-  getCenter({ path, posParentObj }) {
+  getCenter({ path }) {
     let sumPos = new THREE.Vector3();
 
     for (let i = 0; i < path.length; i++) {
@@ -480,6 +308,7 @@ export class ConvertTubesToLines {
     return sumPos;
   }
 
+  // убираем разрывы между трубами (где стыки)
   joinLine() {
     const listDist = [];
     for (let i = 0; i < this.lines.length; i++) {
@@ -557,7 +386,7 @@ export class ConvertTubesToLines {
   // построение векторов для визуализиции
   helperArrow({ dir, pos, length = 1, color = 0x0000ff }) {
     const helper = new THREE.ArrowHelper(dir, pos, length, color);
-    scene.add(helper);
+    this.scene.add(helper);
   }
 
   // todo удалить
@@ -565,7 +394,7 @@ export class ConvertTubesToLines {
   helperBox({ pos, size, color = 0x0000ff }) {
     const box = new THREE.Mesh(new THREE.BoxGeometry(size, size, size), new THREE.MeshStandardMaterial({ color, depthTest: true, transparent: true }));
     box.position.copy(pos);
-    scene.add(box);
+    this.scene.add(box);
 
     return box;
   }
@@ -575,12 +404,8 @@ export class ConvertTubesToLines {
   helperSphere({ pos, size, color = 0x0000ff }) {
     const sphere = new THREE.Mesh(new THREE.SphereGeometry(size, 32, 16), new THREE.MeshStandardMaterial({ color, depthTest: false, transparent: true }));
     sphere.position.copy(pos);
-    scene.add(sphere);
+    this.scene.add(sphere);
 
     return sphere;
   }
 }
-
-let covers = [];
-
-console.log(666, new THREE.Vector3(0, 0, 0).distanceToSquared(new THREE.Vector3(20, 0, 0)));

@@ -150,6 +150,28 @@ class ConverterToSvg {
     this.arr.line = [];
     this.arr.circle = [];
   }
+
+  createSvgScheme({ lines }) {
+    //console.log(this.lines);
+    this.deleteSvg();
+    for (let i = 0; i < lines.length; i++) {
+      const points = lines[i];
+      for (let i2 = 0; i2 < points.length - 1; i2++) {
+        const line = this.createSvgLine({ x1: 0, y1: 0, x2: 0, y2: 0 });
+        line.points = [points[i2], points[i2 + 1]];
+        //this.updateSvgLine(controls.object, controls.domElement, line);
+      }
+      if (points.length > 0) {
+        let circle = this.createSvgCircle();
+        circle.point = points[0];
+        //this.updateSvgCircle(controls.object, controls.domElement, circle);
+        circle = this.createSvgCircle();
+        circle.point = points[points.length - 1];
+        //this.updateSvgCircle(controls.object, controls.domElement, circle);
+      }
+    }
+    //this.updateSvg(controls.object, controls.domElement);
+  }
 }
 
 export const svgConverter = new ConverterToSvg();
