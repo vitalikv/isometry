@@ -22,6 +22,10 @@ export class SelectObj {
     document.addEventListener('keydown', this.onKeyDown);
   }
 
+  updateMesh(meshes) {
+    this.meshes = meshes;
+  }
+
   rayIntersect(event, obj, t) {
     const container = this.canvas;
 

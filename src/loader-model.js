@@ -1,9 +1,12 @@
 import * as THREE from 'three';
 
+import * as Main from './index';
+
 export class LoaderModel {
   loader;
   offset = new THREE.Vector3();
   meshes = [];
+  fittings = [];
 
   constructor({ scene, name }) {
     this.scene = scene;
@@ -40,21 +43,37 @@ export class LoaderModel {
                 }
               }
 
-              if (type === 1) meshes.push(mesh);
+              if (type === 1) this.meshes.push(mesh);
               if (type === 2) if (add) this.meshes.push(mesh);
               if (type === 3) {
                 if (!add) this.meshes.push(mesh);
                 else mesh.material.color.set(0xff0000);
               }
+
+              this.getObjFittings({ mesh });
             }
           });
         } else {
           this.meshes.push(obj);
         }
 
+        Main.setMeshes({ arr: this.meshes });
+
         this.scene.add(obj);
       }
     );
+  }
+
+  // добавляем в массив фитинги
+  getObjFittings({ mesh }) {
+    const list = this.listFittings();
+
+    for (let i = 0; i < list.length; i++) {
+      if (mesh.uuid === list[i]) {
+        this.fittings.push(mesh);
+        break;
+      }
+    }
   }
 
   getBoundObject_1({ obj }) {
@@ -517,6 +536,49 @@ export class LoaderModel {
     );
 
     //list = ['5b098cf9-48a4-4605-9536-aad7442624f0'];
+
+    // list = [
+    //   '7de3ec3c-3105-479e-9e88-85ed8c925735',
+    //   '44e8df7c-2560-418e-b236-d4cb63295af7',
+    //   '6551fc32-a5c0-495e-90b3-25c4bf813c7a',
+    //   '5b098cf9-48a4-4605-9536-aad7442624f0',
+    //   '9572b527-b709-4e1e-93e2-3650b9cd8a92',
+    //   '96445ce0-f4e5-4148-9209-f601bdc30d96',
+    //   '99e148cb-2590-430e-9ddc-deca90a8f88c',
+    //   'd3b4ad7a-12b3-4390-ac34-f7fc9fe4b823',
+    //   '74aaa1ac-1a66-4651-8539-4b7f91575de7',
+    //   '69e76dfb-d41b-48f2-8550-f92bf35a25a0',
+    //   '32dff6b5-4613-4467-9736-93fe2f3a1a8e',
+    //   '04ac1803-99cf-4ebf-a652-eb8f6744ea03',
+    //   'd1c558f6-0239-4663-9789-845981251bfb',
+    //   '2183c8b5-0772-4b6e-aa09-b72efe2757bf',
+    //   '7d1add9a-0ecf-4553-b6a2-43f24d66be87',
+    //   '79b18808-0179-49f4-b029-5864fcddff6e',
+    //   '74ae18bd-41ad-4fc5-b834-3004afeac796',
+    //   '8a0c5017-3739-461b-9595-4fc6b2f40f84',
+    //   'c8dd8578-4584-4cbe-89a4-55c2ab3180a9',
+    //   '75cf4d5b-3c04-43fc-927c-6e8eec4aa604',
+    //   '086c730d-7434-433f-84bc-b830e7146f7b',
+    //   'e77bfaba-2634-4caf-b552-146f856ac382',
+    //   '10d36609-100c-48b3-b8ca-3ba683547c54',
+    //   '01dbabc4-5d58-411f-9408-d9f1fa92e093',
+    //   'ac59c9bd-8edb-49f6-8971-258e8cd6b43e',
+    //   'd625deb8-2cf2-4033-ad18-bcdc237098fd',
+    // ];
+    return list;
+  }
+
+  listFittings() {
+    let list = [
+      'f6faf3ee-0996-4454-8a05-db7fc6ab23c8',
+      '02af993c-812f-4720-b8be-942097c564cb',
+      '54a4bc37-977d-4e42-8d5e-6e72c5e9f8d3',
+      '364738d2-8799-41f4-920a-e76f8d8c5edc',
+      '7ba73ce1-4ed3-4359-a10e-7689c17fcf30',
+      '16ac5c90-f626-4141-b430-d18b08857d4e',
+      '338d9859-c158-41a2-aa3c-3cce66e8d15f',
+    ];
+
     return list;
   }
 }

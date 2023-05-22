@@ -1,32 +1,29 @@
 import * as THREE from 'three';
 
 import { controls, scene, renderer } from './index';
-import { LoaderModel } from './loader-model';
-import { SelectObj } from './select-obj';
 import { svgConverter } from './svg';
+import { Fitting } from './fitting';
+import * as Main from './index';
 
 export class ConvertTubesToLines {
   loaderModel;
   svgConverter = svgConverter;
+  fitting;
   lines = [];
 
   constructor() {
-    this.loaderModel = new LoaderModel({ scene });
-    new SelectObj({ controls, scene, canvas: renderer.domElement, meshes: this.loaderModel.meshes });
+    this.fitting = new Fitting({ scene: Main.scene });
 
     document.addEventListener('keydown', this.onKeyDown);
   }
 
-  loaderObj(name) {
-    this.loaderModel.loaderObj(name);
-  }
-
   onKeyDown = (event) => {
     if (event.code === 'Space') {
-      const meshes = this.loaderModel.meshes;
-      //this.offset = this.loaderModel.offset;
+      const meshes = Main.loaderModel.meshes;
+      const fittings = Main.loaderModel.fittings;
 
       this.getIsometry({ meshes });
+      //this.getIsometryFittings({ meshes: fittings });
     }
 
     // создание svg
@@ -58,26 +55,96 @@ export class ConvertTubesToLines {
     }
   };
 
+  getIsometryFittings({ meshes }) {
+    const fittingObjs = [];
+
+    for (let i = 0; i < meshes.length; i++) {
+      meshes[i].visible = false;
+
+      const obj = this.fitting.obj.clone();
+
+      if (!meshes[i].geometry.boundingSphere) meshes[i].geometry.computeBoundingSphere();
+      const position = meshes[i].geometry.boundingSphere.center.clone().applyMatrix4(meshes[i].matrixWorld);
+
+      const q = meshes[i].getWorldQuaternion(new THREE.Quaternion());
+      obj.position.copy(position);
+      obj.quaternion.copy(q);
+      scene.add(obj);
+
+      fittingObjs.push(obj);
+    }
+
+    for (let i = 0; i < fittingObjs.length; i++) {
+      const obj = fittingObjs[i];
+
+      const listDist = [];
+
+      for (let i2 = 0; i2 < this.lines.length; i2++) {
+        const points = this.lines[i2];
+
+        const dist1 = obj.position.distanceTo(points[0]);
+        const dist2 = obj.position.distanceTo(points[points.length - 1]);
+
+        listDist.push({ dist: dist1, pos: points[0], points, id: 0 });
+        listDist.push({ dist: dist2, pos: points[points.length - 1], points, id: points.length - 1 });
+      }
+
+      listDist.sort((a, b) => {
+        return a.dist - b.dist;
+      });
+
+      //console.log(listDist);
+
+      //this.helperBox({ pos: listDist[0].pos, size: 0.1, color: 0x0000ff });
+      //this.helperBox({ pos: listDist[1].pos, size: 0.1, color: 0xff0000 });
+
+      //const dist = listDist[0].pos.distanceTo(listDist[1].pos);
+      const dist = 0.5;
+      obj.scale.set(dist / 2, dist / 2, dist / 2);
+
+      let posC = listDist[1].pos.clone().sub(listDist[0].pos);
+      posC = new THREE.Vector3(posC.x / 2, posC.y / 2, posC.z / 2);
+      posC.add(listDist[0].pos);
+      obj.position.copy(posC);
+
+      this.fitting.setRot({ obj, pos1: listDist[0].pos, pos2: listDist[1].pos });
+
+      console.log(obj.geometry.boundingBox);
+
+      let dir = listDist[1].pos.clone().sub(listDist[0].pos).normalize();
+      dir.x *= 0.25;
+      dir.y *= 0.25;
+      dir.z *= 0.25;
+      this.createLine({ points: [listDist[0].pos, posC.clone().sub(dir)] });
+      this.createLine({ points: [listDist[1].pos, posC.clone().add(dir)] });
+
+      if (listDist[0].id === 0) listDist[0].points.unshift(posC.clone().sub(dir));
+      else listDist[0].points.push(posC.clone().sub(dir));
+
+      if (listDist[1].id === 0) listDist[1].points.unshift(posC.clone().add(dir));
+      else listDist[1].points.push(posC.clone().add(dir));
+
+      // listDist[0].points[listDist[0].id] = posC.clone().sub(dir);
+      // listDist[1].points[listDist[1].id] = posC.clone().add(dir);
+    }
+  }
+
   getIsometry({ meshes }) {
     this.lines = [];
 
     for (let i = 0; i < meshes.length; i++) {
       const points = this.getPointsForLine(meshes[i]);
-
-      this.createLine({ points });
+      if (points.length < 2) continue;
+      //this.createLine({ points });
 
       this.lines.push(points);
     }
 
-    // if (covers.length > 0) {
-    //   this.getClosestPoint({ arr: covers });
-    //   for (let i = 0; i < covers.length; i++) {
-    //     if (covers[i].dist === Infinity) continue;
-    //     if (covers[i].id2 === -1) continue;
-    //     console.log(i);
-    //     //crPol({ path: covers[i].path, posParentObj: covers[i].posParentObj, center: covers[i].center });
-    //   }
-    // }
+    this.joinLine();
+
+    for (let i = 0; i < this.lines.length; i++) {
+      this.createLine({ points: this.lines[i] });
+    }
   }
 
   // расчет для одного mesh
@@ -88,8 +155,8 @@ export class ConvertTubesToLines {
 
     const geometry = obj.geometry.clone();
     geometry.toNonIndexed();
-    obj.material.color.set(new THREE.Color(0xff0000));
-    obj.material.wireframe = true;
+    // obj.material.color.set(new THREE.Color(0xff0000));
+    // obj.material.wireframe = true;
 
     const arrP = this.getDataPoints({ geometry, obj });
 
@@ -413,6 +480,79 @@ export class ConvertTubesToLines {
     return sumPos;
   }
 
+  joinLine() {
+    const listDist = [];
+    for (let i = 0; i < this.lines.length; i++) {
+      const points1 = this.lines[i];
+
+      for (let i2 = 0; i2 < this.lines.length; i2++) {
+        if (i === i2) continue;
+        const points2 = this.lines[i2];
+        //console.log(i2, points2);
+        const dist1 = points1[0].distanceTo(points2[0]);
+        const dist2 = points1[0].distanceTo(points2[points2.length - 1]);
+
+        if (dist1 < 0.4 && dist1 > 0.01) listDist.push({ dist: dist1, lid1: i, lid2: i2, pid1: 0, pid2: 0 });
+        if (dist2 < 0.4 && dist2 > 0.01) listDist.push({ dist: dist2, lid1: i, lid2: i2, pid1: 0, pid2: points2.length - 1 });
+      }
+
+      for (let i2 = 0; i2 < this.lines.length; i2++) {
+        if (i === i2) continue;
+        const points2 = this.lines[i2];
+
+        const pid1 = points1.length - 1;
+        const dist1 = points1[pid1].distanceTo(points2[0]);
+        const dist2 = points1[pid1].distanceTo(points2[points2.length - 1]);
+
+        if (dist1 < 0.4 && dist1 > 0.01) listDist.push({ dist: dist1, lid1: i, lid2: i2, pid1, pid2: 0 });
+        if (dist2 < 0.4 && dist2 > 0.01) listDist.push({ dist: dist2, lid1: i, lid2: i2, pid1, pid2: points2.length - 1 });
+      }
+    }
+
+    console.log(listDist);
+
+    const pointsHelp = [];
+    const listIgnorLine = [];
+    let count = 0;
+    for (let i = 0; i < listDist.length; i++) {
+      const pid1 = listDist[i].pid1 === 0 ? 0 : this.lines[listDist[i].lid1].length - 1;
+      const pid2 = listDist[i].pid2 === 0 ? 0 : this.lines[listDist[i].lid2].length - 1;
+
+      const ui1 = listDist[i].lid1 + '' + (pid1 === 0 ? 0 : 1);
+      const ui2 = listDist[i].lid2 + '' + (pid2 === 0 ? 0 : 1);
+
+      if (listIgnorLine.indexOf(ui1) > -1 && listIgnorLine.indexOf(ui2) > -1) {
+        //console.log(ui1, listDist[i].lid1, listDist[i].pid1 === 0 ? 0 : 1);
+        continue;
+      }
+
+      listIgnorLine.push(ui1, ui2);
+
+      const pos1 = this.lines[listDist[i].lid1][pid1];
+      const pos2 = this.lines[listDist[i].lid2][pid2];
+
+      const dist = pos1.distanceTo(pos2);
+      //if (dist > 0.2) continue;
+
+      let posC = pos2.clone().sub(pos1);
+      posC = new THREE.Vector3(posC.x / 2, posC.y / 2, posC.z / 2);
+      posC.add(pos1);
+
+      pointsHelp.push(this.helperSphere({ pos: posC, size: 0.1, color: 0x0000ff }));
+
+      if (pid1 === 0) this.lines[listDist[i].lid1].unshift(posC);
+      else this.lines[listDist[i].lid1].push(posC);
+
+      if (pid2 === 0) this.lines[listDist[i].lid2].unshift(posC);
+      else this.lines[listDist[i].lid2].push(posC);
+
+      count++;
+    }
+
+    console.log(count, pointsHelp);
+    Main.setMeshes({ arr: pointsHelp });
+  }
+
   // todo удалить
   // построение векторов для визуализиции
   helperArrow({ dir, pos, length = 1, color = 0x0000ff }) {
@@ -426,6 +566,18 @@ export class ConvertTubesToLines {
     const box = new THREE.Mesh(new THREE.BoxGeometry(size, size, size), new THREE.MeshStandardMaterial({ color, depthTest: true, transparent: true }));
     box.position.copy(pos);
     scene.add(box);
+
+    return box;
+  }
+
+  // todo удалить
+  // построение sphere для визуализиции
+  helperSphere({ pos, size, color = 0x0000ff }) {
+    const sphere = new THREE.Mesh(new THREE.SphereGeometry(size, 32, 16), new THREE.MeshStandardMaterial({ color, depthTest: false, transparent: true }));
+    sphere.position.copy(pos);
+    scene.add(sphere);
+
+    return sphere;
   }
 }
 

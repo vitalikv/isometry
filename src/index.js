@@ -2,11 +2,15 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { ConvertTubesToLines } from './path-line';
 import { svgConverter } from './svg';
+import { LoaderModel } from './loader-model';
+import { SelectObj } from './select-obj';
 
 export let renderer, camera, scene, controls, clock, gui, stats;
 let cameraP, cameraO;
-let environment, collider, visualizer, player;
-let box, plane;
+let selectObj;
+export let loaderModel;
+let isomety;
+let meshes = [];
 
 init();
 render();
@@ -26,7 +30,7 @@ function init() {
 
   // scene setup
   scene = new THREE.Scene();
-  scene.fog = new THREE.Fog(bgColor, 20, 70);
+  //scene.fog = new THREE.Fog(bgColor, 20, 70);
   scene.background = new THREE.Color(0xffffff);
   // lights
   const light = new THREE.DirectionalLight(0xffffff, 1);
@@ -48,7 +52,7 @@ function init() {
   scene.add(gridHelper);
 
   scene.add(light);
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x223344, 0.4));
+  scene.add(new THREE.AmbientLight(0xffffff, 0.4));
 
   // camera setup
   cameraP = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 50);
@@ -62,38 +66,43 @@ function init() {
   cameraO.position.copy(cameraP.position.clone());
   cameraO.updateMatrixWorld();
   cameraO.updateProjectionMatrix();
+  // const cameraOHelper = new THREE.CameraHelper(cameraO);
+  // scene.add(cameraOHelper);
 
   camera = cameraP;
 
   controls = new OrbitControls(camera, document.body);
 
-  const cttl = new ConvertTubesToLines();
+  loaderModel = new LoaderModel({ scene });
 
   let indd = 5;
   if (indd === 1) {
-    cttl.loaderObj('1');
-    cttl.loaderObj('2');
-    cttl.loaderObj('3');
+    loaderModel.loaderObj('1');
+    loaderModel.loaderObj('2');
+    loaderModel.loaderObj('3');
   }
   if (indd === 2) {
-    cttl.loaderObj('test_1');
-    cttl.loaderObj('test_2');
-    cttl.loaderObj('test_3');
+    loaderModel.loaderObj('test_1');
+    loaderModel.loaderObj('test_2');
+    loaderModel.loaderObj('test_3');
   }
   if (indd === 3) {
-    cttl.loaderObj('test_1_0');
-    cttl.loaderObj('test_1_1');
-    cttl.loaderObj('test_1_2');
-    cttl.loaderObj('test_1_3');
-    cttl.loaderObj('test_1_4');
-    cttl.loaderObj('test_1_5');
+    loaderModel.loaderObj('test_1_0');
+    loaderModel.loaderObj('test_1_1');
+    loaderModel.loaderObj('test_1_2');
+    loaderModel.loaderObj('test_1_3');
+    loaderModel.loaderObj('test_1_4');
+    loaderModel.loaderObj('test_1_5');
   }
   if (indd === 4) {
-    cttl.loaderObj('000-MR1_PIPE01');
+    loaderModel.loaderObj('000-MR1_PIPE01');
   }
   if (indd === 5) {
-    cttl.loaderObj('0019.005-TH_02.osf');
+    loaderModel.loaderObj('0019.005-TH_02.osf');
   }
+
+  selectObj = new SelectObj({ controls, scene, canvas: renderer.domElement, meshes: [] });
+  isomety = new ConvertTubesToLines();
 
   window.addEventListener(
     'resize',
@@ -109,10 +118,18 @@ function init() {
   document.addEventListener('keydown', onKeyDown);
 }
 
+// подписка событие - обновление массива объектов для расчета стыков
+export function setMeshes({ arr }) {
+  meshes = arr;
+
+  //isomety.updateMesh(meshes);
+  selectObj.updateMesh(meshes);
+}
+
 function onKeyDown(event) {
   if (event.code !== 'KeyC') return;
 
-  const pos = camera.position.clone();
+  let pos = new THREE.Vector3();
 
   camera = camera === cameraP ? cameraO : cameraP;
 
@@ -120,6 +137,14 @@ function onKeyDown(event) {
     const dist = controls.target.distanceTo(cameraP.position);
 
     cameraO.zoom = 10 / dist;
+
+    const dir = cameraP.position.clone().sub(controls.target).normalize();
+    const offset = new THREE.Vector3().addScaledVector(dir, 1000);
+    pos = cameraP.position.clone().add(offset);
+  } else {
+    const dir = cameraO.position.clone().sub(controls.target).normalize();
+    const offset = new THREE.Vector3().addScaledVector(dir, 1000);
+    pos = cameraO.position.clone().sub(offset);
   }
 
   camera.position.copy(pos);

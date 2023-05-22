@@ -13,17 +13,17 @@ class ConverterToSvg {
   createSvgContainer() {
     const div = document.createElement('div');
     div.style.cssText = 'position: fixed; top: 0; height:100%; width:100%; z-index: 1;';
-    div.innerHTML = `<svg id="svgFrame" height="100%" width="100%" xmlns="http://www.w3.org/2000/svg"></svg>`;
-    //let svg = div.children[0];
+    div.innerHTML = `<svg id="svgFrame" height="100%" width="100%" xmlns="http://www.w3.org/2000/svg"><g id="isometry"></g></svg>`;
+
     document.body.append(div);
 
-    return div;
+    return div.children[0].children[0];
   }
 
   // создаем svg line елемент
   createSvgLine({ x1, y1, x2, y2, params = {} }) {
     const line = {};
-    const container = this.container.children[0];
+    const container = this.container;
 
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'line');
 
@@ -66,7 +66,7 @@ class ConverterToSvg {
   // создаем svg circle елемент
   createSvgCircle() {
     const circle = {};
-    const container = this.container.children[0];
+    const container = this.container;
 
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
 
