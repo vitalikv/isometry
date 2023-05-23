@@ -21,14 +21,16 @@ export class Fitting {
     console.log(geometries);
     const geometry = BufferGeometryUtils.mergeBufferGeometries(geometries);
     const obj = new THREE.Line(geometry, material);
-    obj.geometry.computeBoundingSphere();
-    obj.geometry.computeBoundingBox();
+    //obj.geometry.computeBoundingSphere();
+    //obj.geometry.computeBoundingBox();
     //this.scene.add(obj);
 
     obj.userData = {};
     obj.userData.pos = new THREE.Vector3();
     obj.userData.rot = new THREE.Vector3();
     obj.userData.scale = 1;
+    obj.userData.boundBox = [];
+    obj.userData.joins = { tubes: [], points: [] };
     obj.userData.shapes = [];
     geometries.forEach((g) => {
       obj.userData.shapes.push(g.userData.points);
@@ -45,6 +47,12 @@ export class Fitting {
     points.push(new THREE.Vector3(1, 1, 0));
     points.push(new THREE.Vector3(-1, -1, 0));
 
+    // for (let i = 0; i < points.length; i++) {
+    //   points[i].x *= 0.25;
+    //   points[i].y *= 0.25;
+    //   points[i].z *= 0.25;
+    // }
+
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
     geometry.userData = {};
     geometry.userData.points = points;
@@ -58,6 +66,12 @@ export class Fitting {
     points.push(new THREE.Vector3(0, 1.5, 0));
     points.push(new THREE.Vector3(-1, 1.5, 0));
     points.push(new THREE.Vector3(1, 1.5, 0));
+
+    // for (let i = 0; i < points.length; i++) {
+    //   points[i].x *= 0.25;
+    //   points[i].y *= 0.25;
+    //   points[i].z *= 0.25;
+    // }
 
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
     geometry.userData = {};

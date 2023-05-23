@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 
+import { Moving } from './moving';
+
 export class SelectObj {
   controls;
   scene;
@@ -8,6 +10,7 @@ export class SelectObj {
   meshes;
   materials = { def: null, act: null };
   listSelectObjs = [];
+  moving;
 
   constructor({ controls, scene, canvas, meshes }) {
     this.controls = controls;
@@ -17,6 +20,8 @@ export class SelectObj {
 
     this.materials.def = new THREE.MeshStandardMaterial({ color: 0xffff00, wireframe: false });
     this.materials.act = new THREE.MeshStandardMaterial({ color: 0xff0000, wireframe: true });
+
+    this.moving = new Moving();
 
     document.addEventListener('mousedown', this.onMouseDown);
     document.addEventListener('keydown', this.onKeyDown);
@@ -56,8 +61,10 @@ export class SelectObj {
 
     if (ray && ray.length > 0) {
       this.intersection = ray[0];
-      console.log(666, this.intersection);
-      this.upListObjs({ obj: this.intersection.object });
+      console.log('---', this.intersection.object);
+      //this.upListObjs({ obj: this.intersection.object });
+
+      this.moving.click({ obj: this.intersection.object, event });
     }
   };
 

@@ -72,6 +72,7 @@ function init() {
   camera = cameraP;
 
   controls = new OrbitControls(camera, document.body);
+  console.log(333, controls);
 
   loaderModel = new LoaderModel({ scene });
 

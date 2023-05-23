@@ -47,8 +47,8 @@ export class ConvertObjs {
         const dist1 = obj.position.distanceTo(points[0]);
         const dist2 = obj.position.distanceTo(points[points.length - 1]);
 
-        listDist.push({ dist: dist1, pos: points[0], points, id: 0 });
-        listDist.push({ dist: dist2, pos: points[points.length - 1], points, id: points.length - 1 });
+        listDist.push({ dist: dist1, lid: i2, pos: points[0], points, id: 0 });
+        listDist.push({ dist: dist2, lid: i2, pos: points[points.length - 1], points, id: points.length - 1 });
       }
 
       listDist.sort((a, b) => {
@@ -74,16 +74,26 @@ export class ConvertObjs {
       const pos1 = posC.clone().sub(dir);
       const pos2 = posC.clone().add(dir);
 
-      if (listDist[0].id === 0) listDist[0].points.unshift(pos1);
-      else listDist[0].points.push(pos1);
+      // if (listDist[0].id === 0) listDist[0].points.unshift(pos1);
+      // else listDist[0].points.push(pos1);
 
-      if (listDist[1].id === 0) listDist[1].points.unshift(pos2);
-      else listDist[1].points.push(pos2);
+      // if (listDist[1].id === 0) listDist[1].points.unshift(pos2);
+      // else listDist[1].points.push(pos2);
 
-      pointsHelp.push(this.helperSphere({ pos: pos1, size: 0.1, color: 0x00ff00 }));
-      pointsHelp.push(this.helperSphere({ pos: pos2, size: 0.1, color: 0x00ff00 }));
+      if (listDist[0].id === 0) listDist[0].points[0] = pos1;
+      else listDist[0].points[listDist[0].points.length - 1] = pos1;
+
+      if (listDist[1].id === 0) listDist[1].points[0] = pos2;
+      else listDist[1].points[listDist[1].points.length - 1] = pos2;
+
+      obj.userData.joins.points.push({ pos: pos1 });
+      obj.userData.joins.points.push({ pos: pos2 });
+      // pointsHelp.push(this.helperSphere({ pos: pos1, size: 0.1, color: 0x00ff00 }));
+      // pointsHelp.push(this.helperSphere({ pos: pos2, size: 0.1, color: 0x00ff00 }));
 
       this.upObjUserData({ obj });
+
+      this.getBoundObject({ obj });
     }
 
     console.log('obj', count, pointsHelp);
@@ -107,6 +117,47 @@ export class ConvertObjs {
         //obj.userData.shapes[i2][i3] = new THREE.Vector3(point.x, point.y, point.z).applyMatrix4(obj.matrixWorld);
       }
     }
+  }
+
+  getBoundObject({ obj }) {
+    const arr = [obj];
+
+    obj.updateMatrixWorld(true);
+
+    obj.traverse(function (child) {
+      if (child instanceof THREE.Mesh) {
+        arr.push(child);
+      }
+    });
+
+    for (let i = 0; i < arr.length; i++) {
+      if (!arr[i].geometry.boundingBox) arr[i].geometry.computeBoundingBox();
+      if (!arr[i].geometry.boundingSphere) arr[i].geometry.computeBoundingSphere();
+
+      const pos = arr[i].geometry.boundingSphere.center.clone();
+      let bound = arr[i].geometry.boundingBox;
+
+      const size = new THREE.Vector3(bound.max.x - bound.min.x, bound.max.y - bound.min.y, bound.max.z - bound.min.z);
+
+      // const box = new THREE.Mesh(
+      //   new THREE.BoxGeometry(size.x, size.y, size.z),
+      //   new THREE.MeshStandardMaterial({ color: 0x00ff00, depthTest: true, transparent: true })
+      // );
+      //box.position.copy(pos);
+      //obj.add(box);
+
+      size.x *= obj.scale.x;
+      size.y *= obj.scale.x;
+      size.z *= obj.scale.x;
+
+      pos.x *= obj.scale.x;
+      pos.y *= obj.scale.x;
+      pos.z *= obj.scale.x;
+
+      obj.userData.boundBox.push({ pos, size });
+    }
+
+    //this.scene.add(obj);
   }
 
   // todo удалить

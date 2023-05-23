@@ -380,11 +380,17 @@ export class ConvertTubesToLines {
 
       //pointsHelp.push(this.helperSphere({ pos: posC, size: 0.1, color: 0x0000ff }));
 
-      if (pid1 === 0) this.lines[listDist[i].lid1].unshift(posC);
-      else this.lines[listDist[i].lid1].push(posC);
+      // if (pid1 === 0) this.lines[listDist[i].lid1].unshift(posC);
+      // else this.lines[listDist[i].lid1].push(posC);
 
-      if (pid2 === 0) this.lines[listDist[i].lid2].unshift(posC);
-      else this.lines[listDist[i].lid2].push(posC);
+      // if (pid2 === 0) this.lines[listDist[i].lid2].unshift(posC);
+      // else this.lines[listDist[i].lid2].push(posC);
+
+      if (pid1 === 0) this.lines[listDist[i].lid1][0] = posC;
+      else this.lines[listDist[i].lid1][this.lines[listDist[i].lid1].length - 1] = posC;
+
+      if (pid2 === 0) this.lines[listDist[i].lid2][0] = posC;
+      else this.lines[listDist[i].lid2][this.lines[listDist[i].lid2].length - 1] = posC;
 
       count++;
     }
