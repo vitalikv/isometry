@@ -1,17 +1,16 @@
 import * as THREE from 'three';
 
-import { controls, scene, renderer } from './index';
-import * as Main from './index';
+import { scene } from './index';
 
-export class ConvertTubesToLines {
+export class ConvertTubes {
   scene;
   lines = [];
 
   constructor() {
-    this.scene = scene;
+    this.scene = scene; // todo удалить
   }
 
-  getIsometry({ meshes }) {
+  getData({ meshes }) {
     this.lines = [];
 
     for (let i = 0; i < meshes.length; i++) {
@@ -28,14 +27,11 @@ export class ConvertTubesToLines {
 
   // расчет для одного mesh
   getPointsForLine(obj) {
-    obj.visible = false; // todo - удалить
     obj.updateMatrixWorld();
     obj.updateMatrix();
 
     const geometry = obj.geometry.clone();
     geometry.toNonIndexed();
-    // obj.material.color.set(new THREE.Color(0xff0000));
-    // obj.material.wireframe = true;
 
     const arrP = this.getDataPoints({ geometry, obj });
 
@@ -394,9 +390,6 @@ export class ConvertTubesToLines {
 
       count++;
     }
-
-    //console.log(count, pointsHelp);
-    Main.setMeshes({ arr: pointsHelp });
   }
 
   // todo удалить

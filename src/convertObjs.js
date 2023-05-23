@@ -1,26 +1,24 @@
 import * as THREE from 'three';
 
 import * as Main from './index';
-import { Fitting } from './fitting';
+import { ShapeObjs } from './shapeObjs';
 
 export class ConvertObjs {
   scene;
   lines;
-  fitting;
+  shapeObjs;
 
   constructor() {
     this.scene = Main.scene;
-    this.fitting = new Fitting({ scene: Main.scene });
+    this.shapeObjs = new ShapeObjs();
   }
 
-  getIsometryFittings({ meshes, lines }) {
+  getData({ meshes, lines }) {
     this.lines = lines;
-    const fittingObjs = [];
+    const listObjs = [];
 
     for (let i = 0; i < meshes.length; i++) {
-      meshes[i].visible = false; // todo - удалить
-
-      const obj = this.fitting.obj.clone();
+      const obj = this.shapeObjs.obj.clone();
 
       if (!meshes[i].geometry.boundingSphere) meshes[i].geometry.computeBoundingSphere();
       const position = meshes[i].geometry.boundingSphere.center.clone().applyMatrix4(meshes[i].matrixWorld);
@@ -30,14 +28,11 @@ export class ConvertObjs {
       obj.quaternion.copy(q);
       //this.scene.add(obj);
 
-      fittingObjs.push(obj);
+      listObjs.push(obj);
     }
 
-    const pointsHelp = [];
-    let count = 0;
-
-    for (let i = 0; i < fittingObjs.length; i++) {
-      const obj = fittingObjs[i];
+    for (let i = 0; i < listObjs.length; i++) {
+      const obj = listObjs[i];
 
       const listDist = [];
 
@@ -64,7 +59,7 @@ export class ConvertObjs {
       posC.add(listDist[0].pos);
       obj.position.copy(posC);
 
-      this.fitting.setRot({ obj, pos1: listDist[0].pos, pos2: listDist[1].pos });
+      this.shapeObjs.setRot({ obj, pos1: listDist[0].pos, pos2: listDist[1].pos });
 
       let dir = listDist[1].pos.clone().sub(listDist[0].pos).normalize();
       dir.x *= obj.scale.x; // меняем размер
@@ -74,12 +69,6 @@ export class ConvertObjs {
       const pos1 = posC.clone().sub(dir);
       const pos2 = posC.clone().add(dir);
 
-      // if (listDist[0].id === 0) listDist[0].points.unshift(pos1);
-      // else listDist[0].points.push(pos1);
-
-      // if (listDist[1].id === 0) listDist[1].points.unshift(pos2);
-      // else listDist[1].points.push(pos2);
-
       if (listDist[0].id === 0) listDist[0].points[0] = pos1;
       else listDist[0].points[listDist[0].points.length - 1] = pos1;
 
@@ -88,17 +77,13 @@ export class ConvertObjs {
 
       obj.userData.joins.points.push({ pos: pos1 });
       obj.userData.joins.points.push({ pos: pos2 });
-      // pointsHelp.push(this.helperSphere({ pos: pos1, size: 0.1, color: 0x00ff00 }));
-      // pointsHelp.push(this.helperSphere({ pos: pos2, size: 0.1, color: 0x00ff00 }));
 
       this.upObjUserData({ obj });
 
       this.getBoundObject({ obj });
     }
 
-    console.log('obj', count, pointsHelp);
-
-    return fittingObjs;
+    return listObjs;
   }
 
   // обновляем иформацию по которой будем строить фитинг
@@ -139,13 +124,6 @@ export class ConvertObjs {
 
       const size = new THREE.Vector3(bound.max.x - bound.min.x, bound.max.y - bound.min.y, bound.max.z - bound.min.z);
 
-      // const box = new THREE.Mesh(
-      //   new THREE.BoxGeometry(size.x, size.y, size.z),
-      //   new THREE.MeshStandardMaterial({ color: 0x00ff00, depthTest: true, transparent: true })
-      // );
-      //box.position.copy(pos);
-      //obj.add(box);
-
       size.x *= obj.scale.x;
       size.y *= obj.scale.x;
       size.z *= obj.scale.x;
@@ -156,17 +134,5 @@ export class ConvertObjs {
 
       obj.userData.boundBox.push({ pos, size });
     }
-
-    //this.scene.add(obj);
-  }
-
-  // todo удалить
-  // построение sphere для визуализиции
-  helperSphere({ pos, size, color = 0x0000ff }) {
-    const sphere = new THREE.Mesh(new THREE.SphereGeometry(size, 32, 16), new THREE.MeshStandardMaterial({ color, depthTest: false, transparent: true }));
-    sphere.position.copy(pos);
-    this.scene.add(sphere);
-
-    return sphere;
   }
 }

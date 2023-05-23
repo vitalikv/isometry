@@ -1,15 +1,11 @@
 import * as THREE from 'three';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
-export class Fitting {
-  scene;
+export class ShapeObjs {
   obj;
 
-  constructor({ scene }) {
-    this.scene = scene;
+  constructor() {
     this.createValve();
-
-    //this.crTestPointRot();
   }
 
   createValve() {
@@ -23,7 +19,6 @@ export class Fitting {
     const obj = new THREE.Line(geometry, material);
     //obj.geometry.computeBoundingSphere();
     //obj.geometry.computeBoundingBox();
-    //this.scene.add(obj);
 
     obj.userData = {};
     obj.userData.pos = new THREE.Vector3();

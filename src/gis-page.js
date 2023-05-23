@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 
-import { controls, setMeshes } from './index';
-import { Isometry } from './isometry';
+import { controls, setMeshes, loaderModel } from './index';
+
+import { CalcIsometry } from './calcIsometry';
 import { svgConverter } from './svg';
 
 export class Gis {
@@ -10,12 +11,13 @@ export class Gis {
   isometry;
   svgLines = [];
   lines = [];
+  tubes = [];
   objs = [];
   joins = [];
 
   constructor({ scene }) {
     this.scene = scene;
-    this.isometry = new Isometry();
+    this.isometry = new CalcIsometry();
 
     document.addEventListener('keydown', this.onKeyDown);
   }
@@ -26,7 +28,7 @@ export class Gis {
       //controls.enabled = false;
       controls.enableRotate = false;
 
-      setMeshes({ arr: [...this.lines, ...this.objs, ...this.joins] });
+      setMeshes({ arr: [...this.tubes, ...this.objs, ...this.joins] });
     }
 
     // создание svg
@@ -36,18 +38,36 @@ export class Gis {
   };
 
   init() {
-    const { lines, objs } = this.isometry.getIsometry();
+    for (let i = 0; i < loaderModel.meshes.length; i++) loaderModel.meshes[i].visible = false;
+    for (let i = 0; i < loaderModel.fittings.length; i++) loaderModel.fittings[i].visible = false;
+
+    const { tubes: lines, objs } = this.isometry.getIsometry({ tubes: loaderModel.meshes, objs: loaderModel.fittings });
 
     for (let i = 0; i < lines.length; i++) {
+      const pipeSpline = new THREE.CatmullRomCurve3(lines[i]);
+      pipeSpline.curveType = 'catmullrom';
+      pipeSpline.tension = 0;
+      const tubeGeometry = new THREE.TubeGeometry(pipeSpline, lines[i].length, 0.05, 32, false);
+      const tubeObj = new THREE.Mesh(tubeGeometry, new THREE.MeshStandardMaterial({ color: 0x0000ff, depthTest: true, transparent: true }));
+      tubeObj.userData = {};
+      tubeObj.userData.isIsometry = true;
+      tubeObj.userData.isTube = true;
+      tubeObj.userData.line = null;
+      this.scene.add(tubeObj);
+      this.tubes.push(tubeObj);
+
       const obj = this.createLine({ points: lines[i] });
       obj.userData = {};
-      obj.userData.isIsometry = true;
-      obj.userData.isLine = true;
+      // obj.userData.isIsometry = true;
+      // obj.userData.isLine = true;
       obj.userData.points = [lines[i][0], lines[i][lines[i].length - 1]];
       obj.userData.line = lines[i].map((p) => p.clone());
       obj.userData.tubes = [];
       obj.userData.joins = [];
-      this.scene.add(obj);
+      obj.userData.tubeObj = tubeObj;
+      this.scene.add(tubeObj);
+
+      tubeObj.userData.line = obj;
 
       obj.updateMatrixWorld(true);
       this.svgLines.push(lines[i]);
@@ -59,7 +79,15 @@ export class Gis {
     for (let i = 0; i < objs.length; i++) {
       if (objs[i].userData.shapes.length === 0) continue;
 
-      const obj = new THREE.Object3D();
+      const size = objs[i].userData.boundBox[0].size;
+      const posG = objs[i].userData.boundBox[0].pos;
+      const obj = new THREE.Mesh(
+        new THREE.BoxGeometry(size.x, size.y, size.z),
+        new THREE.MeshStandardMaterial({ color: 0x0000ff, depthTest: true, transparent: true })
+      );
+      obj.geometry.translate(posG.x, posG.y, posG.z);
+
+      //const obj = new THREE.Mesh();
       obj.userData = {};
       obj.userData.isIsometry = true;
       obj.userData.isFittings = true;
@@ -79,28 +107,6 @@ export class Gis {
       const rot = objs[i].userData.rot;
       obj.position.set(pos.x, pos.y, pos.z);
       obj.rotation.set(rot.x, rot.y, rot.z);
-
-      // for (let i2 = 0; i2 < objs[i].userData.boundBox.length; i2++) {
-      //   const size = objs[i].userData.boundBox[i2].size;
-      //   const pos = objs[i].userData.boundBox[i2].pos;
-
-      //   const box = new THREE.Mesh(
-      //     new THREE.BoxGeometry(size.x, size.y, size.z),
-      //     new THREE.MeshStandardMaterial({ color: 0x0000ff, depthTest: true, transparent: true })
-      //   );
-      //   box.position.copy(pos);
-      //   obj.add(box);
-      // }
-
-      // стыки
-      // const joinsP = objs[i].userData.joins.points;
-
-      // for (let i2 = 0; i2 < joinsP.length; i2++) {
-      //   const obj = this.helperSphere({ pos: joinsP[i2].pos, size: 0.1, color: 0xff0000 });
-      //   obj.userData = {};
-      //   obj.userData.isIsometry = true;
-      //   //this.joins.push(obj);
-      // }
 
       this.scene.add(obj);
       this.objs.push(obj);

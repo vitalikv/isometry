@@ -40,7 +40,7 @@ export class Moving {
 
     obj = this.getParentObj({ obj });
     if (!obj) return;
-    console.log(555, obj);
+    console.log(555, obj.userData);
     this.obj = obj;
 
     this.plane.position.copy(obj.position);
@@ -49,8 +49,7 @@ export class Moving {
 
     const intersects = this.rayIntersect(event, this.plane, 'one');
     if (intersects.length == 0) return;
-
-    this.offset = new THREE.Vector3().subVectors(obj.position, intersects[0].point);
+    this.offset = intersects[0].point;
 
     this.isDown = true;
     this.isMove = true;
@@ -110,63 +109,38 @@ export class Moving {
     const intersects = this.rayIntersect(event, this.plane, 'one');
     if (intersects.length == 0) return;
 
-    const pos = new THREE.Vector3().addVectors(intersects[0].point, this.offset);
-    const offset = pos.clone().sub(this.obj.position);
-    this.obj.position.add(offset);
+    const offset = new THREE.Vector3().subVectors(intersects[0].point, this.offset);
+    this.offset = intersects[0].point;
 
-    if (this.obj.userData.isLine) {
-      this.obj.userData.joins.forEach((o) => {
-        o.position.add(offset);
-      });
+    // перетаскиваем линию
+    if (this.obj.userData.isTube) {
+      const obj = this.obj.userData.line;
+      this.updataTubeLine({ obj, offset });
 
-      this.obj.userData.tubes.forEach((data) => {
-        data.obj.geometry.dispose();
-        const points = data.obj.userData.line;
+      obj.userData.joins.forEach((o) => o.position.add(offset));
 
-        if (points.length > 2) {
-          data.obj.position.add(offset);
-        } else {
-          if (data.id === 0) {
-            points[0].add(offset);
-          } else {
-            points[points.length - 1].add(offset);
-          }
-          const geometry = new THREE.BufferGeometry().setFromPoints(points);
-          data.obj.geometry = geometry;
-        }
+      obj.userData.tubes.forEach((data) => {
+        this.updataTubeLine({ obj: data.obj, offset, id: data.id });
       });
     }
 
+    // перетаскиваем фитинги
     if (this.obj.userData.isFittings) {
-      this.obj.userData.joins.forEach((o) => {
-        o.position.add(offset);
-      });
+      this.obj.position.add(offset);
+
+      this.obj.userData.joins.forEach((o) => o.position.add(offset));
 
       this.obj.userData.tubes.forEach((data) => {
-        //data.obj.position.add(offset);
-        data.obj.geometry.dispose();
-        const points = data.obj.userData.line;
-        if (data.id === 0) {
-          points[0].add(offset);
-        } else {
-          points[points.length - 1].add(offset);
-        }
-        const geometry = new THREE.BufferGeometry().setFromPoints(points);
-        data.obj.geometry = geometry;
+        this.updataTubeLine({ obj: data.obj, offset, id: data.id });
       });
     }
 
+    // перетаскиваем стык
     if (this.obj.userData.isJoin) {
+      this.obj.position.add(offset);
+
       this.obj.userData.tubes.forEach((data) => {
-        data.obj.geometry.dispose();
-        const points = data.obj.userData.line;
-        if (data.id === 0) {
-          points[0].add(offset);
-        } else {
-          points[points.length - 1].add(offset);
-        }
-        const geometry = new THREE.BufferGeometry().setFromPoints(points);
-        data.obj.geometry = geometry;
+        this.updataTubeLine({ obj: data.obj, offset, id: data.id });
       });
     }
   };
@@ -178,4 +152,36 @@ export class Moving {
     this.isDown = false;
     this.isMove = false;
   };
+
+  // обновляем геометрию линии при перемещение всей линии или певрой/последней точки
+  updataTubeLine({ obj, offset, id = undefined }) {
+    const points = obj.userData.line;
+
+    if (id === 0) {
+      points[0].add(offset);
+    } else if (id === 1) {
+      points[points.length - 1].add(offset);
+    } else {
+      points.forEach((point) => point.add(offset));
+    }
+
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    obj.geometry.dispose();
+    obj.geometry = geometry;
+
+    this.updataTubeGeom({ obj });
+  }
+
+  // обновляем геометрию трубы
+  updataTubeGeom({ obj }) {
+    const tubeObj = obj.userData.tubeObj;
+    const points = obj.userData.line;
+    const pipeSpline = new THREE.CatmullRomCurve3(points);
+    pipeSpline.curveType = 'catmullrom';
+    pipeSpline.tension = 0;
+
+    const tubeGeometry = new THREE.TubeGeometry(pipeSpline, points.length, 0.05, 32, false);
+    tubeObj.geometry.dispose();
+    tubeObj.geometry = tubeGeometry;
+  }
 }
