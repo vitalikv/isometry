@@ -62,9 +62,12 @@ export class SelectObj {
     if (ray && ray.length > 0) {
       this.intersection = ray[0];
       console.log('---', this.intersection.object);
-      //this.upListObjs({ obj: this.intersection.object });
 
-      this.moving.click({ obj: this.intersection.object, event });
+      if (1 === 2) {
+        this.upListObjs({ obj: this.intersection.object }); // режим веделения
+      } else {
+        this.moving.click({ obj: this.intersection.object, event }); // режим перетаскивания
+      }
     }
   };
 

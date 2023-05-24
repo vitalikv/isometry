@@ -117,31 +117,19 @@ export class Moving {
       const obj = this.obj.userData.line;
       this.updataTubeLine({ obj, offset });
 
-      obj.userData.joins.forEach((o) => o.position.add(offset));
-
-      obj.userData.tubes.forEach((data) => {
-        this.updataTubeLine({ obj: data.obj, offset, id: data.id });
-      });
+      obj.userData.joins.forEach((o) => this.moveJoin({ obj: o, offset, skipObj: obj }));
     }
 
     // перетаскиваем фитинги
-    if (this.obj.userData.isFittings) {
+    if (this.obj.userData.isObj) {
       this.obj.position.add(offset);
 
-      this.obj.userData.joins.forEach((o) => o.position.add(offset));
-
-      this.obj.userData.tubes.forEach((data) => {
-        this.updataTubeLine({ obj: data.obj, offset, id: data.id });
-      });
+      this.obj.userData.joins.forEach((o) => this.moveJoin({ obj: o, offset, skipObj: this.obj }));
     }
 
     // перетаскиваем стык
     if (this.obj.userData.isJoin) {
-      this.obj.position.add(offset);
-
-      this.obj.userData.tubes.forEach((data) => {
-        this.updataTubeLine({ obj: data.obj, offset, id: data.id });
-      });
+      this.moveJoin({ obj: this.obj, offset, skipObj: null });
     }
   };
 
@@ -152,6 +140,22 @@ export class Moving {
     this.isDown = false;
     this.isMove = false;
   };
+
+  moveJoin({ obj, offset, skipObj }) {
+    obj.position.add(offset);
+
+    obj.userData.tubes.forEach((data) => {
+      if (data.obj !== skipObj) {
+        this.updataTubeLine({ obj: data.obj, offset, id: data.id });
+      }
+    });
+
+    obj.userData.objs.forEach((o) => {
+      if (o !== skipObj) {
+        o.position.add(offset);
+      }
+    });
+  }
 
   // обновляем геометрию линии при перемещение всей линии или певрой/последней точки
   updataTubeLine({ obj, offset, id = undefined }) {

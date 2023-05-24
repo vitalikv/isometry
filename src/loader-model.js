@@ -60,12 +60,12 @@ export class LoaderModel {
               if (type === 2) {
                 if (add) {
                   this.meshesModel.push(mesh);
-                  //mesh.material.color.set(0xff0000);
+                  mesh.material.color.set(0xa129d9);
                 }
               }
               if (type === 3) {
                 if (!add) this.meshesModel.push(mesh);
-                else mesh.material.color.set(0xff0000);
+                else mesh.material.color.set(0xa129d9);
               }
             }
           });

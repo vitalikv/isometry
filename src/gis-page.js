@@ -14,6 +14,7 @@ export class Gis {
   tubes = [];
   objs = [];
   joins = [];
+  joinsPos = new Map();
 
   constructor() {
     this.modelsContainerInit = modelsContainerInit;
@@ -52,6 +53,7 @@ export class Gis {
       pipeSpline.tension = 0;
       const tubeGeometry = new THREE.TubeGeometry(pipeSpline, lines[i].length, 0.05, 32, false);
       const tubeObj = new THREE.Mesh(tubeGeometry, new THREE.MeshStandardMaterial({ color: 0x0000ff, depthTest: true, transparent: true }));
+      //tubeObj.material.visible = false;
       tubeObj.userData = {};
       tubeObj.userData.isIsometry = true;
       tubeObj.userData.isTube = true;
@@ -65,6 +67,7 @@ export class Gis {
       // obj.userData.isLine = true;
       obj.userData.points = [lines[i][0], lines[i][lines[i].length - 1]];
       obj.userData.line = lines[i].map((p) => p.clone());
+      //obj.userData.line = lines[i];
       obj.userData.tubes = [];
       obj.userData.joins = [];
       obj.userData.tubeObj = tubeObj;
@@ -76,7 +79,10 @@ export class Gis {
       this.svgLines.push(lines[i]);
       this.lines.push(obj);
 
-      //this.helperSphere({ pos: lines[i][0], size: 0.1, color: 0x0000ff });
+      const p1 = lines[i][0];
+      const p2 = lines[i][lines[i].length - 1];
+      this.joinsPos.set(p1.x + '' + p1.y + '' + p1.z, { pos: p1, obj: null });
+      this.joinsPos.set(p2.x + '' + p2.y + '' + p2.z, { pos: p2, obj: null });
     }
 
     for (let i = 0; i < objs.length; i++) {
@@ -93,7 +99,7 @@ export class Gis {
       //const obj = new THREE.Mesh();
       obj.userData = {};
       obj.userData.isIsometry = true;
-      obj.userData.isFittings = true;
+      obj.userData.isObj = true;
       obj.userData.tubes = [];
       obj.userData.joins = [];
 
@@ -102,7 +108,6 @@ export class Gis {
 
       for (let i2 = 0; i2 < objs[i].userData.shapes.length; i2++) {
         const line = this.createLine({ points: objs[i].userData.shapes[i2] });
-        //console.log(objs[i].userData.shapes[i2]);
         obj.add(line);
       }
 
@@ -113,126 +118,55 @@ export class Gis {
 
       this.modelsContainerInit.control.add(obj);
       this.objs.push(obj);
+
+      const p1 = points[0].pos;
+      const p2 = points[1].pos;
+      this.joinsPos.set(p1.x + '' + p1.y + '' + p1.z, { pos: p1, obj: null });
+      this.joinsPos.set(p2.x + '' + p2.y + '' + p2.z, { pos: p2, obj: null });
     }
 
-    this.createJoins();
-    this.joinLine();
-  }
-
-  createJoins() {
-    let count = 0;
-
-    for (let i = 0; i < this.lines.length; i++) {
-      const points1 = this.lines[i].userData.points;
-
-      const joins = [];
-
-      for (let i2 = 0; i2 < this.objs.length; i2++) {
-        const points2 = this.objs[i2].userData.points;
-
-        const dist1 = points1[0].distanceTo(points2[0]);
-        const dist2 = points1[0].distanceTo(points2[1]);
-
-        //if (joins.length === 2) break;
-        if (dist1 < 0.01) joins.push({ tube: this.lines[i], tubeP: 0, objs: this.objs[i2], pos: points1[0] });
-        if (dist2 < 0.01) joins.push({ tube: this.lines[i], tubeP: 0, objs: this.objs[i2], pos: points1[0] });
-      }
-
-      for (let i2 = 0; i2 < this.objs.length; i2++) {
-        const points2 = this.objs[i2].userData.points;
-
-        const dist1 = points1[1].distanceTo(points2[0]);
-        const dist2 = points1[1].distanceTo(points2[1]);
-        // this.helperSphere({ pos: points2[0], size: 0.1, color: 0xff0000 });
-        // this.helperSphere({ pos: points2[1], size: 0.1, color: 0xff0000 });
-        // if (joins.length === 2) break;
-        if (dist1 < 0.01) joins.push({ tube: this.lines[i], tubeP: 1, objs: this.objs[i2], pos: points1[1] });
-        if (dist2 < 0.01) joins.push({ tube: this.lines[i], tubeP: 1, objs: this.objs[i2], pos: points1[1] });
-      }
-
-      for (let i2 = 0; i2 < joins.length; i2++) {
-        count += 1;
-        const jp = this.helperSphere({ pos: joins[i2].pos, size: 0.1, color: 0xff0000 });
-        jp.userData.isJoin = true;
-        joins[i2].objs.userData.tubes.push({ obj: joins[i2].tube, id: joins[i2].tubeP });
-        joins[i2].objs.userData.joins.push(jp);
-      }
-    }
-
-    console.log(count);
-  }
-
-  joinLine() {
-    const listDist = [];
-    for (let i = 0; i < this.lines.length; i++) {
-      const points1 = this.lines[i].userData.points;
-
-      for (let i2 = 0; i2 < this.lines.length; i2++) {
-        if (i === i2) continue;
-        const points2 = this.lines[i2].userData.points;
-
-        const dist1 = points1[0].distanceTo(points2[0]);
-        const dist2 = points1[0].distanceTo(points2[points2.length - 1]);
-
-        if (dist1 < 0.01) listDist.push({ pos: points1[0], tube1: this.lines[i], tube2: this.lines[i2], lid1: i, lid2: i2, pid1: 0, pid2: 0 });
-        if (dist2 < 0.01) listDist.push({ pos: points1[0], tube1: this.lines[i], tube2: this.lines[i2], lid1: i, lid2: i2, pid1: 0, pid2: points2.length - 1 });
-      }
-
-      for (let i2 = 0; i2 < this.lines.length; i2++) {
-        if (i === i2) continue;
-        const points2 = this.lines[i2].userData.points;
-
-        const pid1 = points1.length - 1;
-        const dist1 = points1[pid1].distanceTo(points2[0]);
-        const dist2 = points1[pid1].distanceTo(points2[points2.length - 1]);
-
-        if (dist1 < 0.01) listDist.push({ pos: points1[1], tube1: this.lines[i], tube2: this.lines[i2], lid1: i, lid2: i2, pid1, pid2: 0 });
-        if (dist2 < 0.01) listDist.push({ pos: points1[1], tube1: this.lines[i], tube2: this.lines[i2], lid1: i, lid2: i2, pid1, pid2: points2.length - 1 });
-      }
-    }
-
-    console.log(listDist);
-
-    const pointsHelp = [];
-    const listIgnorLine = [];
-    let count = 0;
-    for (let i = 0; i < listDist.length; i++) {
-      const pid1 = listDist[i].pid1 === 0 ? 0 : this.lines[listDist[i].lid1].length - 1;
-      const pid2 = listDist[i].pid2 === 0 ? 0 : this.lines[listDist[i].lid2].length - 1;
-
-      const ui1 = listDist[i].lid1 + '' + (pid1 === 0 ? 0 : 1);
-      const ui2 = listDist[i].lid2 + '' + (pid2 === 0 ? 0 : 1);
-
-      if (listIgnorLine.indexOf(ui1) > -1 && listIgnorLine.indexOf(ui2) > -1) {
-        //console.log(ui1, listDist[i].lid1, listDist[i].pid1 === 0 ? 0 : 1);
-        continue;
-      }
-
-      listIgnorLine.push(ui1, ui2);
-
-      const jp = this.helperSphere({ pos: listDist[i].pos, size: 0.1, color: 0x0000ff });
+    this.joinsPos.forEach((value, key, map) => {
+      const jp = this.helperSphere({ pos: value.pos, size: 0.1, color: 0xff0000 });
       jp.userData.isIsometry = true;
       jp.userData.isJoin = true;
       jp.userData.tubes = [];
-
-      const id1 = pid1 === 0 ? 0 : 1;
-      const id2 = pid2 === 0 ? 0 : 1;
-
-      jp.userData.tubes.push({ obj: listDist[i].tube1, id: id1 });
-      jp.userData.tubes.push({ obj: listDist[i].tube2, id: id2 });
-
+      jp.userData.objs = [];
       this.joins.push(jp);
 
-      listDist[i].tube1.userData.tubes.push({ obj: listDist[i].tube2, id: id2 });
-      listDist[i].tube2.userData.tubes.push({ obj: listDist[i].tube1, id: id1 });
+      value.obj = jp;
+    });
 
-      listDist[i].tube1.userData.joins.push(jp);
-      listDist[i].tube2.userData.joins.push(jp);
+    this.createJoins();
+  }
 
-      count++;
+  createJoins() {
+    for (let i = 0; i < this.tubes.length; i++) {
+      const points = this.tubes[i].userData.line.userData.points;
+
+      for (let i2 = 0; i2 < points.length; i2++) {
+        const p = points[i2];
+
+        const result = this.joinsPos.get(p.x + '' + p.y + '' + p.z);
+        if (result) {
+          this.tubes[i].userData.line.userData.joins.push(result.obj);
+          result.obj.userData.tubes.push({ obj: this.tubes[i].userData.line, id: i2 });
+        }
+      }
     }
 
-    //console.log(count, pointsHelp);
+    for (let i = 0; i < this.objs.length; i++) {
+      const points = this.objs[i].userData.points;
+
+      for (let i2 = 0; i2 < points.length; i2++) {
+        const p = points[i2];
+
+        const result = this.joinsPos.get(p.x + '' + p.y + '' + p.z);
+        if (result) {
+          this.objs[i].userData.joins.push(result.obj);
+          result.obj.userData.objs.push(this.objs[i]);
+        }
+      }
+    }
   }
 
   // отображение линий по точкам
@@ -248,10 +182,7 @@ export class Gis {
 
   // построение sphere для визуализиции
   helperSphere({ pos, size, color = 0x0000ff }) {
-    const sphere = new THREE.Mesh(
-      new THREE.SphereGeometry(0.075, 32, 16),
-      new THREE.MeshStandardMaterial({ color: 0x222222, depthTest: false, transparent: true })
-    );
+    const sphere = new THREE.Mesh(new THREE.SphereGeometry(size, 32, 16), new THREE.MeshStandardMaterial({ color, depthTest: false, transparent: true }));
     sphere.position.copy(pos);
     this.modelsContainerInit.control.add(sphere);
 
