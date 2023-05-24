@@ -1,13 +1,13 @@
 import * as THREE from 'three';
 
-import { controls, setMeshes, loaderModel } from './index';
+import { controls, modelsContainerInit, setMeshes, loaderModel } from './index';
 
 import { CalcIsometry } from './calcIsometry';
 import { svgConverter } from './svg';
 
 export class Gis {
   svgConverter = svgConverter;
-  scene;
+  modelsContainerInit;
   isometry;
   svgLines = [];
   lines = [];
@@ -15,8 +15,8 @@ export class Gis {
   objs = [];
   joins = [];
 
-  constructor({ scene }) {
-    this.scene = scene;
+  constructor() {
+    this.modelsContainerInit = modelsContainerInit;
     this.isometry = new CalcIsometry();
 
     document.addEventListener('keydown', this.onKeyDown);
@@ -38,10 +38,13 @@ export class Gis {
   };
 
   init() {
-    for (let i = 0; i < loaderModel.meshes.length; i++) loaderModel.meshes[i].visible = false;
-    for (let i = 0; i < loaderModel.fittings.length; i++) loaderModel.fittings[i].visible = false;
+    const meshesTube = loaderModel.getMeshesTube();
+    const meshesObj = loaderModel.getMeshesObj();
 
-    const { tubes: lines, objs } = this.isometry.getIsometry({ tubes: loaderModel.meshes, objs: loaderModel.fittings });
+    for (let i = 0; i < meshesTube.length; i++) meshesTube[i].visible = false;
+    for (let i = 0; i < meshesObj.length; i++) meshesObj[i].visible = false;
+
+    const { tubes: lines, objs } = this.isometry.getIsometry({ tubes: meshesTube, objs: meshesObj });
 
     for (let i = 0; i < lines.length; i++) {
       const pipeSpline = new THREE.CatmullRomCurve3(lines[i]);
@@ -53,7 +56,7 @@ export class Gis {
       tubeObj.userData.isIsometry = true;
       tubeObj.userData.isTube = true;
       tubeObj.userData.line = null;
-      this.scene.add(tubeObj);
+      this.modelsContainerInit.control.add(tubeObj);
       this.tubes.push(tubeObj);
 
       const obj = this.createLine({ points: lines[i] });
@@ -65,7 +68,7 @@ export class Gis {
       obj.userData.tubes = [];
       obj.userData.joins = [];
       obj.userData.tubeObj = tubeObj;
-      this.scene.add(tubeObj);
+      this.modelsContainerInit.control.add(obj);
 
       tubeObj.userData.line = obj;
 
@@ -108,7 +111,7 @@ export class Gis {
       obj.position.set(pos.x, pos.y, pos.z);
       obj.rotation.set(rot.x, rot.y, rot.z);
 
-      this.scene.add(obj);
+      this.modelsContainerInit.control.add(obj);
       this.objs.push(obj);
     }
 
@@ -250,7 +253,7 @@ export class Gis {
       new THREE.MeshStandardMaterial({ color: 0x222222, depthTest: false, transparent: true })
     );
     sphere.position.copy(pos);
-    this.scene.add(sphere);
+    this.modelsContainerInit.control.add(sphere);
 
     return sphere;
   }

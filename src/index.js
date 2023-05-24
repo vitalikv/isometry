@@ -5,7 +5,7 @@ import { LoaderModel } from './loader-model';
 import { SelectObj } from './select-obj';
 import { Gis } from './gis-page';
 
-export let renderer, camera, scene, controls, clock, gui, stats;
+export let renderer, camera, scene, controls, modelsContainerInit, clock, gui, stats;
 let cameraP, cameraO;
 let selectObj;
 export let loaderModel;
@@ -30,6 +30,7 @@ function init() {
 
   // scene setup
   scene = new THREE.Scene();
+  modelsContainerInit = { control: scene };
   //scene.fog = new THREE.Fog(bgColor, 20, 70);
   scene.background = new THREE.Color(0xffffff);
   // lights
