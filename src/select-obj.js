@@ -1,8 +1,10 @@
 import * as THREE from 'three';
 
+import { ruler } from './index';
 import { Moving } from './moving';
 
 export class SelectObj {
+  type = 'move';
   controls;
   scene;
   canvas;
@@ -57,17 +59,30 @@ export class SelectObj {
     return intersects;
   }
 
+  changeType(type) {
+    this.type = type;
+  }
+
   onMouseDown = (event) => {
-    const ray = this.rayIntersect(event, this.meshes, 'arr');
+    const ray = this.rayIntersect(event, [...this.meshes, ...ruler.rulerObjs], 'arr');
 
     if (ray && ray.length > 0) {
       this.intersection = ray[0];
       console.log('---', this.intersection.object);
 
-      if (1 === 2) {
-        this.upListObjs({ obj: this.intersection.object }); // режим веделения
-      } else {
-        this.moving.click({ obj: this.intersection.object, event }); // режим перетаскивания
+      // режим веделения
+      if (this.type === 'select') {
+        this.upListObjs({ obj: this.intersection.object });
+      }
+
+      // режим перетаскивания
+      if (this.type === 'move') {
+        this.moving.click({ obj: this.intersection.object, event });
+      }
+
+      // режим линейки
+      if (this.type === 'ruler') {
+        ruler.click({ intersection: this.intersection, event });
       }
     }
   };

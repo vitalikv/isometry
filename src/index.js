@@ -3,12 +3,12 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { svgConverter } from './svg';
 import { LoaderModel } from './loader-model';
 import { SelectObj } from './select-obj';
+import { Ruler } from './ruler';
 import { Gis } from './gis-page';
 
 export let renderer, camera, scene, controls, modelsContainerInit, clock, gui, stats;
 let cameraP, cameraO;
-let selectObj;
-export let loaderModel;
+export let loaderModel, selectObj, ruler;
 let isomety;
 let meshes = [];
 
@@ -104,6 +104,7 @@ function init() {
   }
 
   selectObj = new SelectObj({ controls, scene, canvas: renderer.domElement, meshes: [] });
+  ruler = new Ruler();
   new Gis({ scene });
 
   window.addEventListener(
