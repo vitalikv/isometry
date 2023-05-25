@@ -44,6 +44,7 @@ export class SelectObj {
     }
 
     const raycaster = new THREE.Raycaster();
+    raycaster.params.Line.threshold = 0;
     raycaster.setFromCamera(mouse, this.controls.object);
 
     let intersects = null;

@@ -26,7 +26,13 @@ export class ConvertObjs {
       const q = meshes[i].getWorldQuaternion(new THREE.Quaternion());
       obj.position.copy(position);
       obj.quaternion.copy(q);
-      //this.scene.add(obj);
+      //this.scene.add(obj.clone());
+
+      const dist = 0.5;
+      obj.scale.set(dist / 2, dist / 2, dist / 2);
+
+      this.upObjUserData({ obj });
+      this.getBoundObject({ obj });
 
       listObjs.push(obj);
     }
@@ -51,8 +57,8 @@ export class ConvertObjs {
       });
 
       //const dist = listDist[0].pos.distanceTo(listDist[1].pos);
-      const dist = 0.5;
-      obj.scale.set(dist / 2, dist / 2, dist / 2);
+
+      if (listDist[0].dist > 1) continue;
 
       let posC = listDist[1].pos.clone().sub(listDist[0].pos);
       posC = new THREE.Vector3(posC.x / 2, posC.y / 2, posC.z / 2);
@@ -75,12 +81,9 @@ export class ConvertObjs {
       if (listDist[1].id === 0) listDist[1].points[0] = pos2;
       else listDist[1].points[listDist[1].points.length - 1] = pos2;
 
+      obj.userData.joins.points = [];
       obj.userData.joins.points.push({ pos: pos1 });
       obj.userData.joins.points.push({ pos: pos2 });
-
-      this.upObjUserData({ obj });
-
-      this.getBoundObject({ obj });
     }
 
     return listObjs;
@@ -133,6 +136,10 @@ export class ConvertObjs {
       pos.z *= obj.scale.x;
 
       obj.userData.boundBox.push({ pos, size });
+
+      const p1 = new THREE.Vector3(bound.min.x, size.y, size.z).applyMatrix4(arr[i].matrixWorld);
+      const p2 = new THREE.Vector3(bound.max.x, size.y, size.z).applyMatrix4(arr[i].matrixWorld);
+      obj.userData.joins.points = [{ pos: p1 }, { pos: p2 }];
     }
   }
 }

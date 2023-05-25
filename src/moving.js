@@ -38,8 +38,9 @@ export class Moving {
   click({ obj, event }) {
     this.isDown = false;
 
-    obj = this.getParentObj({ obj });
-    if (!obj) return;
+    if (!obj.userData.isIsometry) return;
+    // obj = this.getParentObj({ obj });
+    // if (!obj) return;
     console.log(555, obj.userData);
     this.obj = obj;
 
@@ -141,18 +142,43 @@ export class Moving {
     this.isMove = false;
   };
 
-  moveJoin({ obj, offset, skipObj }) {
+  // перемещение стыка
+  moveJoin({ obj, offset, skipObj, skipJoins = [] }) {
+    // если стык уже перемещался, то отменяем операцию
+    skipJoins.forEach((join) => {
+      if (join === obj) return;
+    });
+
+    // добавляем в массив skipJoins, текущий стык, чтобы большего его не перемещали и небыло зацикливания
+    skipJoins.push(obj);
+
+    // перемещение стыка
     obj.position.add(offset);
 
+    // перемещение труб привязанные к стыку
     obj.userData.tubes.forEach((data) => {
       if (data.obj !== skipObj) {
         this.updataTubeLine({ obj: data.obj, offset, id: data.id });
+
+        if (data.obj.userData.line.length > 2) {
+          data.obj.userData.joins.forEach((join) => {
+            if (join !== obj) this.moveJoin({ obj: join, offset, skipObj: data.obj, skipJoins });
+          });
+        }
       }
     });
 
+    // перемещение объектов привязанные к стыку
     obj.userData.objs.forEach((o) => {
       if (o !== skipObj) {
         o.position.add(offset);
+
+        // перемещение стыков привязанные к объекты, за исключением текущего
+        o.userData.joins.forEach((join) => {
+          if (join !== obj) {
+            this.moveJoin({ obj: join, offset, skipObj: o, skipJoins });
+          }
+        });
       }
     });
   }
@@ -161,9 +187,9 @@ export class Moving {
   updataTubeLine({ obj, offset, id = undefined }) {
     const points = obj.userData.line;
 
-    if (id === 0) {
+    if (id === 0 && points.length < 3) {
       points[0].add(offset);
-    } else if (id === 1) {
+    } else if (id === 1 && points.length < 3) {
       points[points.length - 1].add(offset);
     } else {
       points.forEach((point) => point.add(offset));
