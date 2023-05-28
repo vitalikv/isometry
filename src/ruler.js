@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 
-import { modelsContainerInit, controls, selectObj } from './index';
+import { modelsContainerInit, mapControlInit, selectObj } from './index';
 
-export class Ruler {
+export class IsometricRulerService {
   act = false;
   plane;
   isDown = false;
@@ -12,13 +12,11 @@ export class Ruler {
   pointsTool = [];
   rulerObjs = [];
   modelsContainerInit;
-  controls;
-  selectObj;
+  mapControlInit;
 
   constructor() {
     this.modelsContainerInit = modelsContainerInit;
-    this.controls = controls;
-    this.selectObj = selectObj;
+    this.mapControlInit = mapControlInit;
     this.plane = this.initPlane();
     document.addEventListener('keydown', this.onKeyDown);
     document.addEventListener('mousemove', this.onmousemove);
@@ -47,7 +45,7 @@ export class Ruler {
     this.act = !this.act;
 
     const type = this.act ? 'ruler' : 'move';
-    this.selectObj.changeType(type);
+    selectObj.changeType(type);
   };
 
   click({ intersection, event }) {
@@ -129,22 +127,31 @@ export class Ruler {
   }
 
   rayIntersect(event, obj, t) {
-    const container = this.controls.domElement;
+    const canvas = this.mapControlInit.control.domElement;
 
     const mouse = getMousePosition(event);
 
     function getMousePosition(event) {
-      const x = ((event.clientX - container.offsetLeft) / container.clientWidth) * 2 - 1;
-      const y = -((event.clientY - container.offsetTop) / container.clientHeight) * 2 + 1;
+      const x = ((event.clientX - canvas.offsetLeft) / canvas.clientWidth) * 2 - 1;
+      const y = -((event.clientY - canvas.offsetTop) / canvas.clientHeight) * 2 + 1;
 
       return new THREE.Vector2(x, y);
     }
 
+    // function getMousePosition(event) {
+    //   const rect = canvas.getBoundingClientRect();
+
+    //   const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    //   const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+    //   return new THREE.Vector2(x, y);
+    // }
+
     const raycaster = new THREE.Raycaster();
     raycaster.params.Line.threshold = 0;
-    raycaster.setFromCamera(mouse, this.controls.object);
+    raycaster.setFromCamera(mouse, this.mapControlInit.control.object);
 
-    let intersects = null;
+    let intersects = [];
     if (t === 'one') {
       intersects = raycaster.intersectObject(obj);
     } else if (t === 'arr') {
@@ -159,7 +166,7 @@ export class Ruler {
     this.obj = obj;
 
     this.plane.position.copy(obj.position);
-    this.plane.rotation.copy(controls.object.rotation);
+    this.plane.rotation.copy(this.mapControlInit.control.object.rotation);
     this.plane.updateMatrixWorld();
 
     const intersects = this.rayIntersect(event, this.plane, 'one');

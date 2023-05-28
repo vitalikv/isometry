@@ -3,12 +3,13 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { svgConverter } from './svg';
 import { LoaderModel } from './loader-model';
 import { SelectObj } from './select-obj';
-import { Ruler } from './ruler';
+import { IsometricMovingObjs } from './moving';
+import { IsometricRulerService } from './ruler';
 import { Gis } from './gis-page';
 
-export let renderer, camera, scene, controls, modelsContainerInit, clock, gui, stats;
+export let renderer, camera, scene, controls, modelsContainerInit, mapControlInit, clock, gui, stats;
 let cameraP, cameraO;
-export let loaderModel, selectObj, ruler;
+export let loaderModel, selectObj, ruler, moving;
 let isomety;
 let meshes = [];
 
@@ -73,6 +74,8 @@ function init() {
   camera = cameraP;
 
   controls = new OrbitControls(camera, document.body);
+  mapControlInit = { control: controls };
+
   console.log(333, controls);
 
   loaderModel = new LoaderModel({ scene });
@@ -103,8 +106,9 @@ function init() {
     loaderModel.loaderObj('0019.005-TH_02.osf');
   }
 
+  moving = new IsometricMovingObjs();
+  ruler = new IsometricRulerService();
   selectObj = new SelectObj({ controls, scene, canvas: renderer.domElement, meshes: [] });
-  ruler = new Ruler();
   new Gis({ scene });
 
   window.addEventListener(

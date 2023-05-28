@@ -1,29 +1,25 @@
 import * as THREE from 'three';
 
-import { ruler } from './index';
-import { Moving } from './moving';
+import { mapControlInit, ruler, moving } from './index';
 
 export class SelectObj {
   type = 'move';
-  controls;
+  mapControlInit;
   scene;
-  canvas;
-  intersection;
   meshes;
   materials = { def: null, act: null };
   listSelectObjs = [];
   moving;
 
   constructor({ controls, scene, canvas, meshes }) {
-    this.controls = controls;
+    this.mapControlInit = mapControlInit;
     this.scene = scene;
-    this.canvas = canvas;
     this.meshes = meshes;
 
     this.materials.def = new THREE.MeshStandardMaterial({ color: 0xffff00, wireframe: false });
     this.materials.act = new THREE.MeshStandardMaterial({ color: 0xff0000, wireframe: true });
 
-    this.moving = new Moving();
+    this.moving = moving;
 
     document.addEventListener('mousedown', this.onMouseDown);
     document.addEventListener('keydown', this.onKeyDown);
@@ -34,7 +30,7 @@ export class SelectObj {
   }
 
   rayIntersect(event, obj, t) {
-    const container = this.canvas;
+    const container = this.mapControlInit.control.domElement;
 
     const mouse = getMousePosition(event);
 
@@ -47,7 +43,7 @@ export class SelectObj {
 
     const raycaster = new THREE.Raycaster();
     raycaster.params.Line.threshold = 0;
-    raycaster.setFromCamera(mouse, this.controls.object);
+    raycaster.setFromCamera(mouse, this.mapControlInit.control.object);
 
     let intersects = null;
     if (t === 'one') {
@@ -65,25 +61,24 @@ export class SelectObj {
 
   onMouseDown = (event) => {
     const ray = this.rayIntersect(event, [...this.meshes, ...ruler.rulerObjs], 'arr');
+    if (ray.length === 0) return;
 
-    if (ray && ray.length > 0) {
-      this.intersection = ray[0];
-      console.log('---', this.intersection.object);
+    const intersection = ray[0];
+    console.log('---', intersection.object);
 
-      // режим веделения
-      if (this.type === 'select') {
-        this.upListObjs({ obj: this.intersection.object });
-      }
+    // режим веделения
+    if (this.type === 'select') {
+      this.upListObjs({ obj: intersection.object });
+    }
 
-      // режим перетаскивания
-      if (this.type === 'move') {
-        this.moving.click({ obj: this.intersection.object, event });
-      }
+    // режим перетаскивания
+    if (this.type === 'move') {
+      this.moving.click({ obj: intersection.object, event });
+    }
 
-      // режим линейки
-      if (this.type === 'ruler') {
-        ruler.click({ intersection: this.intersection, event });
-      }
+    // режим линейки
+    if (this.type === 'ruler') {
+      ruler.click({ intersection, event });
     }
   };
 

@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 
-import { scene, controls } from './index';
+import { scene, mapControlInit } from './index';
 
-export class Moving {
+export class IsometricMovingObjs {
   isDown = false;
   isMove = false;
-  controls;
+  mapControlInit;
   scene;
   plane;
   obj;
@@ -14,14 +14,14 @@ export class Moving {
   constructor() {
     document.addEventListener('mousemove', this.onmousemove);
     document.addEventListener('mouseup', this.onmouseup);
-    this.scene = scene;
-    this.controls = controls;
+    //this.scene = scene;
+    this.mapControlInit = mapControlInit;
     this.plane = this.initPlane();
   }
 
   initPlane() {
     let geometry = new THREE.PlaneGeometry(10000, 10000);
-    let material = new THREE.MeshPhongMaterial({
+    let material = new THREE.MeshStandardMaterial({
       color: 0xffff00,
       transparent: true,
       opacity: 0.5,
@@ -30,7 +30,7 @@ export class Moving {
     material.visible = false;
     const planeMath = new THREE.Mesh(geometry, material);
     planeMath.rotation.set(-Math.PI / 2, 0, 0);
-    this.scene.add(planeMath);
+    //this.scene.add(planeMath);
 
     return planeMath;
   }
@@ -45,7 +45,7 @@ export class Moving {
     this.obj = obj;
 
     this.plane.position.copy(obj.position);
-    this.plane.rotation.copy(controls.object.rotation);
+    this.plane.rotation.copy(this.mapControlInit.control.object.rotation);
     this.plane.updateMatrixWorld();
 
     const intersects = this.rayIntersect(event, this.plane, 'one');
@@ -80,7 +80,7 @@ export class Moving {
   }
 
   rayIntersect(event, obj, t) {
-    const container = this.controls.domElement;
+    const container = this.mapControlInit.control.domElement;
 
     const mouse = getMousePosition(event);
 
@@ -92,9 +92,9 @@ export class Moving {
     }
 
     const raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(mouse, this.controls.object);
+    raycaster.setFromCamera(mouse, this.mapControlInit.control.object);
 
-    let intersects = null;
+    let intersects = [];
     if (t === 'one') {
       intersects = raycaster.intersectObject(obj);
     } else if (t === 'arr') {
@@ -207,8 +207,8 @@ export class Moving {
     const tubeObj = obj.userData.tubeObj;
     const points = obj.userData.line;
     const pipeSpline = new THREE.CatmullRomCurve3(points);
-    pipeSpline.curveType = 'catmullrom';
-    pipeSpline.tension = 0;
+    pipeSpline['curveType'] = 'catmullrom';
+    pipeSpline['tension'] = 0;
 
     const tubeGeometry = new THREE.TubeGeometry(pipeSpline, points.length, 0.05, 32, false);
     tubeObj.geometry.dispose();
