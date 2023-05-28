@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { svgConverter } from './svg';
 import { LoaderModel } from './loader-model';
-import { SelectObj } from './select-obj';
+import { IsometricModeService } from './select-obj';
 import { IsometricMovingObjs } from './moving';
 import { IsometricRulerService } from './ruler';
 import { Gis } from './gis-page';
@@ -108,7 +108,7 @@ function init() {
 
   moving = new IsometricMovingObjs();
   ruler = new IsometricRulerService();
-  selectObj = new SelectObj({ controls, scene, canvas: renderer.domElement, meshes: [] });
+  selectObj = new IsometricModeService({ controls, scene, canvas: renderer.domElement, meshes: [] });
   new Gis({ scene });
 
   window.addEventListener(

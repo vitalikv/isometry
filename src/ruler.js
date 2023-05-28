@@ -1,10 +1,9 @@
 import * as THREE from 'three';
 
-import { modelsContainerInit, mapControlInit, selectObj } from './index';
+import { modelsContainerInit, mapControlInit } from './index';
 
 export class IsometricRulerService {
   act = false;
-  plane;
   isDown = false;
   isMove = false;
   offset = new THREE.Vector3();
@@ -17,42 +16,6 @@ export class IsometricRulerService {
   constructor() {
     this.modelsContainerInit = modelsContainerInit;
     this.mapControlInit = mapControlInit;
-    this.plane = this.initPlane();
-    document.addEventListener('keydown', this.onKeyDown);
-    document.addEventListener('mousemove', this.onmousemove);
-    document.addEventListener('mouseup', this.onmouseup);
-  }
-
-  initPlane() {
-    let geometry = new THREE.PlaneGeometry(10000, 10000);
-    let material = new THREE.MeshStandardMaterial({
-      color: 0xffff00,
-      transparent: true,
-      opacity: 0.5,
-      side: THREE.DoubleSide,
-    });
-    //material.visible = false;
-    const planeMath = new THREE.Mesh(geometry, material);
-    planeMath.rotation.set(-Math.PI / 2, 0, 0);
-    //this.modelsContainerInit.control.add(planeMath);
-
-    return planeMath;
-  }
-
-  onKeyDown = (evet) => {
-    if (event.code !== 'KeyR') return;
-
-    this.act = !this.act;
-
-    const type = this.act ? 'ruler' : 'move';
-    selectObj.changeType(type);
-  };
-
-  click({ intersection, event }) {
-    const obj = intersection.object;
-
-    if (obj.userData.isIsometry) this.createPoint(intersection);
-    if (obj.userData.isRuler) this.clickRuler({ event, obj });
   }
 
   // кликнули на изометрию, создаем точку для линейки
@@ -161,15 +124,22 @@ export class IsometricRulerService {
     return intersects;
   }
 
+  onmousedown({ intersection, event, plane }) {
+    const obj = intersection.object;
+
+    if (obj.userData.isIsometry) this.createPoint(intersection);
+    if (obj.userData.isRuler) this.clickRuler({ event, obj, plane });
+  }
+
   // кликнули на линейку, готовимся ее перемещению
-  clickRuler({ event, obj }) {
+  clickRuler({ event, obj, plane }) {
     this.obj = obj;
 
-    this.plane.position.copy(obj.position);
-    this.plane.rotation.copy(this.mapControlInit.control.object.rotation);
-    this.plane.updateMatrixWorld();
+    plane.position.copy(obj.position);
+    plane.rotation.copy(this.mapControlInit.control.object.rotation);
+    plane.updateMatrixWorld();
 
-    const intersects = this.rayIntersect(event, this.plane, 'one');
+    const intersects = this.rayIntersect(event, plane, 'one');
     if (intersects.length == 0) return;
     this.offset = intersects[0].point;
 
@@ -177,10 +147,10 @@ export class IsometricRulerService {
     this.isMove = true;
   }
 
-  onmousemove = (event) => {
+  onmousemove = (event, plane) => {
     if (!this.isMove) return;
 
-    const intersects = this.rayIntersect(event, this.plane, 'one');
+    const intersects = this.rayIntersect(event, plane, 'one');
     if (intersects.length == 0) return;
 
     const offset = new THREE.Vector3().subVectors(intersects[0].point, this.offset);

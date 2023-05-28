@@ -7,53 +7,11 @@ export class IsometricMovingObjs {
   isMove = false;
   mapControlInit;
   scene;
-  plane;
   obj;
   offset;
 
   constructor() {
-    document.addEventListener('mousemove', this.onmousemove);
-    document.addEventListener('mouseup', this.onmouseup);
-    //this.scene = scene;
     this.mapControlInit = mapControlInit;
-    this.plane = this.initPlane();
-  }
-
-  initPlane() {
-    let geometry = new THREE.PlaneGeometry(10000, 10000);
-    let material = new THREE.MeshStandardMaterial({
-      color: 0xffff00,
-      transparent: true,
-      opacity: 0.5,
-      side: THREE.DoubleSide,
-    });
-    material.visible = false;
-    const planeMath = new THREE.Mesh(geometry, material);
-    planeMath.rotation.set(-Math.PI / 2, 0, 0);
-    //this.scene.add(planeMath);
-
-    return planeMath;
-  }
-
-  click({ obj, event }) {
-    this.isDown = false;
-
-    if (!obj.userData.isIsometry) return;
-    // obj = this.getParentObj({ obj });
-    // if (!obj) return;
-    console.log(555, obj.userData);
-    this.obj = obj;
-
-    this.plane.position.copy(obj.position);
-    this.plane.rotation.copy(this.mapControlInit.control.object.rotation);
-    this.plane.updateMatrixWorld();
-
-    const intersects = this.rayIntersect(event, this.plane, 'one');
-    if (intersects.length == 0) return;
-    this.offset = intersects[0].point;
-
-    this.isDown = true;
-    this.isMove = true;
   }
 
   getParentObj({ obj }) {
@@ -104,10 +62,32 @@ export class IsometricMovingObjs {
     return intersects;
   }
 
-  onmousemove = (event) => {
+  // если клиенули по изометрии, то готовимся к перетаскиванию
+  onmousedown({ obj, event, plane }) {
+    this.isDown = false;
+
+    if (!obj.userData.isIsometry) return;
+    // obj = this.getParentObj({ obj });
+    // if (!obj) return;
+
+    this.obj = obj;
+
+    plane.position.copy(obj.position);
+    plane.rotation.copy(this.mapControlInit.control.object.rotation);
+    plane.updateMatrixWorld();
+
+    const intersects = this.rayIntersect(event, plane, 'one');
+    if (intersects.length == 0) return;
+    this.offset = intersects[0].point;
+
+    this.isDown = true;
+    this.isMove = true;
+  }
+
+  onmousemove = (event, plane) => {
     if (!this.isMove) return;
 
-    const intersects = this.rayIntersect(event, this.plane, 'one');
+    const intersects = this.rayIntersect(event, plane, 'one');
     if (intersects.length == 0) return;
 
     const offset = new THREE.Vector3().subVectors(intersects[0].point, this.offset);

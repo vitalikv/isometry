@@ -1,28 +1,56 @@
 import * as THREE from 'three';
 
-import { mapControlInit, ruler, moving } from './index';
+import { modelsContainerInit, mapControlInit, ruler, moving } from './index';
 
-export class SelectObj {
-  type = 'move';
+export class IsometricModeService {
+  mode = 'move';
   mapControlInit;
-  scene;
+  modelsContainerInit;
+  plane;
   meshes;
   materials = { def: null, act: null };
   listSelectObjs = [];
-  moving;
 
-  constructor({ controls, scene, canvas, meshes }) {
+  constructor() {
     this.mapControlInit = mapControlInit;
-    this.scene = scene;
-    this.meshes = meshes;
+    this.modelsContainerInit = modelsContainerInit;
+    this.plane = this.initPlane();
 
     this.materials.def = new THREE.MeshStandardMaterial({ color: 0xffff00, wireframe: false });
     this.materials.act = new THREE.MeshStandardMaterial({ color: 0xff0000, wireframe: true });
 
-    this.moving = moving;
+    document.addEventListener('mousedown', this.onmousedown);
+    document.addEventListener('mousemove', this.onmousemove);
+    document.addEventListener('mouseup', this.onmouseup);
 
-    document.addEventListener('mousedown', this.onMouseDown);
     document.addEventListener('keydown', this.onKeyDown);
+  }
+
+  initPlane() {
+    let geometry = new THREE.PlaneGeometry(10000, 10000);
+    let material = new THREE.MeshStandardMaterial({
+      color: 0xffff00,
+      transparent: true,
+      opacity: 0.5,
+      side: THREE.DoubleSide,
+    });
+    //material.visible = false;
+    const planeMath = new THREE.Mesh(geometry, material);
+    planeMath.rotation.set(-Math.PI / 2, 0, 0);
+    //this.modelsContainerInit.control.add(planeMath);
+
+    return planeMath;
+  }
+
+  onKeyDown = (event) => {
+    if (event.code === 'Enter') this.getListSelectedObjs();
+
+    if (event.code === 'KeyR') this.changeMode('ruler');
+    if (event.code === 'KeyM') this.changeMode('move');
+  };
+
+  changeMode(mode) {
+    this.mode = mode;
   }
 
   updateMesh(meshes) {
@@ -30,22 +58,32 @@ export class SelectObj {
   }
 
   rayIntersect(event, obj, t) {
-    const container = this.mapControlInit.control.domElement;
+    const canvas = this.mapControlInit.control.domElement;
 
     const mouse = getMousePosition(event);
 
     function getMousePosition(event) {
-      const x = ((event.clientX - container.offsetLeft) / container.clientWidth) * 2 - 1;
-      const y = -((event.clientY - container.offsetTop) / container.clientHeight) * 2 + 1;
+      const x = ((event.clientX - canvas.offsetLeft) / canvas.clientWidth) * 2 - 1;
+      const y = -((event.clientY - canvas.offsetTop) / canvas.clientHeight) * 2 + 1;
 
       return new THREE.Vector2(x, y);
     }
+
+    // работает также
+    // function getMousePosition(event) {
+    //   const rect = canvas.getBoundingClientRect();
+
+    //   const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    //   const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+    //   return new THREE.Vector2(x, y);
+    // }
 
     const raycaster = new THREE.Raycaster();
     raycaster.params.Line.threshold = 0;
     raycaster.setFromCamera(mouse, this.mapControlInit.control.object);
 
-    let intersects = null;
+    let intersects = [];
     if (t === 'one') {
       intersects = raycaster.intersectObject(obj);
     } else if (t === 'arr') {
@@ -55,11 +93,7 @@ export class SelectObj {
     return intersects;
   }
 
-  changeType(type) {
-    this.type = type;
-  }
-
-  onMouseDown = (event) => {
+  onmousedown = (event) => {
     const ray = this.rayIntersect(event, [...this.meshes, ...ruler.rulerObjs], 'arr');
     if (ray.length === 0) return;
 
@@ -67,25 +101,43 @@ export class SelectObj {
     console.log('---', intersection.object);
 
     // режим веделения
-    if (this.type === 'select') {
+    if (this.mode === 'select') {
       this.upListObjs({ obj: intersection.object });
     }
 
     // режим перетаскивания
-    if (this.type === 'move') {
-      this.moving.click({ obj: intersection.object, event });
+    if (this.mode === 'move') {
+      moving.onmousedown({ obj: intersection.object, event, plane: this.plane });
     }
 
     // режим линейки
-    if (this.type === 'ruler') {
-      ruler.click({ intersection, event });
+    if (this.mode === 'ruler') {
+      ruler.onmousedown({ intersection, event, plane: this.plane });
+    }
+  };
+
+  onmousemove = (event) => {
+    if (this.mode === 'move') {
+      moving.onmousemove(event, this.plane);
+    }
+
+    if (this.mode === 'ruler') {
+      ruler.onmousemove(event, this.plane);
+    }
+  };
+
+  onmouseup = (event) => {
+    if (this.mode === 'move') {
+      moving.onmouseup(event);
+    }
+
+    if (this.mode === 'ruler') {
+      ruler.onmouseup(event);
     }
   };
 
   // получаем массив uuid выбранных объектов
-  onKeyDown = (event) => {
-    if (event.code !== 'Enter') return;
-
+  getListSelectedObjs() {
     let str = '';
     const uuids = [];
     const list = this.listSelectObjs;
@@ -97,7 +149,7 @@ export class SelectObj {
 
     //console.log(uuids);
     console.log(str);
-  };
+  }
 
   upListObjs({ obj }) {
     const result = this.checkObj({ obj });
