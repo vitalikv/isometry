@@ -6,6 +6,7 @@ import { IsometricModeService } from './select-obj';
 import { IsometricMovingObjs } from './moving';
 import { IsometricRulerService } from './ruler';
 import { IsometricLabels } from './labels';
+import { IsometricScreenshot } from './screenshot';
 import { Gis } from './gis-page';
 
 export let renderer, camera, scene, controls, modelsContainerInit, mapControlInit, clock, gui, stats;
@@ -21,7 +22,7 @@ function init() {
   const bgColor = 0x263238 / 2;
 
   // renderer setup
-  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setClearColor(bgColor, 1);
@@ -112,6 +113,7 @@ function init() {
   selectObj = new IsometricModeService({ controls, scene, canvas: renderer.domElement, meshes: [] });
   new Gis();
   isometricLabels = new IsometricLabels();
+  new IsometricScreenshot();
 
   window.addEventListener(
     'resize',
