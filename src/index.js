@@ -5,11 +5,12 @@ import { LoaderModel } from './loader-model';
 import { IsometricModeService } from './select-obj';
 import { IsometricMovingObjs } from './moving';
 import { IsometricRulerService } from './ruler';
+import { IsometricLabels } from './labels';
 import { Gis } from './gis-page';
 
 export let renderer, camera, scene, controls, modelsContainerInit, mapControlInit, clock, gui, stats;
 let cameraP, cameraO;
-export let loaderModel, selectObj, ruler, moving;
+export let loaderModel, selectObj, ruler, moving, isometricLabels;
 let isomety;
 let meshes = [];
 
@@ -109,7 +110,8 @@ function init() {
   moving = new IsometricMovingObjs();
   ruler = new IsometricRulerService();
   selectObj = new IsometricModeService({ controls, scene, canvas: renderer.domElement, meshes: [] });
-  new Gis({ scene });
+  new Gis();
+  isometricLabels = new IsometricLabels();
 
   window.addEventListener(
     'resize',

@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 
-import { modelsContainerInit, mapControlInit, ruler, moving } from './index';
+import { modelsContainerInit, mapControlInit, ruler, moving, isometricLabels } from './index';
 
 export class IsometricModeService {
-  mode = 'move';
+  mode = 'label';
   mapControlInit;
   modelsContainerInit;
   plane;
@@ -94,25 +94,31 @@ export class IsometricModeService {
   }
 
   onmousedown = (event) => {
-    const ray = this.rayIntersect(event, [...this.meshes, ...ruler.rulerObjs], 'arr');
+    const ray = this.rayIntersect(event, [...this.meshes, ...ruler.rulerObjs, ...isometricLabels.labelObjs], 'arr');
     if (ray.length === 0) return;
 
     const intersection = ray[0];
+    const obj = intersection.object;
     console.log('---', intersection.object);
 
     // режим веделения
     if (this.mode === 'select') {
-      this.upListObjs({ obj: intersection.object });
+      this.upListObjs({ obj });
     }
 
     // режим перетаскивания
     if (this.mode === 'move') {
-      moving.onmousedown({ obj: intersection.object, event, plane: this.plane });
+      if (obj.userData.isIsometry) moving.onmousedown({ obj, event, plane: this.plane });
     }
 
     // режим линейки
     if (this.mode === 'ruler') {
       ruler.onmousedown({ intersection, event, plane: this.plane });
+    }
+
+    // режим выноски для объектов
+    if (this.mode === 'label') {
+      isometricLabels.onmousedown({ intersection, event, plane: this.plane });
     }
   };
 
@@ -124,6 +130,10 @@ export class IsometricModeService {
     if (this.mode === 'ruler') {
       ruler.onmousemove(event, this.plane);
     }
+
+    if (this.mode === 'label') {
+      isometricLabels.onmousemove(event, this.plane);
+    }
   };
 
   onmouseup = (event) => {
@@ -133,6 +143,10 @@ export class IsometricModeService {
 
     if (this.mode === 'ruler') {
       ruler.onmouseup(event);
+    }
+
+    if (this.mode === 'label') {
+      isometricLabels.onmouseup(event);
     }
   };
 
