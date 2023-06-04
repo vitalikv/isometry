@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { modelsContainerInit, mapControlInit, ruler, moving, isometricLabels } from './index';
+import { modelsContainerInit, mapControlInit, ruler, moving, isometricLabels, isometricLabelList } from './index';
 
 export class IsometricModeService {
   mode = 'label';
@@ -22,6 +22,7 @@ export class IsometricModeService {
     document.addEventListener('mousedown', this.onmousedown);
     document.addEventListener('mousemove', this.onmousemove);
     document.addEventListener('mouseup', this.onmouseup);
+    document.addEventListener('wheel', this.mouseWheel);
 
     document.addEventListener('keydown', this.onKeyDown);
   }
@@ -123,6 +124,8 @@ export class IsometricModeService {
   };
 
   onmousemove = (event) => {
+    isometricLabelList.setPosRot();
+
     if (this.mode === 'move') {
       moving.onmousemove(event, this.plane);
     }
@@ -148,6 +151,10 @@ export class IsometricModeService {
     if (this.mode === 'label') {
       isometricLabels.onmouseup(event);
     }
+  };
+
+  mouseWheel = (event) => {
+    isometricLabelList.setPosRot();
   };
 
   // получаем массив uuid выбранных объектов

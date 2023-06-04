@@ -27,7 +27,7 @@ export class Gis {
     if (event.code === 'Space') {
       this.init();
       //controls.enabled = false;
-      controls.enableRotate = false;
+      //controls.enableRotate = false;
 
       setMeshes({ arr: [...this.tubes, ...this.objs, ...this.joins] });
     }
@@ -35,6 +35,10 @@ export class Gis {
     // создание svg
     if (event.code === 'KeyS') {
       svgConverter.createSvgScheme({ lines: this.lines });
+    }
+
+    if (event.code === 'Delete') {
+      this.deleteObjs();
     }
   };
 
@@ -205,5 +209,42 @@ export class Gis {
     this.modelsContainerInit.control.add(sphere);
 
     return sphere;
+  }
+
+  // удаляем изометрию
+  deleteObjs() {
+    const arr = [...this.lines, ...this.tubes, ...this.objs, ...this.joins];
+
+    arr.forEach((item) => {
+      this.clearMesh(item);
+    });
+
+    this.lines = [];
+    this.tubes = [];
+    this.objs = [];
+    this.joins = [];
+    this.joinsPos = new Map();
+  }
+
+  clearMesh(mesh) {
+    mesh?.parent?.remove(mesh);
+    mesh.geometry.dispose();
+
+    const materials = [];
+    if (Array.isArray(mesh.material)) {
+      materials.push(...mesh.material);
+    } else if (mesh.material instanceof THREE.Material) {
+      materials.push(mesh.material);
+    }
+
+    materials.forEach((mtrl) => {
+      if (mtrl.map) mtrl.map.dispose();
+      if (mtrl.lightMap) mtrl.lightMap.dispose();
+      if (mtrl.bumpMap) mtrl.bumpMap.dispose();
+      if (mtrl.normalMap) mtrl.normalMap.dispose();
+      if (mtrl.specularMap) mtrl.specularMap.dispose();
+      if (mtrl.envMap) mtrl.envMap.dispose();
+      mtrl.dispose();
+    });
   }
 }

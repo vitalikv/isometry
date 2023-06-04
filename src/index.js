@@ -6,12 +6,13 @@ import { IsometricModeService } from './select-obj';
 import { IsometricMovingObjs } from './moving';
 import { IsometricRulerService } from './ruler';
 import { IsometricLabels } from './labels';
+import { IsometricLabelList } from './labelList';
 import { IsometricScreenshot } from './screenshot';
 import { Gis } from './gis-page';
 
 export let renderer, camera, scene, controls, modelsContainerInit, mapControlInit, clock, gui, stats;
 let cameraP, cameraO;
-export let loaderModel, selectObj, ruler, moving, isometricLabels;
+export let loaderModel, selectObj, ruler, moving, isometricLabels, isometricLabelList;
 let isomety;
 let meshes = [];
 
@@ -113,6 +114,8 @@ function init() {
   selectObj = new IsometricModeService({ controls, scene, canvas: renderer.domElement, meshes: [] });
   new Gis();
   isometricLabels = new IsometricLabels();
+  isometricLabelList = new IsometricLabelList();
+  //isometricLabelList.init();
   new IsometricScreenshot();
 
   window.addEventListener(
@@ -141,6 +144,7 @@ function onKeyDown(event) {
   if (event.code !== 'KeyC') return;
 
   let pos = new THREE.Vector3();
+  let rot = camera.rotation.clone();
 
   camera = camera === cameraP ? cameraO : cameraP;
 
@@ -159,10 +163,14 @@ function onKeyDown(event) {
   }
 
   camera.position.copy(pos);
+  camera.rotation.copy(rot);
   camera.updateMatrixWorld();
   camera.updateProjectionMatrix();
 
   controls.object = camera;
+  mapControlInit.control.object = camera;
+
+  if (camera === cameraO) isometricLabelList.init();
 }
 
 function render() {

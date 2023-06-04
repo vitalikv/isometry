@@ -103,7 +103,10 @@ export class IsometricLabels {
     if (obj.userData.isLabel) this.clickObj({ event, obj, plane });
     if (obj.userData.isIsometry) {
       let text = 'text';
-      if (obj.userData.isTube) text = 'труба';
+      if (obj.userData.isTube) {
+        text = 'труба';
+        if (obj.userData.line.userData.line.length > 2) text = 'отвод';
+      }
       if (obj.userData.isObj) text = 'кран';
       if (obj.userData.isJoin) text = 'стык';
       this.createLabel({ pos: intersection.point, text });
@@ -113,6 +116,7 @@ export class IsometricLabels {
   // если клиенули по label, то готовимся к перетаскиванию
   clickObj({ obj, event, plane }) {
     this.isDown = false;
+    this.isMove = false;
 
     if (!obj.userData.isLabel) return;
 
