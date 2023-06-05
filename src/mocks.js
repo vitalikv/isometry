@@ -443,4 +443,10 @@ export class MocksIsometry {
 
     return list;
   }
+
+  listTeeIfcId() {
+    let list = ['285ec00f-42f1-4fb8-ad39-ee613d0c0cc6', '2b87c557-d077-49d2-9a50-f688537d54f0'];
+
+    return list;
+  }
 }

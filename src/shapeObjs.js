@@ -1,24 +1,25 @@
 import * as THREE from 'three';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
+import { scene } from './index';
+
 export class ShapeObjs {
-  obj;
+  valveObj;
+  teeObj;
 
   constructor() {
-    this.createValve();
+    this.valveObj = this.createValve();
+    this.teeObj = this.createTee();
+    this.crTestPointRot({ obj: this.teeObj });
   }
 
   createValve() {
     const material = new THREE.LineBasicMaterial({ color: 0x000000 });
 
-    const geometries = [];
-    geometries.push(this.getForm1());
-    geometries.push(this.getForm2());
-    console.log(geometries);
-    const geometry = BufferGeometryUtils.mergeBufferGeometries(geometries);
-    const obj = new THREE.Line(geometry, material);
-    //obj.geometry.computeBoundingSphere();
-    //obj.geometry.computeBoundingBox();
+    const geometries = this.getFormValve();
+
+    const obj = new THREE.Object3D();
+    geometries.forEach((g) => obj.add(new THREE.Line(g, material)));
 
     obj.userData = {};
     obj.userData.pos = new THREE.Vector3();
@@ -31,51 +32,96 @@ export class ShapeObjs {
       obj.userData.shapes.push(g.userData.points);
     });
 
-    this.obj = obj;
+    return obj;
   }
 
-  getForm1() {
-    const points = [];
-    points.push(new THREE.Vector3(-1, -1, 0));
-    points.push(new THREE.Vector3(-1, 1, 0));
-    points.push(new THREE.Vector3(1, -1, 0));
-    points.push(new THREE.Vector3(1, 1, 0));
-    points.push(new THREE.Vector3(-1, -1, 0));
+  createTee() {
+    const material = new THREE.LineBasicMaterial({ color: 0x000000 });
 
-    // for (let i = 0; i < points.length; i++) {
-    //   points[i].x *= 0.25;
-    //   points[i].y *= 0.25;
-    //   points[i].z *= 0.25;
-    // }
+    const geometries = this.getFormTree();
 
-    const geometry = new THREE.BufferGeometry().setFromPoints(points);
-    geometry.userData = {};
-    geometry.userData.points = points;
+    const obj = new THREE.Object3D();
+    geometries.forEach((g) => obj.add(new THREE.Line(g, material)));
 
-    return geometry;
+    obj.userData = {};
+    obj.userData.pos = new THREE.Vector3();
+    obj.userData.rot = new THREE.Vector3();
+    obj.userData.scale = 1;
+    obj.userData.boundBox = [];
+    obj.userData.joins = { tubes: [], points: [] };
+    obj.userData.shapes = [];
+    geometries.forEach((g) => {
+      obj.userData.shapes.push(g.userData.points);
+    });
+
+    return obj;
   }
 
-  getForm2() {
-    const points = [];
-    points.push(new THREE.Vector3(0, 0, 0));
-    points.push(new THREE.Vector3(0, 1.5, 0));
-    points.push(new THREE.Vector3(-1, 1.5, 0));
-    points.push(new THREE.Vector3(1, 1.5, 0));
+  getFormValve() {
+    function line1() {
+      const points = [];
+      points.push(new THREE.Vector3(-1, -1, 0));
+      points.push(new THREE.Vector3(-1, 1, 0));
+      points.push(new THREE.Vector3(1, -1, 0));
+      points.push(new THREE.Vector3(1, 1, 0));
+      points.push(new THREE.Vector3(-1, -1, 0));
 
-    // for (let i = 0; i < points.length; i++) {
-    //   points[i].x *= 0.25;
-    //   points[i].y *= 0.25;
-    //   points[i].z *= 0.25;
-    // }
+      const geometry = new THREE.BufferGeometry().setFromPoints(points);
+      geometry.userData = {};
+      geometry.userData.points = points;
 
-    const geometry = new THREE.BufferGeometry().setFromPoints(points);
-    geometry.userData = {};
-    geometry.userData.points = points;
+      return geometry;
+    }
 
-    return geometry;
+    function line2() {
+      const points = [];
+      points.push(new THREE.Vector3(0, 0, 0));
+      points.push(new THREE.Vector3(0, 1.5, 0));
+      points.push(new THREE.Vector3(-1, 1.5, 0));
+      points.push(new THREE.Vector3(1, 1.5, 0));
+
+      const geometry = new THREE.BufferGeometry().setFromPoints(points);
+      geometry.userData = {};
+      geometry.userData.points = points;
+
+      return geometry;
+    }
+
+    return [line1(), line2()];
   }
 
-  crTestPointRot() {
+  getFormTree() {
+    function line1() {
+      const points = [];
+      points.push(new THREE.Vector3(-1, 0, 0));
+      points.push(new THREE.Vector3(1, 0, 0));
+
+      const geometry = new THREE.BufferGeometry().setFromPoints(points);
+      geometry.userData = {};
+      geometry.userData.points = points;
+
+      return geometry;
+    }
+
+    function line2() {
+      const points = [];
+      points.push(new THREE.Vector3(0, 0, 0));
+      points.push(new THREE.Vector3(0, -1, 0));
+
+      const geometry = new THREE.BufferGeometry().setFromPoints(points);
+      geometry.userData = {};
+      geometry.userData.points = points;
+
+      return geometry;
+    }
+
+    return [line1(), line2()];
+  }
+
+  crTestPointRot({ obj }) {
+    obj = obj.clone();
+    scene.add(obj);
+
     const size = 0.2;
     const material = new THREE.MeshStandardMaterial({ color: 0xff0000, depthTest: true, transparent: true });
     //const pos = [new THREE.Vector3(-1, 0, 0), new THREE.Vector3(1, 0, 0)];
@@ -83,13 +129,13 @@ export class ShapeObjs {
 
     const box1 = new THREE.Mesh(new THREE.BoxGeometry(size, size, size), material);
     box1.position.copy(pos[0]);
-    this.scene.add(box1);
+    scene.add(box1);
 
     const box2 = new THREE.Mesh(new THREE.BoxGeometry(size, size, size), material);
     box2.position.copy(pos[1]);
-    this.scene.add(box2);
+    scene.add(box2);
 
-    this.setRot({ obj: this.obj, pos1: pos[0], pos2: pos[1] });
+    this.setRot({ obj, pos1: pos[0], pos2: pos[1] });
   }
 
   setRot({ obj, pos1, pos2 }) {

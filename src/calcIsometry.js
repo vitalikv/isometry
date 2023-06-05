@@ -1,29 +1,38 @@
 import { ConvertTubes } from './convertTubes';
-import { ConvertObjs } from './convertObjs';
+import { ConvertValves } from './convertValves';
+import { ConvertTees } from './convertTees';
 
 export class CalcIsometry {
   convertTubes;
-  convertObjs;
+  convertValves;
+  convertTees;
   lines = [];
-  objs = [];
+  valves = [];
+  tees = [];
 
   constructor() {
     this.convertTubes = new ConvertTubes();
-    this.convertObjs = new ConvertObjs();
+    this.convertValves = new ConvertValves();
+    this.convertTees = new ConvertTees();
   }
 
-  getIsometry({ tubes, objs }) {
+  getIsometry({ tubes, valves = [], tees = [] }) {
     this.getTubes(tubes);
-    this.getObjs(objs);
+    this.getValves(valves);
+    this.getTees(tees);
 
-    return { tubes: this.lines, objs: this.objs };
+    return { tubes: this.lines, valves: this.valves, tees: this.tees };
   }
 
   getTubes(meshes) {
     this.lines = this.convertTubes.getData({ meshes });
   }
 
-  getObjs(meshes) {
-    this.objs = this.convertObjs.getData({ meshes, lines: this.lines });
+  getValves(meshes) {
+    this.valves = this.convertValves.getData({ meshes, lines: this.lines });
+  }
+
+  getTees(meshes) {
+    this.tees = this.convertTees.getData({ meshes, lines: this.lines });
   }
 }

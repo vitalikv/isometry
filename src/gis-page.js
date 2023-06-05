@@ -12,7 +12,8 @@ export class Gis {
   svgLines = [];
   lines = [];
   tubes = [];
-  objs = [];
+  valves = [];
+  tees = [];
   joins = [];
   joinsPos = new Map();
 
@@ -27,9 +28,9 @@ export class Gis {
     if (event.code === 'Space') {
       this.init();
       //controls.enabled = false;
-      //controls.enableRotate = false;
+      controls.enableRotate = false;
 
-      setMeshes({ arr: [...this.tubes, ...this.objs, ...this.joins] });
+      setMeshes({ arr: [...this.tubes, ...this.valves, ...this.tees, ...this.joins] });
     }
 
     // создание svg
@@ -44,21 +45,29 @@ export class Gis {
 
   init() {
     const meshesTube = loaderModel.getMeshesTube();
-    const meshesObj = loaderModel.getMeshesObj();
+    const meshesValve = loaderModel.getMeshesValve();
+    const meshesTee = loaderModel.getMeshesTee();
 
     for (let i = 0; i < meshesTube.length; i++) meshesTube[i].visible = false;
-    for (let i = 0; i < meshesObj.length; i++) meshesObj[i].visible = false;
+    for (let i = 0; i < meshesValve.length; i++) meshesValve[i].visible = false;
+    for (let i = 0; i < meshesTee.length; i++) meshesTee[i].visible = false;
 
-    const { tubes, objs } = this.isometry.getIsometry({ tubes: meshesTube, objs: meshesObj });
+    const { tubes, valves, tees } = this.isometry.getIsometry({ tubes: meshesTube, valves: meshesValve, tees: meshesTee });
 
     for (let i = 0; i < tubes.length; i++) {
       this.createTube(tubes[i]);
     }
 
-    for (let i = 0; i < objs.length; i++) {
-      if (objs[i].userData.shapes.length === 0) continue;
+    for (let i = 0; i < valves.length; i++) {
+      if (valves[i].shapes.length === 0) continue;
 
-      this.createObj(objs[i].userData);
+      this.createValve(valves[i]);
+    }
+
+    for (let i = 0; i < tees.length; i++) {
+      if (tees[i].shapes.length === 0) continue;
+
+      this.createTee(tees[i]);
     }
 
     this.createJoins();
@@ -104,15 +113,15 @@ export class Gis {
     this.joinsPos.set(p2.x + '' + p2.y + '' + p2.z, { pos: p2, obj: null });
   }
 
-  // создание объектов
-  createObj(data) {
+  // создание кранов
+  createValve(data) {
     const size = data.boundBox[0].size;
     const posG = data.boundBox[0].pos;
     const obj = new THREE.Mesh(
       new THREE.BoxGeometry(size.x, size.y, size.z),
-      new THREE.MeshStandardMaterial({ color: 0x0000ff, depthTest: true, transparent: true, opacity: 0 })
+      new THREE.MeshStandardMaterial({ color: 0x0000ff, depthTest: true, transparent: true, opacity: 1 })
     );
-    obj.material.visible = false;
+    //obj.material.visible = false;
     obj.geometry.translate(posG.x, posG.y, posG.z);
 
     //const obj = new THREE.Mesh();
@@ -138,12 +147,54 @@ export class Gis {
     obj.rotation.set(rot.x, rot.y, rot.z);
 
     this.modelsContainerInit.control.add(obj);
-    this.objs.push(obj);
+    this.valves.push(obj);
 
     const p1 = points[0].pos;
     const p2 = points[1].pos;
     this.joinsPos.set(p1.x + '' + p1.y + '' + p1.z, { pos: p1, obj: null });
     this.joinsPos.set(p2.x + '' + p2.y + '' + p2.z, { pos: p2, obj: null });
+  }
+
+  // создание тройников
+  createTee(data) {
+    const size = data.boundBox[0].size;
+    const posG = data.boundBox[0].pos;
+    const obj = new THREE.Mesh(
+      new THREE.BoxGeometry(size.x, size.y, size.z),
+      new THREE.MeshStandardMaterial({ color: 0x0000ff, depthTest: true, transparent: true, opacity: 1 })
+    );
+    //obj.material.visible = false;
+    obj.geometry.translate(posG.x, posG.y, posG.z);
+
+    //const obj = new THREE.Mesh();
+    obj.userData = {};
+    obj.userData.isIsometry = true;
+    obj.userData.isObj = true;
+    obj.userData.tubes = [];
+    obj.userData.joins = [];
+
+    const points = data.joins.points;
+    obj.userData.points = [points[0].pos, points[1].pos];
+
+    for (let i2 = 0; i2 < data.shapes.length; i2++) {
+      const line = this.createLine({ points: data.shapes[i2] });
+      obj.add(line);
+      line.updateMatrixWorld();
+      line.updateMatrix();
+    }
+
+    const pos = data.pos;
+    const rot = data.rot;
+    obj.position.set(pos.x, pos.y, pos.z);
+    obj.rotation.set(rot.x, rot.y, rot.z);
+
+    this.modelsContainerInit.control.add(obj);
+    this.tees.push(obj);
+
+    const p1 = points[0].pos;
+    const p2 = points[1].pos;
+    // this.joinsPos.set(p1.x + '' + p1.y + '' + p1.z, { pos: p1, obj: null });
+    // this.joinsPos.set(p2.x + '' + p2.y + '' + p2.z, { pos: p2, obj: null });
   }
 
   // создаем стыки
@@ -176,16 +227,16 @@ export class Gis {
       }
     }
 
-    for (let i = 0; i < this.objs.length; i++) {
-      const points = this.objs[i].userData.points;
+    for (let i = 0; i < this.valves.length; i++) {
+      const points = this.valves[i].userData.points;
 
       for (let i2 = 0; i2 < points.length; i2++) {
         const p = points[i2];
 
         const result = this.joinsPos.get(p.x + '' + p.y + '' + p.z);
         if (result) {
-          this.objs[i].userData.joins.push(result.obj);
-          result.obj.userData.objs.push(this.objs[i]);
+          this.valves[i].userData.joins.push(result.obj);
+          result.obj.userData.objs.push(this.valves[i]);
         }
       }
     }

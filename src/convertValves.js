@@ -3,9 +3,8 @@ import * as THREE from 'three';
 import * as Main from './index';
 import { ShapeObjs } from './shapeObjs';
 
-export class ConvertObjs {
+export class ConvertValves {
   scene;
-  lines;
   shapeObjs;
 
   constructor() {
@@ -14,11 +13,10 @@ export class ConvertObjs {
   }
 
   getData({ meshes, lines }) {
-    this.lines = lines;
     const listObjs = [];
 
     for (let i = 0; i < meshes.length; i++) {
-      const obj = this.shapeObjs.obj.clone();
+      const obj = this.shapeObjs.valveObj.clone();
 
       if (!meshes[i].geometry.boundingSphere) meshes[i].geometry.computeBoundingSphere();
       const position = meshes[i].geometry.boundingSphere.center.clone().applyMatrix4(meshes[i].matrixWorld);
@@ -42,8 +40,8 @@ export class ConvertObjs {
 
       const listDist = [];
 
-      for (let i2 = 0; i2 < this.lines.length; i2++) {
-        const points = this.lines[i2];
+      for (let i2 = 0; i2 < lines.length; i2++) {
+        const points = lines[i2];
 
         const dist1 = obj.position.distanceTo(points[0]);
         const dist2 = obj.position.distanceTo(points[points.length - 1]);
@@ -86,7 +84,7 @@ export class ConvertObjs {
       obj.userData.joins.points.push({ pos: pos2 });
     }
 
-    return listObjs;
+    return listObjs.map((item) => item.userData);
   }
 
   // обновляем иформацию по которой будем строить фитинг
@@ -108,38 +106,63 @@ export class ConvertObjs {
   }
 
   getBoundObject({ obj }) {
-    const arr = [obj];
+    const arr = [];
 
     obj.updateMatrixWorld(true);
 
     obj.traverse(function (child) {
-      if (child instanceof THREE.Mesh) {
-        arr.push(child);
-      }
+      arr.push(child);
     });
 
+    const boundG = { min: { x: Infinity, y: Infinity, z: Infinity }, max: { x: -Infinity, y: -Infinity, z: -Infinity } };
+
     for (let i = 0; i < arr.length; i++) {
+      if (!arr[i].geometry) continue;
       if (!arr[i].geometry.boundingBox) arr[i].geometry.computeBoundingBox();
-      if (!arr[i].geometry.boundingSphere) arr[i].geometry.computeBoundingSphere();
+      //if (!arr[i].geometry.boundingSphere) arr[i].geometry.computeBoundingSphere();
 
-      const pos = arr[i].geometry.boundingSphere.center.clone();
-      let bound = arr[i].geometry.boundingBox;
+      //const pos = arr[i].geometry.boundingSphere.center.clone();
+      const bound = arr[i].geometry.boundingBox;
 
-      const size = new THREE.Vector3(bound.max.x - bound.min.x, bound.max.y - bound.min.y, bound.max.z - bound.min.z);
-
-      size.x *= obj.scale.x;
-      size.y *= obj.scale.x;
-      size.z *= obj.scale.x;
-
-      pos.x *= obj.scale.x;
-      pos.y *= obj.scale.x;
-      pos.z *= obj.scale.x;
-
-      obj.userData.boundBox.push({ pos, size });
-
-      const p1 = new THREE.Vector3(bound.min.x, size.y, size.z).applyMatrix4(arr[i].matrixWorld);
-      const p2 = new THREE.Vector3(bound.max.x, size.y, size.z).applyMatrix4(arr[i].matrixWorld);
-      obj.userData.joins.points = [{ pos: p1 }, { pos: p2 }];
+      if (bound.min.x < boundG.min.x) {
+        boundG.min.x = bound.min.x;
+      }
+      if (bound.max.x > boundG.max.x) {
+        boundG.max.x = bound.max.x;
+      }
+      if (bound.min.y < boundG.min.y) {
+        boundG.min.y = bound.min.y;
+      }
+      if (bound.max.y > boundG.max.y) {
+        boundG.max.y = bound.max.y;
+      }
+      if (bound.min.z < boundG.min.z) {
+        boundG.min.z = bound.min.z;
+      }
+      if (bound.max.z > boundG.max.z) {
+        boundG.max.z = bound.max.z;
+      }
     }
+
+    const size = new THREE.Vector3(boundG.max.x - boundG.min.x, boundG.max.y - boundG.min.y, boundG.max.z - boundG.min.z);
+
+    const p1 = new THREE.Vector3(boundG.min.x, size.y, size.z).applyMatrix4(obj.matrixWorld);
+    const p2 = new THREE.Vector3(boundG.max.x, size.y, size.z).applyMatrix4(obj.matrixWorld);
+    obj.userData.joins.points = [{ pos: p1 }, { pos: p2 }];
+
+    const center = new THREE.Vector3(
+      (boundG.max.x - boundG.min.x) / 2 + boundG.min.x,
+      (boundG.max.y - boundG.min.y) / 2 + boundG.min.y,
+      (boundG.max.z - boundG.min.z) / 2 + boundG.min.z
+    );
+
+    center.x *= obj.scale.x;
+    center.y *= obj.scale.y;
+    center.z *= obj.scale.z;
+
+    size.x *= obj.scale.x;
+    size.y *= obj.scale.x;
+    size.z *= obj.scale.x;
+    obj.userData.boundBox.push({ pos: center, size });
   }
 }

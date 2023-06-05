@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { modelsContainerInit, mapControlInit, ruler, moving, isometricLabels, isometricLabelList } from './index';
 
 export class IsometricModeService {
-  mode = 'label';
+  mode = 'move';
   mapControlInit;
   modelsContainerInit;
   plane;
@@ -204,6 +204,6 @@ export class IsometricModeService {
 
   // назначаем материал для объекта , если он выбран или нет
   setMaterial({ obj, act }) {
-    obj.material = act ? this.materials.act.clone() : this.materials.def.clone();
+    act ? (obj.material.wireframe = true) : (obj.material.wireframe = false);
   }
 }

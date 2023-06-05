@@ -34,9 +34,10 @@ export class LoaderModel {
           obj.traverse((mesh) => {
             if (mesh instanceof THREE.Mesh) {
               mesh.material = mesh.material.clone();
+              mesh.material.color.set(0xcccccc);
 
+              // трубы
               const list = this.mocksIsometry.listTubeIfcId();
-
               let add = false;
               for (let i = 0; i < list.length; i++) {
                 if (mesh.uuid === list[i]) {
@@ -44,7 +45,9 @@ export class LoaderModel {
                   break;
                 }
               }
+              if (add) mesh.material.color.set(0xa129d9);
 
+              // краны
               if (!add) {
                 const list = this.mocksIsometry.listValveIfcId();
 
@@ -54,19 +57,25 @@ export class LoaderModel {
                     break;
                   }
                 }
+                if (add) mesh.material.color.set(0xbfad04);
+              }
+
+              // тройники
+              if (!add) {
+                const list = this.mocksIsometry.listTeeIfcId();
+
+                for (let i = 0; i < list.length; i++) {
+                  if (mesh.uuid === list[i]) {
+                    add = true;
+                    break;
+                  }
+                }
+                if (add) mesh.material.color.set(0x02e8cd);
               }
 
               if (type === 1) this.meshesModel.push(mesh);
-              if (type === 2) {
-                if (add) {
-                  this.meshesModel.push(mesh);
-                  mesh.material.color.set(0xa129d9);
-                }
-              }
-              if (type === 3) {
-                if (!add) this.meshesModel.push(mesh);
-                else mesh.material.color.set(0xa129d9);
-              }
+              if (type === 2 && add) this.meshesModel.push(mesh);
+              if (type === 3 && !add) this.meshesModel.push(mesh);
             }
           });
         } else {
@@ -99,8 +108,26 @@ export class LoaderModel {
   }
 
   // получаем все фитинги(объекты) из списка
-  getMeshesObj() {
+  getMeshesValve() {
     const list = this.mocksIsometry.listValveIfcId();
+
+    const arrMesh = [];
+
+    for (let i = 0; i < list.length; i++) {
+      for (let i2 = 0; i2 < this.meshesModel.length; i2++) {
+        if (this.meshesModel[i2].uuid === list[i]) {
+          arrMesh.push(this.meshesModel[i2]);
+          break;
+        }
+      }
+    }
+
+    return arrMesh;
+  }
+
+  // получаем все фитинги(объекты) из списка
+  getMeshesTee() {
+    const list = this.mocksIsometry.listTeeIfcId();
 
     const arrMesh = [];
 
