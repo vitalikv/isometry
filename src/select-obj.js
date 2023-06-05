@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { modelsContainerInit, mapControlInit, ruler, moving, isometricLabels, isometricLabelList } from './index';
 
 export class IsometricModeService {
-  mode = 'move';
+  mode = 'select';
   mapControlInit;
   modelsContainerInit;
   plane;
@@ -46,8 +46,8 @@ export class IsometricModeService {
   onKeyDown = (event) => {
     if (event.code === 'Enter') this.getListSelectedObjs();
 
-    if (event.code === 'KeyR') this.changeMode('ruler');
-    if (event.code === 'KeyM') this.changeMode('move');
+    // if (event.code === 'KeyR') this.changeMode('ruler');
+    // if (event.code === 'KeyM') this.changeMode('move');
   };
 
   changeMode(mode) {

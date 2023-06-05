@@ -10,6 +10,8 @@ import { IsometricLabelList } from './labelList';
 import { IsometricScreenshot } from './screenshot';
 import { Gis } from './gis-page';
 
+import { PanelRp } from './ui/panelRp';
+
 export let renderer, camera, scene, controls, modelsContainerInit, mapControlInit, clock, gui, stats;
 let cameraP, cameraO;
 export let loaderModel, selectObj, ruler, moving, isometricLabels, isometricLabelList;
@@ -112,11 +114,13 @@ function init() {
   moving = new IsometricMovingObjs();
   ruler = new IsometricRulerService();
   selectObj = new IsometricModeService({ controls, scene, canvas: renderer.domElement, meshes: [] });
-  new Gis();
+  const gisdPage = new Gis();
   isometricLabels = new IsometricLabels();
   isometricLabelList = new IsometricLabelList();
   //isometricLabelList.init();
-  new IsometricScreenshot();
+  const isometricScreenshot = new IsometricScreenshot();
+
+  new PanelRp({ gisdPage, isometricScreenshot, ruler, isometricMode: selectObj, isometricLabelList });
 
   window.addEventListener(
     'resize',

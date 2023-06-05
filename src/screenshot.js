@@ -6,7 +6,7 @@ export class IsometricScreenshot {
   constructor() {
     this.mapControlInit = mapControlInit;
 
-    document.addEventListener('keydown', this.onKeyDown);
+    //document.addEventListener('keydown', this.onKeyDown);
   }
 
   onKeyDown = (event) => {

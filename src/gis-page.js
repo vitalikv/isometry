@@ -26,11 +26,6 @@ export class Gis {
 
   onKeyDown = (event) => {
     if (event.code === 'Space') {
-      this.init();
-      //controls.enabled = false;
-      controls.enableRotate = false;
-
-      setMeshes({ arr: [...this.tubes, ...this.valves, ...this.tees, ...this.joins] });
     }
 
     // создание svg
@@ -42,6 +37,15 @@ export class Gis {
       this.deleteObjs();
     }
   };
+
+  // ковертируем трубопровод в изометрию
+  getIsometry() {
+    this.init();
+    //controls.enabled = false;
+    controls.enableRotate = false;
+
+    setMeshes({ arr: [...this.tubes, ...this.valves, ...this.tees, ...this.joins] });
+  }
 
   init() {
     const meshesTube = loaderModel.getMeshesTube();
