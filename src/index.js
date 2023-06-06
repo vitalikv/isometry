@@ -5,6 +5,7 @@ import { LoaderModel } from './loader-model';
 import { IsometricModeService } from './select-obj';
 import { IsometricMovingObjs } from './moving';
 import { IsometricRulerService } from './ruler';
+import { Joint } from './joint';
 import { IsometricLabels } from './labels';
 import { IsometricLabelList } from './labelList';
 import { IsometricScreenshot } from './screenshot';
@@ -15,7 +16,7 @@ import { PanelRp } from './ui/panelRp';
 
 export let renderer, camera, scene, controls, modelsContainerInit, mapControlInit, clock, gui, stats;
 let cameraP, cameraO;
-export let loaderModel, gisdPage, selectObj, ruler, moving, isometricLabels, isometricLabelList;
+export let loaderModel, gisdPage, selectObj, ruler, moving, joint, isometricLabels, isometricLabelList;
 let isomety;
 let meshes = [];
 
@@ -116,13 +117,14 @@ function init() {
   ruler = new IsometricRulerService();
   selectObj = new IsometricModeService({ controls, scene, canvas: renderer.domElement, meshes: [] });
   gisdPage = new Gis();
+  joint = new Joint();
   isometricLabels = new IsometricLabels();
   isometricLabelList = new IsometricLabelList();
   //isometricLabelList.init();
   const isometricScreenshot = new IsometricScreenshot();
   const readWrite = new ReadWrite();
 
-  new PanelRp({ gisdPage, isometricScreenshot, ruler, isometricMode: selectObj, isometricLabelList, readWrite });
+  new PanelRp({ gisdPage, isometricScreenshot, ruler, isometricMode: selectObj, isometricLabelList, readWrite, joint });
 
   window.addEventListener(
     'resize',

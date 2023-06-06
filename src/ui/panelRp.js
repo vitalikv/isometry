@@ -8,12 +8,14 @@ export class PanelRp {
   isometricLabelList;
   readWrite;
 
-  constructor({ gisdPage, isometricScreenshot, isometricMode, isometricLabelList, readWrite }) {
+  constructor({ gisdPage, isometricScreenshot, isometricMode, isometricLabelList, readWrite, joint }) {
     this.gisdPage = gisdPage;
+    this.joint = joint;
     this.isometricScreenshot = isometricScreenshot;
     this.isometricMode = isometricMode;
     this.isometricLabelList = isometricLabelList;
     this.readWrite = readWrite;
+
     this.init();
   }
 
@@ -24,7 +26,8 @@ export class PanelRp {
     this.btns$[2] = this.crBtn({ txt: 'размер' });
     this.btns$[3] = this.crBtn({ txt: 'сноска' });
     this.btns$[4] = this.crBtn({ txt: 'инф. блок' });
-    this.btns$[5] = this.crBtn({ txt: 'сохранить' });
+    this.btns$[5] = this.crBtn({ txt: 'стык' });
+    this.btns$[6] = this.crBtn({ txt: 'сохранить' });
 
     this.initEvent();
   }
@@ -53,12 +56,17 @@ export class PanelRp {
     };
 
     this.btns$[5].onmousedown = () => {
+      this.isometricMode.changeMode('addJoint');
+      this.joint.activate();
+    };
+
+    this.btns$[6].onmousedown = () => {
       this.readWrite.write();
     };
   }
 
   crPanel() {
-    const css = `position: absolute; top: 0; right: 0; width: 248px; height: 300px; background: #F0F0F0; border: 1px solid #D1D1D1; border-radius: 4px; font-family: arial,sans-serif; z-index: 1;`;
+    const css = `position: absolute; top: 0; right: 0; width: 248px; height: 400px; background: #F0F0F0; border: 1px solid #D1D1D1; border-radius: 4px; font-family: arial,sans-serif; z-index: 1;`;
 
     const html = `
     <div style="${css}">

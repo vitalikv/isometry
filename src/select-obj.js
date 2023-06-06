@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { modelsContainerInit, mapControlInit, ruler, moving, isometricLabels, isometricLabelList } from './index';
+import { modelsContainerInit, mapControlInit, ruler, moving, isometricLabels, isometricLabelList, gisdPage, joint } from './index';
 
 export class IsometricModeService {
   mode = 'select';
@@ -112,6 +112,15 @@ export class IsometricModeService {
       if (obj.userData.isIsometry) moving.onmousedown({ obj, event, plane: this.plane });
     }
 
+    // режим добавления стыка
+    if (this.mode === 'addJoint') {
+      const result = joint.onmousedown({ event, tubes: gisdPage.tubes });
+      if (result) {
+        this.changeMode('move');
+        joint.activate();
+      }
+    }
+
     // режим линейки
     if (this.mode === 'ruler') {
       ruler.onmousedown({ intersection, event, plane: this.plane });
@@ -128,6 +137,10 @@ export class IsometricModeService {
 
     if (this.mode === 'move') {
       moving.onmousemove(event, this.plane);
+    }
+
+    if (this.mode === 'addJoint') {
+      joint.onmousemove(event, gisdPage.tubes);
     }
 
     if (this.mode === 'ruler') {
