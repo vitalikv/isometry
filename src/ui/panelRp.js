@@ -6,12 +6,14 @@ export class PanelRp {
   isometricScreenshot;
   isometricMode;
   isometricLabelList;
+  readWrite;
 
-  constructor({ gisdPage, isometricScreenshot, isometricMode, isometricLabelList }) {
+  constructor({ gisdPage, isometricScreenshot, isometricMode, isometricLabelList, readWrite }) {
     this.gisdPage = gisdPage;
     this.isometricScreenshot = isometricScreenshot;
     this.isometricMode = isometricMode;
     this.isometricLabelList = isometricLabelList;
+    this.readWrite = readWrite;
     this.init();
   }
 
@@ -22,6 +24,7 @@ export class PanelRp {
     this.btns$[2] = this.crBtn({ txt: 'размер' });
     this.btns$[3] = this.crBtn({ txt: 'сноска' });
     this.btns$[4] = this.crBtn({ txt: 'инф. блок' });
+    this.btns$[5] = this.crBtn({ txt: 'сохранить' });
 
     this.initEvent();
   }
@@ -37,6 +40,7 @@ export class PanelRp {
     };
 
     this.btns$[2].onmousedown = () => {
+      this.changeBackground(this.btns$[2]);
       this.isometricMode.changeMode('ruler');
     };
 
@@ -46,6 +50,10 @@ export class PanelRp {
 
     this.btns$[4].onmousedown = () => {
       this.isometricLabelList.init();
+    };
+
+    this.btns$[5].onmousedown = () => {
+      this.readWrite.write();
     };
   }
 
@@ -78,5 +86,10 @@ export class PanelRp {
     this.container$.querySelector('[nameId="btns"]').append(div);
 
     return div;
+  }
+
+  changeBackground(elem$) {
+    console.log(elem$.style.background);
+    elem$.style.background = elem$.style.background === 'rgb(204, 204, 204)' ? 'rgb(255, 255, 255)' : 'rgb(204, 204, 204)';
   }
 }

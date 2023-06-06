@@ -16,6 +16,7 @@ export class Gis {
   tees = [];
   joins = [];
   joinsPos = new Map();
+  jsonIsometry = {};
 
   constructor() {
     this.modelsContainerInit = modelsContainerInit;
@@ -76,6 +77,8 @@ export class Gis {
 
     this.createJoins();
     this.linkJoins();
+
+    this.jsonIsometry = { tubes, valves, tees };
   }
 
   // создание труб

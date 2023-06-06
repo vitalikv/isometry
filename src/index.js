@@ -9,12 +9,13 @@ import { IsometricLabels } from './labels';
 import { IsometricLabelList } from './labelList';
 import { IsometricScreenshot } from './screenshot';
 import { Gis } from './gis-page';
+import { ReadWrite } from './readWrite';
 
 import { PanelRp } from './ui/panelRp';
 
 export let renderer, camera, scene, controls, modelsContainerInit, mapControlInit, clock, gui, stats;
 let cameraP, cameraO;
-export let loaderModel, selectObj, ruler, moving, isometricLabels, isometricLabelList;
+export let loaderModel, gisdPage, selectObj, ruler, moving, isometricLabels, isometricLabelList;
 let isomety;
 let meshes = [];
 
@@ -114,13 +115,14 @@ function init() {
   moving = new IsometricMovingObjs();
   ruler = new IsometricRulerService();
   selectObj = new IsometricModeService({ controls, scene, canvas: renderer.domElement, meshes: [] });
-  const gisdPage = new Gis();
+  gisdPage = new Gis();
   isometricLabels = new IsometricLabels();
   isometricLabelList = new IsometricLabelList();
   //isometricLabelList.init();
   const isometricScreenshot = new IsometricScreenshot();
+  const readWrite = new ReadWrite();
 
-  new PanelRp({ gisdPage, isometricScreenshot, ruler, isometricMode: selectObj, isometricLabelList });
+  new PanelRp({ gisdPage, isometricScreenshot, ruler, isometricMode: selectObj, isometricLabelList, readWrite });
 
   window.addEventListener(
     'resize',
