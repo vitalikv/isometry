@@ -24,15 +24,7 @@ export class Joint {
     return obj;
   }
 
-  createJoint({ pos }) {
-    const obj = new THREE.Mesh(new THREE.SphereGeometry(0.075, 32, 16), new THREE.MeshBasicMaterial({ color: 0x000000, depthTest: false, transparent: true }));
-    obj.position.copy(pos);
-    this.modelsContainerInit.control.add(obj);
-
-    return obj;
-  }
-
-  onmousedown = ({ event, tubes }) => {
+  onmousedown = ({ event, tubes, scheme }) => {
     if (!this.activated) return;
 
     const ray = this.rayIntersect(event, [...tubes], 'arr');
@@ -42,7 +34,33 @@ export class Joint {
     this.helperJoint.position.copy(intersection.point);
     this.helperJoint.visible = false;
 
-    this.createJoint({ pos: intersection.point });
+    const obj = intersection.object;
+
+    let index = scheme.lines.indexOf(obj);
+    if (index > -1) scheme.lines.splice(index, 1);
+
+    index = scheme.tubes.indexOf(obj.userData.tubeObj);
+    if (index > -1) scheme.tubes.splice(index, 1);
+
+    console.log(obj);
+    obj.userData.tubeObj.parent?.remove(obj.userData.tubeObj);
+    obj.parent?.remove(obj);
+
+    console.log(obj.userData.points);
+
+    const joins = obj.userData.joins;
+    const line1 = scheme.createTube([joins[0].position, intersection.point]);
+    const line2 = scheme.createTube([joins[1].position, intersection.point]);
+
+    const jp = scheme.createJoin(intersection.point);
+
+    line1.userData.joins.push(obj.userData.joins[0], jp);
+    obj.userData.joins[0].userData.tubes.push({ obj: line1, id: 0 });
+    jp.userData.tubes.push({ obj: line1, id: 1 });
+
+    line2.userData.joins.push(obj.userData.joins[1], jp);
+    obj.userData.joins[1].userData.tubes.push({ obj: line2, id: 0 });
+    jp.userData.tubes.push({ obj: line2, id: 1 });
 
     return true;
   };
@@ -82,7 +100,7 @@ export class Joint {
     // }
 
     const raycaster = new THREE.Raycaster();
-    raycaster.params.Line.threshold = 0;
+    raycaster.params.Line.threshold = 0.25;
     raycaster.setFromCamera(mouse, this.mapControlInit.control.object);
 
     let intersects = [];

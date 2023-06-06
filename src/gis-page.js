@@ -90,7 +90,7 @@ export class Gis {
     pipeSpline['tension'] = 0;
     const tubeGeometry = new THREE.TubeGeometry(pipeSpline, points.length, 0.05, 32, false);
     const tubeObj = new THREE.Mesh(tubeGeometry, new THREE.MeshStandardMaterial({ color: 0x0000ff, depthTest: true, transparent: true }));
-    tubeObj.material.visible = false;
+    tubeObj.material.visible = true;
     tubeObj.userData = {};
     tubeObj.userData.isIsometry = true;
     tubeObj.userData.isTube = true;
@@ -116,8 +116,13 @@ export class Gis {
 
     const p1 = obj.userData.points[0];
     const p2 = obj.userData.points[1];
-    this.joinsPos.set(p1.x + '' + p1.y + '' + p1.z, { pos: p1, obj: null });
-    this.joinsPos.set(p2.x + '' + p2.y + '' + p2.z, { pos: p2, obj: null });
+    let result = this.joinsPos.get(p1.x + '' + p1.y + '' + p1.z);
+    if (!result) this.joinsPos.set(p1.x + '' + p1.y + '' + p1.z, { pos: p1, obj: null });
+
+    result = this.joinsPos.get(p2.x + '' + p2.y + '' + p2.z);
+    if (!result) this.joinsPos.set(p2.x + '' + p2.y + '' + p2.z, { pos: p2, obj: null });
+
+    return obj;
   }
 
   // создание кранов
@@ -207,15 +212,28 @@ export class Gis {
   // создаем стыки
   createJoins() {
     this.joinsPos.forEach((value, key, map) => {
-      const jp = this.helperSphere({ pos: value.pos, size: 0.075, color: 0x222222 });
-      jp.userData.isIsometry = true;
-      jp.userData.isJoin = true;
-      jp.userData.tubes = [];
-      jp.userData.objs = [];
-      this.joins.push(jp);
+      if (!value.obj) {
+        const jp = this.helperSphere({ pos: value.pos, size: 0.075, color: 0x222222 });
+        jp.userData.isIsometry = true;
+        jp.userData.isJoin = true;
+        jp.userData.tubes = [];
+        jp.userData.objs = [];
+        this.joins.push(jp);
 
-      value.obj = jp;
+        value.obj = jp;
+      }
     });
+  }
+
+  createJoin(pos) {
+    const jp = this.helperSphere({ pos, size: 0.075, color: 0x222222 });
+    jp.userData.isIsometry = true;
+    jp.userData.isJoin = true;
+    jp.userData.tubes = [];
+    jp.userData.objs = [];
+    this.joins.push(jp);
+
+    return jp;
   }
 
   // связываем стыки с объектами

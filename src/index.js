@@ -115,7 +115,6 @@ function init() {
 
   moving = new IsometricMovingObjs();
   ruler = new IsometricRulerService();
-  selectObj = new IsometricModeService({ controls, scene, canvas: renderer.domElement, meshes: [] });
   gisdPage = new Gis();
   joint = new Joint();
   isometricLabels = new IsometricLabels();
@@ -123,6 +122,8 @@ function init() {
   //isometricLabelList.init();
   const isometricScreenshot = new IsometricScreenshot();
   const readWrite = new ReadWrite();
+
+  selectObj = new IsometricModeService({ controls, scene, canvas: renderer.domElement, meshes: [] });
 
   new PanelRp({ gisdPage, isometricScreenshot, ruler, isometricMode: selectObj, isometricLabelList, readWrite, joint });
 

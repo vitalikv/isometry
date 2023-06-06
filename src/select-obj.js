@@ -11,9 +11,12 @@ export class IsometricModeService {
   materials = { def: null, act: null };
   listSelectObjs = [];
 
+  isometricSchemeService;
+
   constructor() {
     this.mapControlInit = mapControlInit;
     this.modelsContainerInit = modelsContainerInit;
+    this.isometricSchemeService = gisdPage;
     this.plane = this.initPlane();
 
     this.materials.def = new THREE.MeshStandardMaterial({ color: 0xffff00, wireframe: false });
@@ -95,7 +98,14 @@ export class IsometricModeService {
   }
 
   onmousedown = (event) => {
-    const ray = this.rayIntersect(event, [...this.meshes, ...ruler.rulerObjs, ...isometricLabels.labelObjs], 'arr');
+    const tubes = this.isometricSchemeService.tubes;
+    const valves = this.isometricSchemeService.valves;
+    const tees = this.isometricSchemeService.tees;
+    const joins = this.isometricSchemeService.joins;
+    const rulerObjs = ruler.rulerObjs;
+    const labelObjs = isometricLabels.labelObjs;
+
+    const ray = this.rayIntersect(event, [...tubes, ...valves, ...tees, ...joins, ...rulerObjs, ...labelObjs], 'arr');
     if (ray.length === 0) return;
 
     const intersection = ray[0];
@@ -114,7 +124,7 @@ export class IsometricModeService {
 
     // режим добавления стыка
     if (this.mode === 'addJoint') {
-      const result = joint.onmousedown({ event, tubes: gisdPage.tubes });
+      const result = joint.onmousedown({ event, tubes: gisdPage.lines, scheme: gisdPage });
       if (result) {
         this.changeMode('move');
         joint.activate();
@@ -140,7 +150,7 @@ export class IsometricModeService {
     }
 
     if (this.mode === 'addJoint') {
-      joint.onmousemove(event, gisdPage.tubes);
+      joint.onmousemove(event, gisdPage.lines);
     }
 
     if (this.mode === 'ruler') {
