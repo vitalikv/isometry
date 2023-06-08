@@ -109,7 +109,7 @@ export class IsometricMovingObjs {
     }
 
     // перетаскиваем стык
-    if (this.obj.userData.isJoin) {
+    if (this.obj.userData.isJoint) {
       this.moveJoin({ obj: this.obj, offset, skipObj: null });
     }
   };

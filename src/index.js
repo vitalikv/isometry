@@ -9,6 +9,7 @@ import { Joint } from './joint';
 import { IsometricLabels } from './labels';
 import { IsometricLabelList } from './labelList';
 import { IsometricScreenshot } from './screenshot';
+import { DeleteObj } from './deleteObj';
 import { Gis } from './gis-page';
 import { ReadWrite } from './readWrite';
 
@@ -16,7 +17,7 @@ import { PanelRp } from './ui/panelRp';
 
 export let renderer, camera, scene, controls, modelsContainerInit, mapControlInit, clock, gui, stats;
 let cameraP, cameraO;
-export let loaderModel, gisdPage, selectObj, ruler, moving, joint, isometricLabels, isometricLabelList;
+export let loaderModel, gisdPage, selectObj, ruler, moving, joint, isometricLabels, isometricLabelList, deleteObj;
 let isomety;
 let meshes = [];
 
@@ -115,6 +116,7 @@ function init() {
 
   moving = new IsometricMovingObjs();
   ruler = new IsometricRulerService();
+  deleteObj = new DeleteObj();
   gisdPage = new Gis();
   joint = new Joint();
   isometricLabels = new IsometricLabels();

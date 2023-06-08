@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { modelsContainerInit, mapControlInit, ruler, moving, isometricLabels, isometricLabelList, gisdPage, joint } from './index';
+import { modelsContainerInit, mapControlInit, ruler, moving, isometricLabels, isometricLabelList, gisdPage, joint, deleteObj } from './index';
 
 export class IsometricModeService {
   mode = 'select';
@@ -10,6 +10,11 @@ export class IsometricModeService {
   meshes;
   materials = { def: null, act: null };
   listSelectObjs = [];
+  isDown = false;
+  isMove = false;
+  actObj = null;
+  colorAct = 0xff0000;
+  colorDef = 0x222222;
 
   isometricSchemeService;
 
@@ -51,6 +56,7 @@ export class IsometricModeService {
 
     // if (event.code === 'KeyR') this.changeMode('ruler');
     // if (event.code === 'KeyM') this.changeMode('move');
+    if (event.code === 'Delete') deleteObj.delete(this.actObj);
   };
 
   changeMode(mode) {
@@ -98,6 +104,10 @@ export class IsometricModeService {
   }
 
   onmousedown = (event) => {
+    this.deActivateObj();
+    this.isDown = false;
+    this.isMove = false;
+
     const tubes = this.isometricSchemeService.tubes;
     const valves = this.isometricSchemeService.valves;
     const tees = this.isometricSchemeService.tees;
@@ -119,6 +129,7 @@ export class IsometricModeService {
 
     // режим перетаскивания
     if (this.mode === 'move') {
+      this.actObj = obj;
       if (obj.userData.isIsometry) moving.onmousedown({ obj, event, plane: this.plane });
     }
 
@@ -140,9 +151,13 @@ export class IsometricModeService {
     if (this.mode === 'label') {
       isometricLabels.onmousedown({ intersection, event, plane: this.plane });
     }
+
+    this.isDown = true;
   };
 
   onmousemove = (event) => {
+    if (this.isDown) this.isMove = true;
+
     isometricLabelList.setPosRot();
 
     if (this.mode === 'move') {
@@ -165,6 +180,7 @@ export class IsometricModeService {
   onmouseup = (event) => {
     if (this.mode === 'move') {
       moving.onmouseup(event);
+      this.activateObj();
     }
 
     if (this.mode === 'ruler') {
@@ -174,11 +190,53 @@ export class IsometricModeService {
     if (this.mode === 'label') {
       isometricLabels.onmouseup(event);
     }
+
+    this.isDown = false;
+    this.isMove = false;
   };
 
   mouseWheel = (event) => {
     isometricLabelList.setPosRot();
   };
+
+  deActivateObj() {
+    const obj = this.actObj;
+    this.actObj = null;
+    if (!obj) return;
+    if (!obj.userData.isIsometry) return;
+
+    if (obj.userData.isObj) {
+      obj.children.forEach((child) => {
+        child.material.color.set(this.colorDef);
+      });
+    }
+
+    if (obj.userData.isJoint) {
+      obj.material.color.set(this.colorDef);
+    }
+  }
+
+  activateObj() {
+    let obj = null;
+    if (this.isDown && !this.isMove) {
+      obj = this.actObj;
+    } else {
+      this.actObj = null;
+    }
+
+    if (!obj) return;
+    if (!obj.userData.isIsometry) return;
+
+    if (obj.userData.isObj) {
+      obj.children.forEach((child) => {
+        child.material.color.set(this.colorAct);
+      });
+    }
+
+    if (obj.userData.isJoint) {
+      obj.material.color.set(this.colorAct);
+    }
+  }
 
   // получаем массив uuid выбранных объектов
   getListSelectedObjs() {

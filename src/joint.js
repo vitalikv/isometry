@@ -46,20 +46,25 @@ export class Joint {
     obj.userData.tubeObj.parent?.remove(obj.userData.tubeObj);
     obj.parent?.remove(obj);
 
-    console.log(obj.userData.points);
+    const joints = obj.userData.joins;
 
-    const joins = obj.userData.joins;
-    const line1 = scheme.createTube([joins[0].position, intersection.point]);
-    const line2 = scheme.createTube([joins[1].position, intersection.point]);
+    index = joints[0].userData.tubes.findIndex((item) => item.obj === obj);
+    if (index > -1) joints[0].userData.tubes.splice(index, 1);
+
+    index = joints[1].userData.tubes.findIndex((item) => item.obj === obj);
+    if (index > -1) joints[1].userData.tubes.splice(index, 1);
+
+    const line1 = scheme.createTube([joints[0].position, intersection.point]);
+    const line2 = scheme.createTube([joints[1].position, intersection.point]);
 
     const jp = scheme.createJoin(intersection.point);
 
-    line1.userData.joins.push(obj.userData.joins[0], jp);
-    obj.userData.joins[0].userData.tubes.push({ obj: line1, id: 0 });
+    line1.userData.joins.push(joints[0], jp);
+    joints[0].userData.tubes.push({ obj: line1, id: 0 });
     jp.userData.tubes.push({ obj: line1, id: 1 });
 
-    line2.userData.joins.push(obj.userData.joins[1], jp);
-    obj.userData.joins[1].userData.tubes.push({ obj: line2, id: 0 });
+    line2.userData.joins.push(joints[1], jp);
+    joints[1].userData.tubes.push({ obj: line2, id: 0 });
     jp.userData.tubes.push({ obj: line2, id: 1 });
 
     return true;

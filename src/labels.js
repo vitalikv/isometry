@@ -108,7 +108,7 @@ export class IsometricLabels {
         if (obj.userData.line.userData.line.length > 2) text = 'отвод';
       }
       if (obj.userData.isObj) text = 'кран';
-      if (obj.userData.isJoin) text = 'стык';
+      if (obj.userData.isJoint) text = 'стык';
       this.createLabel({ pos: intersection.point, text });
     }
   }

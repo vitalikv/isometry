@@ -35,7 +35,7 @@ export class Gis {
     }
 
     if (event.code === 'Delete') {
-      this.deleteObjs();
+      //this.deleteObjs();
     }
   };
 
@@ -90,7 +90,7 @@ export class Gis {
     pipeSpline['tension'] = 0;
     const tubeGeometry = new THREE.TubeGeometry(pipeSpline, points.length, 0.05, 32, false);
     const tubeObj = new THREE.Mesh(tubeGeometry, new THREE.MeshStandardMaterial({ color: 0x0000ff, depthTest: true, transparent: true }));
-    tubeObj.material.visible = true;
+    tubeObj.material.visible = false;
     tubeObj.userData = {};
     tubeObj.userData.isIsometry = true;
     tubeObj.userData.isTube = true;
@@ -133,7 +133,7 @@ export class Gis {
       new THREE.BoxGeometry(size.x, size.y, size.z),
       new THREE.MeshStandardMaterial({ color: 0x0000ff, depthTest: true, transparent: true, opacity: 1 })
     );
-    //obj.material.visible = false;
+    obj.material.visible = false;
     obj.geometry.translate(posG.x, posG.y, posG.z);
 
     //const obj = new THREE.Mesh();
@@ -213,13 +213,7 @@ export class Gis {
   createJoins() {
     this.joinsPos.forEach((value, key, map) => {
       if (!value.obj) {
-        const jp = this.helperSphere({ pos: value.pos, size: 0.075, color: 0x222222 });
-        jp.userData.isIsometry = true;
-        jp.userData.isJoin = true;
-        jp.userData.tubes = [];
-        jp.userData.objs = [];
-        this.joins.push(jp);
-
+        const jp = this.createJoin(value.pos);
         value.obj = jp;
       }
     });
@@ -228,7 +222,7 @@ export class Gis {
   createJoin(pos) {
     const jp = this.helperSphere({ pos, size: 0.075, color: 0x222222 });
     jp.userData.isIsometry = true;
-    jp.userData.isJoin = true;
+    jp.userData.isJoint = true;
     jp.userData.tubes = [];
     jp.userData.objs = [];
     this.joins.push(jp);
@@ -289,7 +283,7 @@ export class Gis {
 
   // удаляем изометрию
   deleteObjs() {
-    const arr = [...this.lines, ...this.tubes, ...this.objs, ...this.joins];
+    const arr = [...this.lines, ...this.tubes, ...this.valves, ...this.tees, ...this.joins];
 
     arr.forEach((item) => {
       this.clearMesh(item);
@@ -297,7 +291,8 @@ export class Gis {
 
     this.lines = [];
     this.tubes = [];
-    this.objs = [];
+    this.valves = [];
+    this.tees = [];
     this.joins = [];
     this.joinsPos = new Map();
   }
