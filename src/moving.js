@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { scene, mapControlInit } from './index';
+import { scene, mapControlInit, isometricLabels } from './index';
 
 export class IsometricMovingObjs {
   isDown = false;
@@ -105,6 +105,8 @@ export class IsometricMovingObjs {
     if (this.obj.userData.isObj) {
       this.obj.position.add(offset);
 
+      isometricLabels.updataPos(this.obj);
+
       this.obj.userData.joins.forEach((o) => this.moveJoin({ obj: o, offset, skipObj: this.obj }));
     }
 
@@ -129,6 +131,8 @@ export class IsometricMovingObjs {
       if (join === obj) return;
     });
 
+    isometricLabels.updataPos(obj);
+
     // добавляем в массив skipJoins, текущий стык, чтобы большего его не перемещали и небыло зацикливания
     skipJoins.push(obj);
 
@@ -152,6 +156,7 @@ export class IsometricMovingObjs {
     obj.userData.objs.forEach((o) => {
       if (o !== skipObj) {
         o.position.add(offset);
+        isometricLabels.updataPos(o);
 
         // перемещение стыков привязанные к объекты, за исключением текущего
         o.userData.joins.forEach((join) => {
@@ -178,6 +183,8 @@ export class IsometricMovingObjs {
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
     obj.geometry.dispose();
     obj.geometry = geometry;
+
+    isometricLabels.updataPos(obj);
 
     this.updataTubeGeom({ obj });
   }

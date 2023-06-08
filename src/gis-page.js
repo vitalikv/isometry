@@ -98,10 +98,12 @@ export class Gis {
 
     const obj = this.createLine({ points });
     obj.userData = {};
+    obj.userData.isLine = true;
     obj.userData.points = [points[0], points[points.length - 1]];
     obj.userData.line = points.map((p) => p.clone());
     obj.userData.tubes = [];
     obj.userData.joins = [];
+    obj.userData.labels = [];
     obj.userData.tubeObj = tubeObj;
 
     tubeObj.userData.line = obj;
@@ -142,6 +144,7 @@ export class Gis {
     obj.userData.isObj = true;
     obj.userData.tubes = [];
     obj.userData.joins = [];
+    obj.userData.labels = [];
 
     const points = data.joins.points;
     obj.userData.points = [points[0].pos, points[1].pos];
@@ -184,6 +187,7 @@ export class Gis {
     obj.userData.isObj = true;
     obj.userData.tubes = [];
     obj.userData.joins = [];
+    obj.userData.labels = [];
 
     const points = data.joins.points;
     obj.userData.points = [points[0].pos, points[1].pos];
@@ -225,6 +229,7 @@ export class Gis {
     jp.userData.isJoint = true;
     jp.userData.tubes = [];
     jp.userData.objs = [];
+    jp.userData.labels = [];
     this.joins.push(jp);
 
     return jp;

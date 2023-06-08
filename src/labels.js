@@ -16,7 +16,9 @@ export class IsometricLabels {
     this.modelsContainerInit = modelsContainerInit;
   }
 
-  createLabel({ pos, text }) {
+  createLabel({ intersection, text }) {
+    const pos = this.modelsContainerInit.control.worldToLocal(intersection.point.clone());
+
     const radius = 0.5;
     const circleShape = new THREE.Shape().moveTo(radius, 0).absarc(0, 0, radius, 0, Math.PI * 2, false);
     circleShape.userData = {};
@@ -30,6 +32,7 @@ export class IsometricLabels {
     obj.userData.isInfo = true;
     obj.userData.pointerObj = null;
     obj.userData.lineObj = null;
+    obj.userData.target = { pos: new THREE.Vector3(), obj: null };
 
     const objP = new THREE.Mesh(obj.geometry.clone(), new THREE.MeshStandardMaterial({ color: 0x333333, side: THREE.DoubleSide }));
     objP.rotation.copy(this.mapControlInit.control.object.rotation);
@@ -52,6 +55,26 @@ export class IsometricLabels {
 
     this.modelsContainerInit.control.add(obj, objP, line);
     this.labelObjs.push(obj, objP);
+
+    this.linkObj({ labelObj: obj, targetObj: intersection.object, pos });
+  }
+
+  // создаем ссылку на сноску для объекта
+  linkObj({ labelObj, targetObj, pos }) {
+    if (targetObj.userData.isTube) {
+      targetObj = targetObj.userData.line;
+      const points = targetObj.userData.line;
+      const fullDist = points[0].distanceTo(points[1]);
+      const distFirst = points[0].distanceTo(pos);
+      const range = Math.round((distFirst / fullDist) * 100) / 100;
+      console.log(range);
+      labelObj.userData.target.pos = new THREE.Vector3(range, 0, 0);
+    } else {
+      labelObj.userData.target.pos = targetObj.worldToLocal(pos.clone());
+    }
+
+    labelObj.userData.target.obj = targetObj;
+    targetObj.userData.labels.push(labelObj);
   }
 
   addShape(shape, text) {
@@ -109,7 +132,7 @@ export class IsometricLabels {
       }
       if (obj.userData.isObj) text = 'кран';
       if (obj.userData.isJoint) text = 'стык';
-      this.createLabel({ pos: intersection.point, text });
+      this.createLabel({ intersection, text });
     }
   }
 
@@ -171,6 +194,24 @@ export class IsometricLabels {
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
     obj.geometry.dispose();
     obj.geometry = geometry;
+  }
+
+  // двигаем выноску вслед за привязанным объектом
+  updataPos(obj) {
+    obj.userData.labels.forEach((label) => {
+      let pos = new THREE.Vector3();
+      if (obj.userData.isLine) {
+        const points = obj.userData.line;
+        pos = new THREE.Vector3().subVectors(points[1], points[0]);
+        pos = new THREE.Vector3().addScaledVector(pos, label.userData.target.pos.x);
+        pos.add(points[0]);
+      } else {
+        pos = obj.localToWorld(label.userData.target.pos.clone());
+      }
+      label.userData.pointerObj.position.copy(pos);
+
+      this.updataGeomLine({ obj: label.userData.lineObj });
+    });
   }
 
   crTexture({ text, radius }) {

@@ -22,6 +22,7 @@ export class DeleteObj {
 
     obj.userData.tubeObj.parent?.remove(obj.userData.tubeObj);
     obj.parent?.remove(obj);
+    this.deleteLabels(obj);
 
     obj.userData.joins.forEach((joint) => {
       const index = joint.userData.tubes.findIndex((item) => item.obj === obj);
@@ -45,6 +46,7 @@ export class DeleteObj {
     if (arr.length < 2) return;
 
     obj.parent?.remove(obj);
+    this.deleteLabels(obj);
 
     const joints = [];
     const lines = [];
@@ -84,10 +86,41 @@ export class DeleteObj {
 
   deleteObj(obj) {
     obj.parent?.remove(obj);
+    this.deleteLabels(obj);
 
     obj.userData.joins.forEach((joint) => {
       let index = joint.userData.objs.findIndex((item) => item === obj);
       if (index > -1) joint.userData.objs.splice(index, 1);
+    });
+  }
+
+  deleteLabels(obj) {
+    obj.userData.labels.forEach((label) => {
+      this.clearMesh(label.userData.lineObj);
+      this.clearMesh(label.userData.pointerObj);
+      this.clearMesh(label);
+    });
+  }
+
+  clearMesh(mesh) {
+    mesh.removeFromParent();
+    mesh.geometry.dispose();
+
+    const materials = [];
+    if (Array.isArray(mesh.material)) {
+      materials.push(...mesh.material);
+    } else if (mesh.material instanceof THREE.Material) {
+      materials.push(mesh.material);
+    }
+
+    materials.forEach((mtrl) => {
+      if (mtrl.map) mtrl.map.dispose();
+      if (mtrl.lightMap) mtrl.lightMap.dispose();
+      if (mtrl.bumpMap) mtrl.bumpMap.dispose();
+      if (mtrl.normalMap) mtrl.normalMap.dispose();
+      if (mtrl.specularMap) mtrl.specularMap.dispose();
+      if (mtrl.envMap) mtrl.envMap.dispose();
+      mtrl.dispose();
     });
   }
 }

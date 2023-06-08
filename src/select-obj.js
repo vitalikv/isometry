@@ -60,7 +60,12 @@ export class IsometricModeService {
   };
 
   changeMode(mode) {
-    this.mode = mode;
+    if (this.mode === mode) {
+      this.mode = 'move';
+    } else {
+      this.mode = mode;
+    }
+    console.log(this.mode);
   }
 
   updateMesh(meshes) {
@@ -115,7 +120,7 @@ export class IsometricModeService {
     const rulerObjs = ruler.rulerObjs;
     const labelObjs = isometricLabels.labelObjs;
 
-    const ray = this.rayIntersect(event, [...tubes, ...valves, ...tees, ...joins, ...rulerObjs, ...labelObjs], 'arr');
+    const ray = this.rayIntersect(event, [...this.meshes, ...tubes, ...valves, ...tees, ...joins, ...rulerObjs, ...labelObjs], 'arr');
     if (ray.length === 0) return;
 
     const intersection = ray[0];
