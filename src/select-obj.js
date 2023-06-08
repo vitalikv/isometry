@@ -205,6 +205,10 @@ export class IsometricModeService {
     if (!obj) return;
     if (!obj.userData.isIsometry) return;
 
+    if (obj.userData.isTube) {
+      obj.userData.line.material.color.set(this.colorDef);
+    }
+
     if (obj.userData.isObj) {
       obj.children.forEach((child) => {
         child.material.color.set(this.colorDef);
@@ -226,6 +230,10 @@ export class IsometricModeService {
 
     if (!obj) return;
     if (!obj.userData.isIsometry) return;
+
+    if (obj.userData.isTube) {
+      obj.userData.line.material.color.set(this.colorAct);
+    }
 
     if (obj.userData.isObj) {
       obj.children.forEach((child) => {
