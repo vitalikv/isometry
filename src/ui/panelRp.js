@@ -39,6 +39,10 @@ export class PanelRp {
   }
 
   initEvent() {
+    this.container$.onmousedown = (e) => {
+      e.stopPropagation();
+    };
+
     this.btns$[0].onmousedown = () => {
       this.gisdPage.getIsometry();
       this.isometricMode.changeMode('move');
@@ -71,19 +75,19 @@ export class PanelRp {
     };
 
     this.btns$[7].onmousedown = () => {
-      this.addObj.addTube();
+      this.addObj.enable('tube');
     };
 
     this.btns$[8].onmousedown = () => {
-      this.addObj.addValve();
+      this.addObj.enable('valve');
     };
 
     this.btns$[9].onmousedown = () => {
-      this.addObj.addTee();
+      this.addObj.enable('tee');
     };
 
     this.btns$[10].onmousedown = () => {
-      this.addObj.addCorner();
+      this.addObj.enable('corner');
     };
   }
 

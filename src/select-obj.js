@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { modelsContainerInit, mapControlInit, ruler, moving, isometricLabels, isometricLabelList, gisdPage, joint, deleteObj } from './index';
+import { modelsContainerInit, mapControlInit, ruler, moving, isometricLabels, isometricLabelList, gisdPage, joint, deleteObj, addObj } from './index';
 
 export class IsometricModeService {
   mode = 'select';
@@ -27,10 +27,10 @@ export class IsometricModeService {
     this.materials.def = new THREE.MeshStandardMaterial({ color: 0xffff00, wireframe: false });
     this.materials.act = new THREE.MeshStandardMaterial({ color: 0xff0000, wireframe: true });
 
-    document.addEventListener('mousedown', this.onmousedown);
-    document.addEventListener('mousemove', this.onmousemove);
-    document.addEventListener('mouseup', this.onmouseup);
-    document.addEventListener('wheel', this.mouseWheel);
+    document.body.addEventListener('mousedown', this.onmousedown);
+    document.body.addEventListener('mousemove', this.onmousemove);
+    document.body.addEventListener('mouseup', this.onmouseup);
+    document.body.addEventListener('wheel', this.mouseWheel);
 
     document.addEventListener('keydown', this.onKeyDown);
   }
@@ -112,6 +112,9 @@ export class IsometricModeService {
     this.deActivateObj();
     this.isDown = false;
     this.isMove = false;
+
+    const result = addObj.click({ event, plane: this.plane });
+    if (result) return;
 
     const tubes = this.isometricSchemeService.tubes;
     const valves = this.isometricSchemeService.valves;

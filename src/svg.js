@@ -152,7 +152,7 @@ class ConverterToSvg {
   }
 
   createSvgScheme({ lines }) {
-    //console.log(this.lines);
+    console.log(lines);
     this.deleteSvg();
     for (let i = 0; i < lines.length; i++) {
       const points = lines[i];

@@ -34,7 +34,7 @@ export class Gis {
 
     // создание svg
     if (event.code === 'KeyS') {
-      svgConverter.createSvgScheme({ lines: this.lines });
+      svgConverter.createSvgScheme({ lines: this.svgLines });
     }
 
     if (event.code === 'Delete') {

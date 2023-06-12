@@ -18,7 +18,7 @@ import { PanelRp } from './ui/panelRp';
 
 export let renderer, camera, scene, controls, modelsContainerInit, mapControlInit, clock, gui, stats;
 let cameraP, cameraO;
-export let loaderModel, gisdPage, selectObj, ruler, moving, joint, isometricLabels, isometricLabelList, deleteObj;
+export let loaderModel, gisdPage, selectObj, ruler, moving, joint, isometricLabels, isometricLabelList, deleteObj, addObj;
 let isomety;
 let meshes = [];
 
@@ -125,7 +125,7 @@ function init() {
   //isometricLabelList.init();
   const isometricScreenshot = new IsometricScreenshot();
   const readWrite = new ReadWrite();
-  const addObj = new AddObj();
+  addObj = new AddObj();
 
   selectObj = new IsometricModeService({ controls, scene, canvas: renderer.domElement, meshes: [] });
 
