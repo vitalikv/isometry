@@ -8,13 +8,14 @@ export class PanelRp {
   isometricLabelList;
   readWrite;
 
-  constructor({ gisdPage, isometricScreenshot, isometricMode, isometricLabelList, readWrite, joint }) {
+  constructor({ gisdPage, isometricScreenshot, isometricMode, isometricLabelList, readWrite, joint, addObj }) {
     this.gisdPage = gisdPage;
     this.joint = joint;
     this.isometricScreenshot = isometricScreenshot;
     this.isometricMode = isometricMode;
     this.isometricLabelList = isometricLabelList;
     this.readWrite = readWrite;
+    this.addObj = addObj;
 
     this.init();
   }
@@ -28,6 +29,11 @@ export class PanelRp {
     this.btns$[4] = this.crBtn({ txt: 'инф. блок' });
     this.btns$[5] = this.crBtn({ txt: 'стык' });
     this.btns$[6] = this.crBtn({ txt: 'сохранить' });
+
+    this.btns$[7] = this.crBtn({ txt: 'труба' });
+    this.btns$[8] = this.crBtn({ txt: 'кран' });
+    this.btns$[9] = this.crBtn({ txt: 'тройник' });
+    this.btns$[10] = this.crBtn({ txt: 'обвод' });
 
     this.initEvent();
   }
@@ -63,10 +69,26 @@ export class PanelRp {
     this.btns$[6].onmousedown = () => {
       this.readWrite.write();
     };
+
+    this.btns$[7].onmousedown = () => {
+      this.addObj.addTube();
+    };
+
+    this.btns$[8].onmousedown = () => {
+      this.addObj.addValve();
+    };
+
+    this.btns$[9].onmousedown = () => {
+      this.addObj.addTee();
+    };
+
+    this.btns$[10].onmousedown = () => {
+      this.addObj.addCorner();
+    };
   }
 
   crPanel() {
-    const css = `position: absolute; top: 0; right: 0; width: 248px; height: 400px; background: #F0F0F0; border: 1px solid #D1D1D1; border-radius: 4px; font-family: arial,sans-serif; z-index: 1;`;
+    const css = `position: absolute; top: 0; right: 0; width: 248px; height: 700px; background: #F0F0F0; border: 1px solid #D1D1D1; border-radius: 4px; font-family: arial,sans-serif; z-index: 1;`;
 
     const html = `
     <div style="${css}">

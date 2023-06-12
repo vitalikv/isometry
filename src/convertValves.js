@@ -146,8 +146,8 @@ export class ConvertValves {
 
     const size = new THREE.Vector3(boundG.max.x - boundG.min.x, boundG.max.y - boundG.min.y, boundG.max.z - boundG.min.z);
 
-    const p1 = new THREE.Vector3(boundG.min.x, size.y, size.z).applyMatrix4(obj.matrixWorld);
-    const p2 = new THREE.Vector3(boundG.max.x, size.y, size.z).applyMatrix4(obj.matrixWorld);
+    const p1 = new THREE.Vector3(boundG.min.x, 0, size.z).applyMatrix4(obj.matrixWorld);
+    const p2 = new THREE.Vector3(boundG.max.x, 0, size.z).applyMatrix4(obj.matrixWorld);
     obj.userData.joins.points = [{ pos: p1 }, { pos: p2 }];
 
     const center = new THREE.Vector3(

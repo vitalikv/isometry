@@ -10,7 +10,7 @@ export class ShapeObjs {
   constructor() {
     this.valveObj = this.createValve();
     this.teeObj = this.createTee();
-    this.crTestPointRot({ obj: this.teeObj });
+    //this.crTestPointRot({ obj: this.teeObj });
   }
 
   createValve() {

@@ -12,6 +12,7 @@ import { IsometricScreenshot } from './screenshot';
 import { DeleteObj } from './deleteObj';
 import { Gis } from './gis-page';
 import { ReadWrite } from './readWrite';
+import { AddObj } from './addObj';
 
 import { PanelRp } from './ui/panelRp';
 
@@ -124,10 +125,11 @@ function init() {
   //isometricLabelList.init();
   const isometricScreenshot = new IsometricScreenshot();
   const readWrite = new ReadWrite();
+  const addObj = new AddObj();
 
   selectObj = new IsometricModeService({ controls, scene, canvas: renderer.domElement, meshes: [] });
 
-  new PanelRp({ gisdPage, isometricScreenshot, ruler, isometricMode: selectObj, isometricLabelList, readWrite, joint });
+  new PanelRp({ gisdPage, isometricScreenshot, ruler, isometricMode: selectObj, isometricLabelList, readWrite, joint, addObj });
 
   window.addEventListener(
     'resize',

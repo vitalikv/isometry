@@ -19,6 +19,7 @@ export class Joint {
 
   createHelperJoint() {
     const obj = new THREE.Mesh(new THREE.SphereGeometry(0.075, 32, 16), new THREE.MeshBasicMaterial({ color: 0xff0000, depthTest: false, transparent: true }));
+    obj.visible = false;
     this.modelsContainerInit.control.add(obj);
 
     return obj;

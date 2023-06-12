@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { scene, mapControlInit, isometricLabels } from './index';
+import { scene, mapControlInit, isometricLabels, addObj } from './index';
 
 export class IsometricMovingObjs {
   isDown = false;

@@ -4,6 +4,7 @@ import { controls, modelsContainerInit, setMeshes, loaderModel } from './index';
 
 import { CalcIsometry } from './calcIsometry';
 import { svgConverter } from './svg';
+import { ShapeObjs } from './shapeObjs';
 
 export class Gis {
   svgConverter = svgConverter;
@@ -17,10 +18,12 @@ export class Gis {
   joins = [];
   joinsPos = new Map();
   jsonIsometry = {};
+  shapeObjs;
 
   constructor() {
     this.modelsContainerInit = modelsContainerInit;
     this.isometry = new CalcIsometry();
+    this.shapeObjs = new ShapeObjs();
 
     document.addEventListener('keydown', this.onKeyDown);
   }
@@ -135,7 +138,7 @@ export class Gis {
       new THREE.BoxGeometry(size.x, size.y, size.z),
       new THREE.MeshStandardMaterial({ color: 0x0000ff, depthTest: true, transparent: true, opacity: 1 })
     );
-    obj.material.visible = false;
+    //obj.material.visible = false;
     obj.geometry.translate(posG.x, posG.y, posG.z);
 
     //const obj = new THREE.Mesh();
@@ -168,6 +171,8 @@ export class Gis {
     const p2 = points[1].pos;
     this.joinsPos.set(p1.x + '' + p1.y + '' + p1.z, { pos: p1, obj: null });
     this.joinsPos.set(p2.x + '' + p2.y + '' + p2.z, { pos: p2, obj: null });
+
+    return obj;
   }
 
   // создание тройников
@@ -190,7 +195,7 @@ export class Gis {
     obj.userData.labels = [];
 
     const points = data.joins.points;
-    obj.userData.points = [points[0].pos, points[1].pos];
+    obj.userData.points = [points[0].pos, points[1].pos, points[2].pos];
 
     for (let i2 = 0; i2 < data.shapes.length; i2++) {
       const line = this.createLine({ points: data.shapes[i2] });
@@ -211,6 +216,13 @@ export class Gis {
     const p2 = points[1].pos;
     // this.joinsPos.set(p1.x + '' + p1.y + '' + p1.z, { pos: p1, obj: null });
     // this.joinsPos.set(p2.x + '' + p2.y + '' + p2.z, { pos: p2, obj: null });
+
+    points.forEach((item) => {
+      const p1 = item.pos;
+      this.joinsPos.set(p1.x + '' + p1.y + '' + p1.z, { pos: p1, obj: null });
+    });
+
+    return obj;
   }
 
   // создаем стыки
@@ -261,6 +273,20 @@ export class Gis {
         if (result) {
           this.valves[i].userData.joins.push(result.obj);
           result.obj.userData.objs.push(this.valves[i]);
+        }
+      }
+    }
+
+    for (let i = 0; i < this.tees.length; i++) {
+      const points = this.tees[i].userData.points;
+
+      for (let i2 = 0; i2 < points.length; i2++) {
+        const p = points[i2];
+
+        const result = this.joinsPos.get(p.x + '' + p.y + '' + p.z);
+        if (result) {
+          this.tees[i].userData.joins.push(result.obj);
+          result.obj.userData.objs.push(this.tees[i]);
         }
       }
     }
