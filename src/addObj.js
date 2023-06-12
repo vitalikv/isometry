@@ -116,58 +116,35 @@ export class AddObj {
   }
 
   addValve(pos) {
-    let obj = gisdPage.shapeObjs.valveObj.clone();
+    if (!gisdPage.dataObjs.valve) return;
 
-    const dist = 0.5;
-    obj.scale.set(dist / 2, dist / 2, dist / 2);
-
-    const convertValves = new ConvertValves();
-
+    let obj = gisdPage.createValve(gisdPage.dataObjs.valve);
     obj.position.copy(pos);
 
-    convertValves.upObjUserData({ obj });
-    convertValves.getBoundObject({ obj });
-
-    //this.modelsContainerInit.control.add(obj);
-    obj = gisdPage.createValve(obj.userData);
-    obj.position.copy(pos);
-
+    const pos1 = obj.localToWorld(obj.userData.points[0].clone());
     let jp = gisdPage.createJoin(obj.userData.points[0].clone());
+    jp.position.add(pos);
     obj.userData.joins.push(jp);
     jp.userData.objs.push(obj);
 
+    const pos2 = obj.localToWorld(obj.userData.points[1].clone());
     jp = gisdPage.createJoin(obj.userData.points[1].clone());
+    jp.position.add(pos);
     obj.userData.joins.push(jp);
     jp.userData.objs.push(obj);
-
-    console.log(pos);
   }
 
   addTee(pos) {
-    let obj = gisdPage.shapeObjs.teeObj;
+    if (!gisdPage.dataObjs.tee) return;
 
-    const dist = 0.5;
-    obj.scale.set(dist / 2, dist / 2, dist / 2);
-
-    const convertTees = new ConvertTees();
-    obj.position.copy(pos);
-    convertTees.upObjUserData({ obj });
-    convertTees.getBoundObject({ obj });
-
-    //this.modelsContainerInit.control.add(obj);
-    obj = gisdPage.createTee(obj.userData);
+    let obj = gisdPage.createTee(gisdPage.dataObjs.tee);
     obj.position.copy(pos);
 
-    let jp = gisdPage.createJoin(obj.userData.points[0].clone());
-    obj.userData.joins.push(jp);
-    jp.userData.objs.push(obj);
-
-    jp = gisdPage.createJoin(obj.userData.points[1].clone());
-    obj.userData.joins.push(jp);
-    jp.userData.objs.push(obj);
-
-    jp = gisdPage.createJoin(obj.userData.points[2].clone());
-    obj.userData.joins.push(jp);
-    jp.userData.objs.push(obj);
+    obj.userData.points.forEach((p) => {
+      const pos2 = new THREE.Vector3(p.x, p.y, p.z).add(pos);
+      let jp = gisdPage.createJoin(pos2);
+      obj.userData.joins.push(jp);
+      jp.userData.objs.push(obj);
+    });
   }
 }

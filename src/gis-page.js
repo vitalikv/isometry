@@ -4,7 +4,6 @@ import { controls, modelsContainerInit, setMeshes, loaderModel } from './index';
 
 import { CalcIsometry } from './calcIsometry';
 import { svgConverter } from './svg';
-import { ShapeObjs } from './shapeObjs';
 
 export class Gis {
   svgConverter = svgConverter;
@@ -18,12 +17,11 @@ export class Gis {
   joins = [];
   joinsPos = new Map();
   jsonIsometry = {};
-  shapeObjs;
+  dataObjs = { valve: null, tee: null };
 
   constructor() {
     this.modelsContainerInit = modelsContainerInit;
     this.isometry = new CalcIsometry();
-    this.shapeObjs = new ShapeObjs();
 
     document.addEventListener('keydown', this.onKeyDown);
   }
@@ -60,7 +58,7 @@ export class Gis {
     for (let i = 0; i < meshesValve.length; i++) meshesValve[i].visible = false;
     for (let i = 0; i < meshesTee.length; i++) meshesTee[i].visible = false;
 
-    const { tubes, valves, tees } = this.isometry.getIsometry({ tubes: meshesTube, valves: meshesValve, tees: meshesTee });
+    const { tubes, valves, tees, dataObjs } = this.isometry.getIsometry({ tubes: meshesTube, valves: meshesValve, tees: meshesTee });
 
     for (let i = 0; i < tubes.length; i++) {
       this.createTube(tubes[i]);
@@ -82,6 +80,8 @@ export class Gis {
     this.linkJoins();
 
     this.jsonIsometry = { tubes, valves, tees };
+
+    this.dataObjs = dataObjs;
   }
 
   // создание труб

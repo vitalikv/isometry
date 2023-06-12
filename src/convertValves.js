@@ -1,15 +1,14 @@
 import * as THREE from 'three';
 
 import * as Main from './index';
-import { ShapeObjs } from './shapeObjs';
 
 export class ConvertValves {
   scene;
   shapeObjs;
 
-  constructor() {
+  constructor(shapeObjs) {
     this.scene = Main.scene;
-    this.shapeObjs = new ShapeObjs();
+    this.shapeObjs = shapeObjs;
   }
 
   getData({ meshes, lines }) {

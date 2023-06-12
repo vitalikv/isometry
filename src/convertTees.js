@@ -1,15 +1,14 @@
 import * as THREE from 'three';
 
 import * as Main from './index';
-import { ShapeObjs } from './shapeObjs';
 
 export class ConvertTees {
   scene;
-  shapeObjs;
+  CalcIsometry;
 
-  constructor() {
+  constructor(shapeObjs) {
     this.scene = Main.scene;
-    this.shapeObjs = new ShapeObjs();
+    this.shapeObjs = shapeObjs;
   }
 
   getData({ meshes, lines }) {
@@ -148,9 +147,9 @@ export class ConvertTees {
 
     const size = new THREE.Vector3(boundG.max.x - boundG.min.x, boundG.max.y - boundG.min.y, boundG.max.z - boundG.min.z);
 
-    const p1 = new THREE.Vector3(boundG.min.x, boundG.max.y, size.z).applyMatrix4(obj.matrixWorld);
-    const p2 = new THREE.Vector3(boundG.max.x, boundG.max.y, size.z).applyMatrix4(obj.matrixWorld);
-    const p3 = new THREE.Vector3(0, boundG.min.y, size.z).applyMatrix4(obj.matrixWorld);
+    const p1 = new THREE.Vector3(boundG.min.x, boundG.max.y, 0).applyMatrix4(obj.matrixWorld);
+    const p2 = new THREE.Vector3(boundG.max.x, boundG.max.y, 0).applyMatrix4(obj.matrixWorld);
+    const p3 = new THREE.Vector3(0, boundG.min.y, 0).applyMatrix4(obj.matrixWorld);
     obj.userData.joins.points = [{ pos: p1 }, { pos: p2 }, { pos: p3 }];
 
     const center = new THREE.Vector3(
