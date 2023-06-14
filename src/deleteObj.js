@@ -20,8 +20,8 @@ export class DeleteObj {
     index = scheme.tubes.indexOf(obj.userData.tubeObj);
     if (index > -1) scheme.tubes.splice(index, 1);
 
-    obj.userData.tubeObj.parent?.remove(obj.userData.tubeObj);
-    obj.parent?.remove(obj);
+    this.clearMesh(obj.userData.tubeObj);
+    this.clearMesh(obj);
     this.deleteLabels(obj);
 
     obj.userData.joins.forEach((joint) => {
@@ -34,7 +34,7 @@ export class DeleteObj {
         const index = scheme.joins.indexOf(joint);
         if (index > -1) {
           scheme.joins.splice(index, 1);
-          joint.parent?.remove(joint);
+          this.clearMesh(joint);
         }
       }
     });
@@ -43,9 +43,14 @@ export class DeleteObj {
   deleteJoint(obj) {
     const arr = obj.userData.tubes.filter((item) => item.obj.userData.line.length === 2);
 
-    if (arr.length < 2) return;
+    if (arr.length < 2) {
+      if (obj.userData.tubes.length === 1) this.deleteTube(obj.userData.tubes[0].obj.userData.tubeObj);
+      return;
+    }
 
-    obj.parent?.remove(obj);
+    const index = scheme.joins.indexOf(obj);
+    if (index > -1) scheme.joins.splice(index, 1);
+    this.clearMesh(obj);
     this.deleteLabels(obj);
 
     const joints = [];
@@ -66,8 +71,8 @@ export class DeleteObj {
       index = scheme.tubes.indexOf(line.userData.tubeObj);
       if (index > -1) scheme.tubes.splice(index, 1);
 
-      line.userData.tubeObj.parent?.remove(line.userData.tubeObj);
-      line.parent?.remove(line);
+      this.clearMesh(line.userData.tubeObj);
+      this.clearMesh(line);
     });
 
     lines.forEach((line) => {
@@ -85,12 +90,20 @@ export class DeleteObj {
   }
 
   deleteObj(obj) {
-    obj.parent?.remove(obj);
+    this.clearMesh(obj);
     this.deleteLabels(obj);
 
     obj.userData.joins.forEach((joint) => {
-      let index = joint.userData.objs.findIndex((item) => item === obj);
+      const index = joint.userData.objs.findIndex((item) => item === obj);
       if (index > -1) joint.userData.objs.splice(index, 1);
+
+      if ([...joint.userData.objs, ...joint.userData.tubes].length === 0) {
+        const index = scheme.joins.indexOf(joint);
+        if (index > -1) {
+          scheme.joins.splice(index, 1);
+          this.clearMesh(joint);
+        }
+      }
     });
   }
 

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { scene, mapControlInit, isometricLabels, addObj } from './index';
+import { scene, mapControlInit, isometricLabels, addObj, gisdPage } from './index';
 
 export class IsometricMovingObjs {
   isDown = false;
@@ -113,6 +113,8 @@ export class IsometricMovingObjs {
     // перетаскиваем стык
     if (this.obj.userData.isJoint) {
       this.moveJoin({ obj: this.obj, offset, skipObj: null });
+
+      this.connectJoints(event);
     }
   };
 
@@ -120,9 +122,115 @@ export class IsometricMovingObjs {
     if (!this.isDown) return;
     if (!this.isMove) return;
 
+    if (this.obj.userData.isJoint) {
+      this.connectJoints(event, 'up');
+    }
+
     this.isDown = false;
     this.isMove = false;
   };
+
+  // соединение стыка (который ни с кем не соединен) с другим стыком (тоже ни с кем не соединен)
+  connectJoints(event, type = '') {
+    if ([...this.obj.userData.objs, ...this.obj.userData.tubes].length !== 1) return;
+
+    let findObj = null;
+    let limit = 20;
+
+    const canvas = this.mapControlInit.control.domElement;
+    const x = event.clientX - canvas.offsetLeft;
+    const y = event.clientY - canvas.offsetTop;
+    const v1 = new THREE.Vector2(x, y);
+    const camera = this.mapControlInit.control.object;
+
+    const arr = gisdPage.joins;
+
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i] === this.obj) continue;
+      if ([...arr[i].userData.objs, ...arr[i].userData.tubes].length !== 1) continue;
+
+      const v2 = this.getPosition2D({ camera, canvas, pos: arr[i].position });
+
+      const dist = v1.distanceTo(v2);
+
+      if (limit > dist) {
+        limit = dist;
+        findObj = arr[i];
+      }
+    }
+
+    if (!findObj) return;
+
+    const offset = findObj.position.clone().sub(this.obj.position);
+    this.obj.position.add(offset);
+
+    this.offset = findObj.position.clone();
+
+    const obj = this.obj;
+    const skipObj = null;
+    const skipJoins = [];
+
+    // перемещение труб привязанные к стыку
+    obj.userData.tubes.forEach((data) => {
+      if (data.obj !== skipObj) {
+        this.updataTubeLine({ obj: data.obj, offset, id: data.id });
+
+        if (data.obj.userData.line.length > 2) {
+          data.obj.userData.joins.forEach((join) => {
+            if (join !== obj) this.moveJoin({ obj: join, offset, skipObj: data.obj, skipJoins });
+          });
+        }
+      }
+    });
+
+    // перемещение объектов привязанные к стыку
+    obj.userData.objs.forEach((o) => {
+      if (o !== skipObj) {
+        o.position.add(offset);
+        isometricLabels.updataPos(o);
+
+        // перемещение стыков привязанные к объекты, за исключением текущего
+        o.userData.joins.forEach((join) => {
+          if (join !== obj) {
+            this.moveJoin({ obj: join, offset, skipObj: o, skipJoins });
+          }
+        });
+      }
+    });
+
+    if (type === 'up') {
+      const index = gisdPage.joins.indexOf(obj);
+      if (index > -1) {
+        gisdPage.joins.splice(index, 1);
+
+        obj.removeFromParent();
+        obj.geometry.dispose();
+
+        let objJ = [...this.obj.userData.objs, ...this.obj.userData.tubes];
+
+        if (this.obj.userData.tubes.length > 0) {
+          objJ[0].obj.userData.joins.push(findObj);
+          findObj.userData.tubes.push(objJ[0]);
+        }
+        if (this.obj.userData.objs.length > 0) {
+          objJ[0].userData.joins.push(findObj);
+          findObj.userData.objs.push(objJ[0]);
+        }
+
+        this.obj = null;
+      }
+    }
+  }
+
+  // положение стыка на 2D экране
+  getPosition2D({ camera, canvas, pos }) {
+    const tempV = pos.clone().project(camera);
+
+    const x = (tempV.x * 0.5 + 0.5) * canvas.clientWidth;
+    const y = (tempV.y * -0.5 + 0.5) * canvas.clientHeight;
+
+    return new THREE.Vector2(x, y);
+  }
 
   // перемещение стыка
   moveJoin({ obj, offset, skipObj, skipJoins = [] }) {
