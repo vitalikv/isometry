@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import * as Main from './index';
+import * as Main from '../index';
 
 export class ConvertValves {
   scene;

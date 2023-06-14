@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { scene } from './index';
+import { scene } from '../index';
 
 export class ConvertTubes {
   scene;

@@ -1,8 +1,6 @@
 import * as THREE from 'three';
 
 import { gisdPage, modelsContainerInit, mapControlInit } from './index';
-import { ConvertValves } from './convertValves';
-import { ConvertTees } from './convertTees';
 
 export class AddObj {
   activated = false;

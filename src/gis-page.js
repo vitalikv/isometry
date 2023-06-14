@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 import { controls, modelsContainerInit, setMeshes, loaderModel } from './index';
 
-import { CalcIsometry } from './calcIsometry';
+import { CalcIsometry } from './back/calcIsometry';
 import { svgConverter } from './svg';
 
 export class Gis {
