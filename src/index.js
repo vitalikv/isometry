@@ -13,12 +13,14 @@ import { DeleteObj } from './deleteObj';
 import { Gis } from './gis-page';
 import { ReadWrite } from './readWrite';
 import { AddObj } from './addObj';
+import { Axes } from './axes';
+import { CatchObj } from './catchObj';
 
 import { PanelRp } from './ui/panelRp';
 
 export let renderer, camera, scene, controls, modelsContainerInit, mapControlInit, clock, gui, stats;
 let cameraP, cameraO;
-export let loaderModel, gisdPage, selectObj, ruler, moving, joint, isometricLabels, isometricLabelList, deleteObj, addObj;
+export let loaderModel, gisdPage, selectObj, ruler, moving, joint, isometricLabels, isometricLabelList, deleteObj, addObj, axes, catchObj;
 let isomety;
 let meshes = [];
 
@@ -115,21 +117,7 @@ function init() {
     loaderModel.loaderObj('0019.005-TH_02.osf');
   }
 
-  moving = new IsometricMovingObjs();
-  ruler = new IsometricRulerService();
-  deleteObj = new DeleteObj();
-  gisdPage = new Gis();
-  joint = new Joint();
-  isometricLabels = new IsometricLabels();
-  isometricLabelList = new IsometricLabelList();
-  //isometricLabelList.init();
-  const isometricScreenshot = new IsometricScreenshot();
-  const readWrite = new ReadWrite();
-  addObj = new AddObj();
-
-  selectObj = new IsometricModeService({ controls, scene, canvas: renderer.domElement, meshes: [] });
-
-  new PanelRp({ gisdPage, isometricScreenshot, ruler, isometricMode: selectObj, isometricLabelList, readWrite, joint, addObj });
+  includeClasses();
 
   window.addEventListener(
     'resize',
@@ -143,6 +131,27 @@ function init() {
   );
 
   document.addEventListener('keydown', onKeyDown);
+}
+
+// подключаем классы
+function includeClasses() {
+  moving = new IsometricMovingObjs();
+  ruler = new IsometricRulerService();
+  deleteObj = new DeleteObj();
+  gisdPage = new Gis();
+  joint = new Joint();
+  isometricLabels = new IsometricLabels();
+  isometricLabelList = new IsometricLabelList();
+  //isometricLabelList.init();
+  const isometricScreenshot = new IsometricScreenshot();
+  const readWrite = new ReadWrite();
+  addObj = new AddObj();
+  catchObj = new CatchObj();
+  axes = new Axes();
+
+  selectObj = new IsometricModeService({ controls, scene, canvas: renderer.domElement, meshes: [] });
+
+  new PanelRp({ gisdPage, isometricScreenshot, ruler, isometricMode: selectObj, isometricLabelList, readWrite, joint, addObj });
 }
 
 // подписка событие - обновление массива объектов для расчета стыков

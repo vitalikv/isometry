@@ -27,16 +27,9 @@ export class Gis {
   }
 
   onKeyDown = (event) => {
-    if (event.code === 'Space') {
-    }
-
     // создание svg
     if (event.code === 'KeyS') {
       svgConverter.createSvgScheme({ lines: this.svgLines });
-    }
-
-    if (event.code === 'Delete') {
-      //this.deleteObjs();
     }
   };
 
@@ -138,10 +131,9 @@ export class Gis {
       new THREE.BoxGeometry(size.x, size.y, size.z),
       new THREE.MeshStandardMaterial({ color: 0x0000ff, depthTest: true, transparent: true, opacity: 1 })
     );
-    //obj.material.visible = false;
+    obj.material.visible = false;
     obj.geometry.translate(posG.x, posG.y, posG.z);
 
-    //const obj = new THREE.Mesh();
     obj.userData = {};
     obj.userData.isIsometry = true;
     obj.userData.isObj = true;
@@ -183,7 +175,7 @@ export class Gis {
       new THREE.BoxGeometry(size.x, size.y, size.z),
       new THREE.MeshStandardMaterial({ color: 0x0000ff, depthTest: true, transparent: true, opacity: 1 })
     );
-    //obj.material.visible = false;
+    obj.material.visible = false;
     obj.geometry.translate(posG.x, posG.y, posG.z);
 
     //const obj = new THREE.Mesh();

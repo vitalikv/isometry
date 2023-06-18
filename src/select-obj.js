@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { modelsContainerInit, mapControlInit, ruler, moving, isometricLabels, isometricLabelList, gisdPage, joint, deleteObj, addObj } from './index';
+import { modelsContainerInit, mapControlInit, ruler, moving, isometricLabels, isometricLabelList, gisdPage, joint, deleteObj, addObj, axes } from './index';
 
 export class IsometricModeService {
   mode = 'select';
@@ -33,6 +33,7 @@ export class IsometricModeService {
     document.body.addEventListener('wheel', this.mouseWheel);
 
     document.addEventListener('keydown', this.onKeyDown);
+    document.addEventListener('keyup', this.onKeyUp);
   }
 
   initPlane() {
@@ -57,6 +58,15 @@ export class IsometricModeService {
     // if (event.code === 'KeyR') this.changeMode('ruler');
     // if (event.code === 'KeyM') this.changeMode('move');
     if (event.code === 'Delete') deleteObj.delete(this.actObj);
+    if (event.code === 'ControlLeft' && !event.repeat) {
+      if (axes.enable({ obj: this.actObj })) this.changeMode('axes');
+    }
+  };
+
+  onKeyUp = (event) => {
+    if (event.code === 'ControlLeft' && !event.repeat) {
+      if (axes.disable()) this.changeMode('move');
+    }
   };
 
   changeMode(mode) {
@@ -109,6 +119,11 @@ export class IsometricModeService {
   }
 
   onmousedown = (event) => {
+    if (this.mode === 'axes') {
+      axes.onmousedown();
+      return;
+    }
+
     this.deActivateObj();
     this.isDown = false;
     this.isMove = false;
@@ -168,6 +183,10 @@ export class IsometricModeService {
 
     isometricLabelList.setPosRot();
 
+    if (this.mode === 'axes') {
+      axes.onmousemove(event);
+    }
+
     if (this.mode === 'move') {
       moving.onmousemove(event, this.plane);
     }
@@ -186,6 +205,10 @@ export class IsometricModeService {
   };
 
   onmouseup = (event) => {
+    if (this.mode === 'axes') {
+      axes.onmouseup(event);
+    }
+
     if (this.mode === 'move') {
       moving.onmouseup(event);
       this.activateObj();

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { scene, mapControlInit, isometricLabels, addObj, gisdPage } from './index';
+import { scene, mapControlInit, isometricLabels, addObj, gisdPage, catchObj } from './index';
 
 export class IsometricMovingObjs {
   isDown = false;
@@ -103,6 +103,10 @@ export class IsometricMovingObjs {
 
     // перетаскиваем фитинги
     if (this.obj.userData.isObj) {
+      // позиционирование одиночного объекта
+      const done = catchObj.onmousemove({ event, obj: this.obj, offset });
+      if (done) return;
+
       this.obj.position.add(offset);
 
       isometricLabels.updataPos(this.obj);
@@ -121,6 +125,10 @@ export class IsometricMovingObjs {
   onmouseup = (event) => {
     if (!this.isDown) return;
     if (!this.isMove) return;
+
+    if (this.obj.userData.isObj) {
+      catchObj.onmouseup();
+    }
 
     if (this.obj.userData.isJoint) {
       this.connectJoints(event, 'up');
