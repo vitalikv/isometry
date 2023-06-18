@@ -15,12 +15,13 @@ import { ReadWrite } from './readWrite';
 import { AddObj } from './addObj';
 import { Axes } from './axes';
 import { CatchObj } from './catchObj';
+import { IsometricLineStyle } from './lineStyle';
 
 import { PanelRp } from './ui/panelRp';
 
 export let renderer, camera, scene, controls, modelsContainerInit, mapControlInit, clock, gui, stats;
 let cameraP, cameraO;
-export let loaderModel, gisdPage, selectObj, ruler, moving, joint, isometricLabels, isometricLabelList, deleteObj, addObj, axes, catchObj;
+export let loaderModel, gisdPage, selectObj, ruler, moving, joint, isometricLabels, isometricLabelList, deleteObj, addObj, axes, catchObj, isometricLineStyle;
 let isomety;
 let meshes = [];
 
@@ -148,10 +149,11 @@ function includeClasses() {
   addObj = new AddObj();
   catchObj = new CatchObj();
   axes = new Axes();
+  isometricLineStyle = new IsometricLineStyle();
 
-  selectObj = new IsometricModeService({ controls, scene, canvas: renderer.domElement, meshes: [] });
+  selectObj = new IsometricModeService({ mapControlInit });
 
-  new PanelRp({ gisdPage, isometricScreenshot, ruler, isometricMode: selectObj, isometricLabelList, readWrite, joint, addObj });
+  new PanelRp({ gisdPage, isometricScreenshot, ruler, isometricMode: selectObj, isometricLabelList, readWrite, joint, addObj, isometricLineStyle });
 }
 
 // подписка событие - обновление массива объектов для расчета стыков

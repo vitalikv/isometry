@@ -14,7 +14,7 @@ export class IsometricModeService {
   isMove = false;
   actObj = null;
   colorAct = 0xff0000;
-  colorDef = 0x222222;
+  colorDef = 0x000000;
 
   isometricSchemeService;
 
@@ -23,9 +23,6 @@ export class IsometricModeService {
     this.modelsContainerInit = modelsContainerInit;
     this.isometricSchemeService = gisdPage;
     this.plane = this.initPlane();
-
-    this.materials.def = new THREE.MeshStandardMaterial({ color: 0xffff00, wireframe: false });
-    this.materials.act = new THREE.MeshStandardMaterial({ color: 0xff0000, wireframe: true });
 
     document.body.addEventListener('mousedown', this.onmousedown);
     document.body.addEventListener('mousemove', this.onmousemove);

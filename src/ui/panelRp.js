@@ -7,8 +7,9 @@ export class PanelRp {
   isometricMode;
   isometricLabelList;
   readWrite;
+  isometricLineStyle;
 
-  constructor({ gisdPage, isometricScreenshot, isometricMode, isometricLabelList, readWrite, joint, addObj }) {
+  constructor({ gisdPage, isometricScreenshot, isometricMode, isometricLabelList, readWrite, joint, addObj, isometricLineStyle }) {
     this.gisdPage = gisdPage;
     this.joint = joint;
     this.isometricScreenshot = isometricScreenshot;
@@ -16,6 +17,7 @@ export class PanelRp {
     this.isometricLabelList = isometricLabelList;
     this.readWrite = readWrite;
     this.addObj = addObj;
+    this.isometricLineStyle = isometricLineStyle;
 
     this.init();
   }
@@ -34,6 +36,10 @@ export class PanelRp {
     this.btns$[8] = this.crBtn({ txt: 'кран' });
     this.btns$[9] = this.crBtn({ txt: 'тройник' });
     this.btns$[10] = this.crBtn({ txt: 'обвод' });
+
+    this.btns$[11] = this.crBtn({ txt: 'сплошная тонкая' });
+    this.btns$[12] = this.crBtn({ txt: 'сплошная толстая' });
+    this.btns$[13] = this.crBtn({ txt: 'штриховая' });
 
     this.initEvent();
   }
@@ -88,6 +94,18 @@ export class PanelRp {
 
     this.btns$[10].onmousedown = () => {
       this.addObj.enable('corner');
+    };
+
+    this.btns$[11].onmousedown = () => {
+      this.isometricLineStyle.setTypeLine('basic');
+    };
+
+    this.btns$[12].onmousedown = () => {
+      this.isometricLineStyle.setTypeLine('thick');
+    };
+
+    this.btns$[13].onmousedown = () => {
+      this.isometricLineStyle.setTypeLine('dashed');
     };
   }
 

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js';
 
 import { scene, mapControlInit, isometricLabels, addObj, gisdPage, catchObj } from './index';
 
@@ -296,9 +297,19 @@ export class IsometricMovingObjs {
       points.forEach((point) => point.add(offset));
     }
 
-    const geometry = new THREE.BufferGeometry().setFromPoints(points);
     obj.geometry.dispose();
+
+    const positions = [];
+    const curve = new THREE.CatmullRomCurve3(points, false, 'catmullrom', 0);
+    const points2 = curve.getPoints(12 * points.length);
+    for (let i = 0; i < points2.length; i++) {
+      const point = points2[i];
+      positions.push(point.x, point.y, point.z);
+    }
+    const geometry = new LineGeometry();
+    geometry.setPositions(positions);
     obj.geometry = geometry;
+    obj.computeLineDistances();
 
     isometricLabels.updataPos(obj);
 

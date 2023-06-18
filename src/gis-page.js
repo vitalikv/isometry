@@ -1,6 +1,9 @@
 import * as THREE from 'three';
+import { Line2 } from 'three/examples/jsm/lines/Line2.js';
+import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js';
+import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 
-import { controls, modelsContainerInit, setMeshes, loaderModel } from './index';
+import { controls, mapControlInit, modelsContainerInit, setMeshes, loaderModel } from './index';
 
 import { CalcIsometry } from './back/calcIsometry';
 import { svgConverter } from './svg';
@@ -20,6 +23,7 @@ export class Gis {
   dataObjs = { valve: null, tee: null };
 
   constructor() {
+    this.mapControlInit = mapControlInit;
     this.modelsContainerInit = modelsContainerInit;
     this.isometry = new CalcIsometry();
 
@@ -145,7 +149,9 @@ export class Gis {
     obj.userData.points = [points[0].pos, points[1].pos];
 
     for (let i2 = 0; i2 < data.shapes.length; i2++) {
-      const line = this.createLine({ points: data.shapes[i2] });
+      const points = data.shapes[i2].map((p) => new THREE.Vector3(p.x, p.y, p.z));
+
+      const line = this.createLine({ points });
       obj.add(line);
       line.updateMatrixWorld();
       line.updateMatrix();
@@ -190,7 +196,9 @@ export class Gis {
     obj.userData.points = [points[0].pos, points[1].pos, points[2].pos];
 
     for (let i2 = 0; i2 < data.shapes.length; i2++) {
-      const line = this.createLine({ points: data.shapes[i2] });
+      const points = data.shapes[i2].map((p) => new THREE.Vector3(p.x, p.y, p.z));
+
+      const line = this.createLine({ points });
       obj.add(line);
       line.updateMatrixWorld();
       line.updateMatrix();
@@ -286,11 +294,34 @@ export class Gis {
 
   // отображение линий по точкам
   createLine({ points }) {
-    const material = new THREE.LineBasicMaterial({ color: 0x000000 });
+    const positions = [];
+    const curve = new THREE.CatmullRomCurve3(points, false, 'catmullrom', 0);
+    points = curve.getPoints(12 * points.length);
 
-    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    for (let i = 0; i < points.length; i++) {
+      const point = points[i];
+      positions.push(point.x, point.y, point.z);
+    }
 
-    const line = new THREE.Line(geometry, material);
+    const geometry = new LineGeometry();
+    geometry.setPositions(positions);
+
+    const domElement = this.mapControlInit.control.domElement;
+
+    const matLine = new LineMaterial({
+      color: 0x000000,
+      linewidth: 1,
+      worldUnits: false,
+      dashed: true,
+      dashScale: 4,
+      dashSize: 4,
+      gapSize: 1,
+      alphaToCoverage: true,
+      resolution: new THREE.Vector2(domElement.clientWidth, domElement.clientHeight),
+    });
+
+    const line = new Line2(geometry, matLine);
+    line.computeLineDistances();
 
     return line;
   }
