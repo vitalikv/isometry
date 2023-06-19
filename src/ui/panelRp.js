@@ -6,16 +6,16 @@ export class PanelRp {
   isometricScreenshot;
   isometricMode;
   isometricLabelList;
-  readWrite;
+  saveLoad;
   isometricLineStyle;
 
-  constructor({ gisdPage, isometricScreenshot, isometricMode, isometricLabelList, readWrite, joint, addObj, isometricLineStyle }) {
+  constructor({ gisdPage, isometricScreenshot, isometricMode, isometricLabelList, saveLoad, joint, addObj, isometricLineStyle }) {
     this.gisdPage = gisdPage;
     this.joint = joint;
     this.isometricScreenshot = isometricScreenshot;
     this.isometricMode = isometricMode;
     this.isometricLabelList = isometricLabelList;
-    this.readWrite = readWrite;
+    this.saveLoad = saveLoad;
     this.addObj = addObj;
     this.isometricLineStyle = isometricLineStyle;
 
@@ -78,7 +78,7 @@ export class PanelRp {
     };
 
     this.btns$[6].onmousedown = () => {
-      this.readWrite.write();
+      this.saveLoad.save();
     };
 
     this.btns$[7].onmousedown = () => {

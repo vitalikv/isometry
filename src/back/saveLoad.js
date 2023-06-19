@@ -1,7 +1,7 @@
-import { gisdPage } from './index';
+import { gisdPage } from '../index';
 
-export class ReadWrite {
-  write() {
+export class SaveLoad {
+  save() {
     const isometry = gisdPage.jsonIsometry;
     const str = JSON.stringify(isometry);
     console.log(str);

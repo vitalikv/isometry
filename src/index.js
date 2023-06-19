@@ -13,7 +13,7 @@ import { IsometricLabelList } from './labelList';
 import { IsometricScreenshot } from './screenshot';
 import { DeleteObj } from './deleteObj';
 import { Gis } from './gis-page';
-import { ReadWrite } from './readWrite';
+import { SaveLoad } from './back/saveLoad';
 import { AddObj } from './addObj';
 import { Axes } from './axes';
 import { CatchObj } from './catchObj';
@@ -153,7 +153,7 @@ function includeClasses() {
   isometricLabelList = new IsometricLabelList();
   //isometricLabelList.init();
   const isometricScreenshot = new IsometricScreenshot();
-  const readWrite = new ReadWrite();
+  const saveLoad = new SaveLoad();
   addObj = new AddObj();
   catchObj = new CatchObj();
   axes = new Axes();
@@ -161,7 +161,7 @@ function includeClasses() {
 
   selectObj = new IsometricModeService({ mapControlInit });
 
-  new PanelRp({ gisdPage, isometricScreenshot, ruler, isometricMode: selectObj, isometricLabelList, readWrite, joint, addObj, isometricLineStyle });
+  new PanelRp({ gisdPage, isometricScreenshot, ruler, isometricMode: selectObj, isometricLabelList, saveLoad, joint, addObj, isometricLineStyle });
 }
 
 // подписка событие - обновление массива объектов для расчета стыков
