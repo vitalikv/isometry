@@ -46,6 +46,7 @@ export class PanelRp {
 
   initEvent() {
     this.container$.onmousedown = (e) => {
+      //e.preventDefault();
       e.stopPropagation();
     };
 

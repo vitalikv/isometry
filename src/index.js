@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
+
 import { svgConverter } from './svg';
 import { LoaderModel } from './loader-model';
 import { IsometricModeService } from './select-obj';
@@ -19,7 +21,7 @@ import { IsometricLineStyle } from './lineStyle';
 
 import { PanelRp } from './ui/panelRp';
 
-export let renderer, camera, scene, controls, modelsContainerInit, mapControlInit, clock, gui, stats;
+export let renderer, labelRenderer, camera, scene, controls, modelsContainerInit, mapControlInit, clock, gui, stats;
 let cameraP, cameraO;
 export let loaderModel, gisdPage, selectObj, ruler, moving, joint, isometricLabels, isometricLabelList, deleteObj, addObj, axes, catchObj, isometricLineStyle;
 let isomety;
@@ -40,6 +42,12 @@ function init() {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.outputEncoding = THREE.sRGBEncoding;
   document.body.appendChild(renderer.domElement);
+
+  labelRenderer = new CSS2DRenderer();
+  labelRenderer.setSize(window.innerWidth, window.innerHeight);
+  labelRenderer.domElement.style.position = 'absolute';
+  labelRenderer.domElement.style.top = '0px';
+  document.body.appendChild(labelRenderer.domElement);
 
   // scene setup
   scene = new THREE.Scene();
@@ -204,4 +212,5 @@ function render() {
   svgConverter.updateSvg(controls.object, controls.domElement);
 
   renderer.render(scene, camera);
+  labelRenderer.render(scene, camera);
 }

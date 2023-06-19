@@ -312,7 +312,7 @@ export class Gis {
       color: 0x000000,
       linewidth: 1,
       worldUnits: false,
-      dashed: true,
+      dashed: false,
       dashScale: 4,
       dashSize: 4,
       gapSize: 1,

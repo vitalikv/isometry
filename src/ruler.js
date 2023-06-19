@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 import { modelsContainerInit, mapControlInit } from './index';
 
@@ -48,12 +49,14 @@ export class IsometricRulerService {
     pipeSpline['tension'] = 0;
     const geometry = new THREE.TubeGeometry(pipeSpline, points.length, 0.05, 12, false);
     const lineG = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: 0x0000ff, depthTest: false, transparent: true }));
-    lineG.material.visible = false;
+    //lineG.material.visible = false;
     lineG.userData = {};
     lineG.userData.isRuler = true;
     lineG.userData.line = line;
     lineG.userData.line2 = line2;
     lineG.userData.pointObjs = this.pointsTool;
+    lineG.userData.labelPoint = null;
+    lineG.userData.label = null;
 
     this.modelsContainerInit.control.add(line, lineG, ...line2);
 
@@ -67,6 +70,8 @@ export class IsometricRulerService {
     this.rulerObjs.push(lineG);
 
     this.pointsTool = [];
+
+    this.createLabel({ obj: lineG, points });
   }
 
   // отображение линий по точкам
@@ -171,6 +176,11 @@ export class IsometricRulerService {
       line2.geometry.dispose();
       line2.geometry = geometry;
     });
+
+    if (this.obj.userData.labelPoint && this.obj.userData.label) {
+      this.obj.userData.labelPoint.position.add(offset);
+      this.setRotLabel(this.obj);
+    }
   };
 
   onmouseup = (event) => {
@@ -180,4 +190,105 @@ export class IsometricRulerService {
     this.isDown = false;
     this.isMove = false;
   };
+
+  createLabel({ obj, points }) {
+    const posC = points[1].clone().sub(points[0]);
+    posC.divideScalar(2).add(points[0]);
+
+    const point = this.helperSphere({ pos: posC, size: 0.075, color: 0x00ff00 });
+    point.visible = false;
+    obj.userData.labelPoint = point;
+
+    const container = document.createElement('div');
+
+    const elem = document.createElement('div');
+    elem.textContent = 'размер';
+    elem.style.background = 'rgb(255, 255, 255)';
+    elem.style.border = '1px solid rgb(204, 204, 204)';
+    elem.style.fontSize = '20px';
+    elem.style.borderRadius = '4px';
+    elem.style.cursor = 'pointer';
+    elem.style.padding = '10px';
+    elem.style.transform = 'rotate(30deg)';
+    container.append(elem);
+
+    const label = new CSS2DObject(container);
+    console.log(label);
+    label.position.set(0, 0, 0);
+    point.add(label);
+
+    obj.userData.label = label;
+    this.setRotLabel(obj);
+    this.initEventLabel(label);
+  }
+
+  initEventLabel(label) {
+    const container = label.element;
+    const elem = container.children[0];
+
+    elem.onpointerdown = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const elem2 = document.createElement('input');
+      elem2.textContent = '';
+      elem2.style.background = 'rgb(255, 255, 255)';
+      elem2.style.border = '1px solid rgb(204, 204, 204)';
+      elem2.style.width = '100px';
+      elem2.style.fontSize = '20px';
+      elem2.style.borderRadius = '4px';
+      elem2.style.padding = '10px';
+      container.append(elem2);
+
+      elem2.focus();
+
+      elem2.onkeydown = (e2) => {
+        if (e2.code === 'Enter') {
+          const txt = elem2.value;
+          container.children[1].remove();
+
+          if (txt !== '') elem.textContent = txt;
+          elem.style.display = '';
+        }
+      };
+
+      elem.style.display = 'none';
+    };
+  }
+
+  setRotLabel(obj) {
+    const p1 = this.getPosition2D(obj.userData.pointObjs[0].position);
+    const p2 = this.getPosition2D(obj.userData.pointObjs[1].position);
+
+    const dir = new THREE.Vector2().subVectors(p2, p1);
+    let rotY = Math.atan2(dir.x, dir.y);
+    rotY += rotY <= 0.001 ? Math.PI / 2 : -Math.PI / 2;
+    rotY = THREE.MathUtils.radToDeg(rotY);
+
+    const container = obj.userData.label.element;
+    const elem = container.children[0];
+    elem.style.transform = 'rotate(' + -rotY + 'deg)';
+
+    // const offset = new THREE.Vector3(-dir.y, dir.x).normalize();
+    // if (offset.y < p1.y || offset.y < p2.y) {
+    //   offset.x *= -1;
+    //   offset.y *= -1;
+    // }
+    // container.style.top = offset.y * 30 + 'px';
+    // container.style.left = offset.x * 30 + 'px';
+    // console.log(rotY, elem.children[0], offset);
+  }
+
+  // положение объекта на 2D экране
+  getPosition2D(pos) {
+    const camera = this.mapControlInit.control.object;
+    const canvas = this.mapControlInit.control.domElement;
+
+    const tempV = pos.clone().project(camera);
+
+    const x = (tempV.x * 0.5 + 0.5) * canvas.clientWidth;
+    const y = (tempV.y * -0.5 + 0.5) * canvas.clientHeight;
+
+    return new THREE.Vector2(x, y);
+  }
 }
