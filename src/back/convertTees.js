@@ -40,7 +40,7 @@ export class ConvertTees {
       const listDist = [];
 
       for (let i2 = 0; i2 < lines.length; i2++) {
-        const points = lines[i2];
+        const points = lines[i2].points;
 
         const dist1 = obj.position.distanceTo(points[0]);
         const dist2 = obj.position.distanceTo(points[points.length - 1]);

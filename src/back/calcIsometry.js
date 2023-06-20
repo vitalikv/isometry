@@ -21,24 +21,24 @@ export class CalcIsometry {
   }
 
   getIsometry({ tubes, valves = [], tees = [] }) {
-    this.getTubes(tubes);
-    this.getValves(valves);
-    this.getTees(tees);
-    this.getDataObjs();
+    this.lines = this.getTubes(tubes);
+    this.valves = this.getValves(valves);
+    this.tees = this.getTees(tees);
+    this.dataObjs = this.getDataObjs();
 
     return { tubes: this.lines, valves: this.valves, tees: this.tees, dataObjs: this.dataObjs };
   }
 
   getTubes(meshes) {
-    this.lines = this.convertTubes.getData({ meshes });
+    return this.convertTubes.getData({ meshes });
   }
 
   getValves(meshes) {
-    this.valves = this.convertValves.getData({ meshes, lines: this.lines });
+    return this.convertValves.getData({ meshes, lines: this.lines });
   }
 
   getTees(meshes) {
-    this.tees = this.convertTees.getData({ meshes, lines: this.lines });
+    return this.convertTees.getData({ meshes, lines: this.lines });
   }
 
   getDataObjs() {
@@ -54,7 +54,9 @@ export class CalcIsometry {
     this.convertTees.upObjUserData({ obj: teeObj });
     this.convertTees.getBoundObject({ obj: teeObj });
 
-    this.dataObjs.valve = valveObj.userData;
-    this.dataObjs.tee = teeObj.userData;
+    const valve = valveObj.userData;
+    const tee = teeObj.userData;
+
+    return { valve, tee };
   }
 }

@@ -63,7 +63,6 @@ export class Gis {
   // собираем изометрию из полученных данных
   init({ tubes, valves, tees, dataObjs }) {
     for (let i = 0; i < tubes.length; i++) {
-      tubes[i] = tubes[i].map((p) => new THREE.Vector3(p.x, p.y, p.z));
       this.createTube(tubes[i]);
     }
 
@@ -89,7 +88,7 @@ export class Gis {
 
   // создание труб
   createTube(data) {
-    const points = data;
+    const points = data.points.map((p) => new THREE.Vector3(p.x, p.y, p.z));
 
     const pipeSpline = new THREE.CatmullRomCurve3(points);
     pipeSpline['curveType'] = 'catmullrom';
@@ -107,6 +106,7 @@ export class Gis {
     obj.userData.isLine = true;
     obj.userData.points = [points[0], points[points.length - 1]];
     obj.userData.line = points.map((p) => p.clone());
+    obj.userData.lineStyle = 'basic';
     obj.userData.joins = [];
     obj.userData.labels = [];
     obj.userData.tubeObj = tubeObj;
