@@ -93,6 +93,15 @@ export class DeleteObj {
     this.clearMesh(obj);
     this.deleteLabels(obj);
 
+    if (obj.userData.isValve) {
+      const index = scheme.valves.indexOf(obj);
+      if (index > -1) scheme.valves.splice(index, 1);
+    }
+    if (obj.userData.isTee) {
+      const index = scheme.tees.indexOf(obj);
+      if (index > -1) scheme.tees.splice(index, 1);
+    }
+
     obj.userData.joins.forEach((joint) => {
       const index = joint.userData.objs.findIndex((item) => item === obj);
       if (index > -1) joint.userData.objs.splice(index, 1);

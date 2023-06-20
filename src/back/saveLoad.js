@@ -27,7 +27,7 @@ export class SaveLoad {
       const boundBox = obj.userData.boundBox;
       const joins = { tubes: [], points: [] };
       obj.userData.joins.forEach((joint) => {
-        joins.points.push({ pos: joint.position });
+        joins.points.push(joint.position);
       });
       isometry.valves.push({ pos, rot, shapes, boundBox, joins });
     });
@@ -39,7 +39,7 @@ export class SaveLoad {
       const boundBox = obj.userData.boundBox;
       const joins = { tubes: [], points: [] };
       obj.userData.joins.forEach((joint) => {
-        joins.points.push({ pos: joint.position });
+        joins.points.push(joint.position);
       });
       isometry.tees.push({ pos, rot, shapes, boundBox, joins });
     });

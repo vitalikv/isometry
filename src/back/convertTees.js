@@ -78,11 +78,9 @@ export class ConvertTees {
       if (listDist[1].id === 0) listDist[1].points[0] = pos2;
       else listDist[1].points[listDist[1].points.length - 1] = pos2;
 
-      const pos3 = obj.userData.joins.points[2].pos;
+      const pos3 = obj.userData.joins.points[2];
       obj.userData.joins.points = [];
-      obj.userData.joins.points.push({ pos: pos1 });
-      obj.userData.joins.points.push({ pos: pos2 });
-      obj.userData.joins.points.push({ pos: pos3 });
+      obj.userData.joins.points.push(pos1, pos2, pos3);
     }
 
     return listObjs.map((item) => item.userData);
@@ -150,7 +148,7 @@ export class ConvertTees {
     const p1 = new THREE.Vector3(boundG.min.x, boundG.max.y, 0).applyMatrix4(obj.matrixWorld);
     const p2 = new THREE.Vector3(boundG.max.x, boundG.max.y, 0).applyMatrix4(obj.matrixWorld);
     const p3 = new THREE.Vector3(0, boundG.min.y, 0).applyMatrix4(obj.matrixWorld);
-    obj.userData.joins.points = [{ pos: p1 }, { pos: p2 }, { pos: p3 }];
+    obj.userData.joins.points = [p1, p2, p3];
 
     const center = new THREE.Vector3(
       (boundG.max.x - boundG.min.x) / 2 + boundG.min.x,

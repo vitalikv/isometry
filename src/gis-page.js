@@ -146,12 +146,13 @@ export class Gis {
     obj.userData = {};
     obj.userData.isIsometry = true;
     obj.userData.isObj = true;
+    obj.userData.isValve = true;
     obj.userData.shapes = [];
     obj.userData.boundBox = data.boundBox;
     obj.userData.joins = [];
     obj.userData.labels = [];
 
-    const points = data.joins.points.map((p) => new THREE.Vector3(p.pos.x, p.pos.y, p.pos.z));
+    const points = data.joins.points.map((p) => new THREE.Vector3(p.x, p.y, p.z));
     obj.userData.points = [points[0], points[1]];
 
     for (let i2 = 0; i2 < data.shapes.length; i2++) {
@@ -165,10 +166,8 @@ export class Gis {
       line.updateMatrix();
     }
 
-    const pos = data.pos;
-    const rot = data.rot;
-    obj.position.set(pos.x, pos.y, pos.z);
-    obj.rotation.set(rot.x, rot.y, rot.z);
+    obj.position.set(data.pos.x, data.pos.y, data.pos.z);
+    obj.rotation.set(data.rot.x, data.rot.y, data.rot.z);
 
     this.modelsContainerInit.control.add(obj);
     this.valves.push(obj);
@@ -195,12 +194,13 @@ export class Gis {
     obj.userData = {};
     obj.userData.isIsometry = true;
     obj.userData.isObj = true;
+    obj.userData.isTee = true;
     obj.userData.shapes = [];
     obj.userData.boundBox = data.boundBox;
     obj.userData.joins = [];
     obj.userData.labels = [];
 
-    const points = data.joins.points.map((p) => new THREE.Vector3(p.pos.x, p.pos.y, p.pos.z));
+    const points = data.joins.points.map((p) => new THREE.Vector3(p.x, p.y, p.z));
     obj.userData.points = [points[0], points[1], points[2]];
 
     for (let i2 = 0; i2 < data.shapes.length; i2++) {
@@ -214,10 +214,8 @@ export class Gis {
       line.updateMatrix();
     }
 
-    const pos = data.pos;
-    const rot = data.rot;
-    obj.position.set(pos.x, pos.y, pos.z);
-    obj.rotation.set(rot.x, rot.y, rot.z);
+    obj.position.set(data.pos.x, data.pos.y, data.pos.z);
+    obj.rotation.set(data.rot.x, data.rot.y, data.rot.z);
 
     this.modelsContainerInit.control.add(obj);
     this.tees.push(obj);
