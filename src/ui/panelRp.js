@@ -2,15 +2,15 @@ export class PanelRp {
   container$;
   btns$ = [];
 
-  gisdPage;
+  isometricSchemeService;
   isometricScreenshot;
   isometricMode;
   isometricLabelList;
   saveLoad;
   isometricLineStyle;
 
-  constructor({ gisdPage, isometricScreenshot, isometricMode, isometricLabelList, saveLoad, joint, addObj, isometricLineStyle }) {
-    this.gisdPage = gisdPage;
+  constructor({ isometricSchemeService, isometricScreenshot, isometricMode, isometricLabelList, saveLoad, joint, addObj, isometricLineStyle }) {
+    this.isometricSchemeService = isometricSchemeService;
     this.joint = joint;
     this.isometricScreenshot = isometricScreenshot;
     this.isometricMode = isometricMode;
@@ -41,6 +41,8 @@ export class PanelRp {
     this.btns$[12] = this.crBtn({ txt: 'сплошная толстая' });
     this.btns$[13] = this.crBtn({ txt: 'штриховая' });
 
+    this.btns$[14] = this.crBtn({ txt: 'загрузка' });
+
     this.initEvent();
   }
 
@@ -51,8 +53,7 @@ export class PanelRp {
     };
 
     this.btns$[0].onmousedown = () => {
-      this.gisdPage.getIsometry();
-      this.isometricMode.changeMode('move');
+      this.isometricSchemeService.getIsometry();
     };
 
     this.btns$[1].onmousedown = () => {
@@ -108,10 +109,14 @@ export class PanelRp {
     this.btns$[13].onmousedown = () => {
       this.isometricLineStyle.setTypeLine('dashed');
     };
+
+    this.btns$[14].onmousedown = () => {
+      this.saveLoad.load();
+    };
   }
 
   crPanel() {
-    const css = `position: absolute; top: 0; right: 0; width: 248px; height: 700px; background: #F0F0F0; border: 1px solid #D1D1D1; border-radius: 4px; font-family: arial,sans-serif; z-index: 1;`;
+    const css = `position: absolute; top: 0; right: 0; width: 248px; height: 800px; background: #F0F0F0; border: 1px solid #D1D1D1; border-radius: 4px; font-family: arial,sans-serif; z-index: 1;`;
 
     const html = `
     <div style="${css}">

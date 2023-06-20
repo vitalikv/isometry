@@ -3,7 +3,7 @@ import { Line2 } from 'three/examples/jsm/lines/Line2.js';
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 
-import { controls, mapControlInit, modelsContainerInit, setMeshes, loaderModel } from './index';
+import { controls, mapControlInit, modelsContainerInit, setMeshes, loaderModel, selectObj as isometricMode } from './index';
 
 import { CalcIsometry } from './back/calcIsometry';
 import { svgConverter } from './svg';
@@ -37,16 +37,8 @@ export class Gis {
     }
   };
 
-  // ковертируем трубопровод в изометрию
+  // ковертируем/рассчитываем трубопровод в изометрию
   getIsometry() {
-    this.init();
-    //controls.enabled = false;
-    controls.enableRotate = false;
-
-    setMeshes({ arr: [...this.tubes, ...this.valves, ...this.tees, ...this.joins] });
-  }
-
-  init() {
     const meshesTube = loaderModel.getMeshesTube();
     const meshesValve = loaderModel.getMeshesValve();
     const meshesTee = loaderModel.getMeshesTee();
@@ -57,7 +49,21 @@ export class Gis {
 
     const { tubes, valves, tees, dataObjs } = this.isometry.getIsometry({ tubes: meshesTube, valves: meshesValve, tees: meshesTee });
 
+    this.init({ tubes, valves, tees, dataObjs });
+
+    this.enable();
+  }
+
+  enable() {
+    controls.enableRotate = false;
+    isometricMode.changeMode('move');
+    setMeshes({ arr: [...this.tubes, ...this.valves, ...this.tees, ...this.joins] });
+  }
+
+  // собираем изометрию из полученных данных
+  init({ tubes, valves, tees, dataObjs }) {
     for (let i = 0; i < tubes.length; i++) {
+      tubes[i] = tubes[i].map((p) => new THREE.Vector3(p.x, p.y, p.z));
       this.createTube(tubes[i]);
     }
 
@@ -101,7 +107,6 @@ export class Gis {
     obj.userData.isLine = true;
     obj.userData.points = [points[0], points[points.length - 1]];
     obj.userData.line = points.map((p) => p.clone());
-    obj.userData.tubes = [];
     obj.userData.joins = [];
     obj.userData.labels = [];
     obj.userData.tubeObj = tubeObj;
@@ -141,15 +146,18 @@ export class Gis {
     obj.userData = {};
     obj.userData.isIsometry = true;
     obj.userData.isObj = true;
-    obj.userData.tubes = [];
+    obj.userData.shapes = [];
+    obj.userData.boundBox = data.boundBox;
     obj.userData.joins = [];
     obj.userData.labels = [];
 
-    const points = data.joins.points;
-    obj.userData.points = [points[0].pos, points[1].pos];
+    const points = data.joins.points.map((p) => new THREE.Vector3(p.pos.x, p.pos.y, p.pos.z));
+    obj.userData.points = [points[0], points[1]];
 
     for (let i2 = 0; i2 < data.shapes.length; i2++) {
       const points = data.shapes[i2].map((p) => new THREE.Vector3(p.x, p.y, p.z));
+
+      obj.userData.shapes.push(points);
 
       const line = this.createLine({ points });
       obj.add(line);
@@ -165,10 +173,9 @@ export class Gis {
     this.modelsContainerInit.control.add(obj);
     this.valves.push(obj);
 
-    const p1 = points[0].pos;
-    const p2 = points[1].pos;
-    this.joinsPos.set(p1.x + '' + p1.y + '' + p1.z, { pos: p1, obj: null });
-    this.joinsPos.set(p2.x + '' + p2.y + '' + p2.z, { pos: p2, obj: null });
+    points.forEach((p1) => {
+      this.joinsPos.set(p1.x + '' + p1.y + '' + p1.z, { pos: p1, obj: null });
+    });
 
     return obj;
   }
@@ -188,15 +195,18 @@ export class Gis {
     obj.userData = {};
     obj.userData.isIsometry = true;
     obj.userData.isObj = true;
-    obj.userData.tubes = [];
+    obj.userData.shapes = [];
+    obj.userData.boundBox = data.boundBox;
     obj.userData.joins = [];
     obj.userData.labels = [];
 
-    const points = data.joins.points;
-    obj.userData.points = [points[0].pos, points[1].pos, points[2].pos];
+    const points = data.joins.points.map((p) => new THREE.Vector3(p.pos.x, p.pos.y, p.pos.z));
+    obj.userData.points = [points[0], points[1], points[2]];
 
     for (let i2 = 0; i2 < data.shapes.length; i2++) {
       const points = data.shapes[i2].map((p) => new THREE.Vector3(p.x, p.y, p.z));
+
+      obj.userData.shapes.push(points);
 
       const line = this.createLine({ points });
       obj.add(line);
@@ -212,13 +222,7 @@ export class Gis {
     this.modelsContainerInit.control.add(obj);
     this.tees.push(obj);
 
-    const p1 = points[0].pos;
-    const p2 = points[1].pos;
-    // this.joinsPos.set(p1.x + '' + p1.y + '' + p1.z, { pos: p1, obj: null });
-    // this.joinsPos.set(p2.x + '' + p2.y + '' + p2.z, { pos: p2, obj: null });
-
-    points.forEach((item) => {
-      const p1 = item.pos;
+    points.forEach((p1) => {
       this.joinsPos.set(p1.x + '' + p1.y + '' + p1.z, { pos: p1, obj: null });
     });
 
