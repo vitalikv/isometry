@@ -3,7 +3,7 @@ import { Line2 } from 'three/examples/jsm/lines/Line2.js';
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 
-import { controls, mapControlInit, modelsContainerInit, setMeshes, loaderModel, selectObj as isometricMode } from './index';
+import { controls, mapControlInit, modelsContainerInit, setMeshes, loaderModel, selectObj as isometricMode, isometricLineStyle } from './index';
 
 import { CalcIsometry } from './back/calcIsometry';
 import { svgConverter } from './svg';
@@ -88,7 +88,9 @@ export class Gis {
 
   // создание труб
   createTube(data) {
+    console.log(data);
     const points = data.points.map((p) => new THREE.Vector3(p.x, p.y, p.z));
+    const lineStyle = data.lineStyle;
 
     const pipeSpline = new THREE.CatmullRomCurve3(points);
     pipeSpline['curveType'] = 'catmullrom';
@@ -101,17 +103,21 @@ export class Gis {
     tubeObj.userData.isTube = true;
     tubeObj.userData.line = null;
 
-    const obj = this.createLine({ points });
+    const obj = this.createLine({ points, lineStyle });
     obj.userData = {};
     obj.userData.isLine = true;
     obj.userData.points = [points[0], points[points.length - 1]];
     obj.userData.line = points.map((p) => p.clone());
-    obj.userData.lineStyle = 'basic';
+    obj.userData.lineStyle = lineStyle;
     obj.userData.joins = [];
     obj.userData.labels = [];
     obj.userData.tubeObj = tubeObj;
 
     tubeObj.userData.line = obj;
+
+    if (lineStyle) {
+      isometricLineStyle.setTypeLine(lineStyle, tubeObj);
+    }
 
     this.modelsContainerInit.control.add(tubeObj);
     this.modelsContainerInit.control.add(obj);

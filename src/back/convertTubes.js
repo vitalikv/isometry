@@ -17,7 +17,7 @@ export class ConvertTubes {
       const points = this.getPointsForLine(meshes[i]);
       if (points.length < 2) continue;
 
-      this.lines.push({ points, lineStyle: 'basic' });
+      this.lines.push(points);
     }
 
     this.joinLine();
@@ -319,11 +319,11 @@ export class ConvertTubes {
   joinLine() {
     const listDist = [];
     for (let i = 0; i < this.lines.length; i++) {
-      const points1 = this.lines[i].points;
+      const points1 = this.lines[i];
 
       for (let i2 = 0; i2 < this.lines.length; i2++) {
         if (i === i2) continue;
-        const points2 = this.lines[i2].points;
+        const points2 = this.lines[i2];
         //console.log(i2, points2);
         const dist1 = points1[0].distanceTo(points2[0]);
         const dist2 = points1[0].distanceTo(points2[points2.length - 1]);
@@ -334,7 +334,7 @@ export class ConvertTubes {
 
       for (let i2 = 0; i2 < this.lines.length; i2++) {
         if (i === i2) continue;
-        const points2 = this.lines[i2].points;
+        const points2 = this.lines[i2];
 
         const pid1 = points1.length - 1;
         const dist1 = points1[pid1].distanceTo(points2[0]);
@@ -351,8 +351,8 @@ export class ConvertTubes {
     const listIgnorLine = [];
     let count = 0;
     for (let i = 0; i < listDist.length; i++) {
-      const pid1 = listDist[i].pid1 === 0 ? 0 : this.lines[listDist[i].lid1].points.length - 1;
-      const pid2 = listDist[i].pid2 === 0 ? 0 : this.lines[listDist[i].lid2].points.length - 1;
+      const pid1 = listDist[i].pid1 === 0 ? 0 : this.lines[listDist[i].lid1].length - 1;
+      const pid2 = listDist[i].pid2 === 0 ? 0 : this.lines[listDist[i].lid2].length - 1;
 
       const ui1 = listDist[i].lid1 + '' + (pid1 === 0 ? 0 : 1);
       const ui2 = listDist[i].lid2 + '' + (pid2 === 0 ? 0 : 1);
@@ -364,8 +364,8 @@ export class ConvertTubes {
 
       listIgnorLine.push(ui1, ui2);
 
-      const pos1 = this.lines[listDist[i].lid1].points[pid1];
-      const pos2 = this.lines[listDist[i].lid2].points[pid2];
+      const pos1 = this.lines[listDist[i].lid1][pid1];
+      const pos2 = this.lines[listDist[i].lid2][pid2];
 
       const dist = pos1.distanceTo(pos2);
       //if (dist > 0.2) continue;
@@ -382,11 +382,11 @@ export class ConvertTubes {
       // if (pid2 === 0) this.lines[listDist[i].lid2].unshift(posC);
       // else this.lines[listDist[i].lid2].push(posC);
 
-      if (pid1 === 0) this.lines[listDist[i].lid1].points[0] = posC;
-      else this.lines[listDist[i].lid1].points[this.lines[listDist[i].lid1].length - 1] = posC;
+      if (pid1 === 0) this.lines[listDist[i].lid1][0] = posC;
+      else this.lines[listDist[i].lid1][this.lines[listDist[i].lid1].length - 1] = posC;
 
-      if (pid2 === 0) this.lines[listDist[i].lid2].points[0] = posC;
-      else this.lines[listDist[i].lid2].points[this.lines[listDist[i].lid2].length - 1] = posC;
+      if (pid2 === 0) this.lines[listDist[i].lid2][0] = posC;
+      else this.lines[listDist[i].lid2][this.lines[listDist[i].lid2].length - 1] = posC;
 
       count++;
     }

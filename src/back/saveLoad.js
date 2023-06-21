@@ -17,7 +17,9 @@ export class SaveLoad {
     const isometry = { tubes: [], valves: [], tees: [] };
 
     tubes.forEach((tube) => {
-      isometry.tubes.push(tube.userData.line.userData.line);
+      const points = tube.userData.line.userData.line;
+      const lineStyle = tube.userData.line.userData.lineStyle;
+      isometry.tubes.push({ points, lineStyle });
     });
 
     valves.forEach((obj) => {

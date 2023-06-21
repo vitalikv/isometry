@@ -80,7 +80,7 @@ export class AddObj {
       v.y += pos.y;
       v.z += pos.z;
     });
-    const obj = gisdPage.createTube(arr);
+    const obj = gisdPage.createTube({ points: arr });
 
     let jp = gisdPage.createJoin(obj.userData.points[0].clone());
     obj.userData.joins.push(jp);
@@ -95,14 +95,14 @@ export class AddObj {
     const arr = [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0.1, 0.26, 0), new THREE.Vector3(0.23, 0.4, 0), new THREE.Vector3(0.49, 0.5, 0)];
 
     arr.forEach((v) => {
-      v.x *= 2;
-      v.y *= 2;
-      v.z *= 2;
+      v.x *= 1;
+      v.y *= 1;
+      v.z *= 1;
       v.x += pos.x;
       v.y += pos.y;
       v.z += pos.z;
     });
-    const obj = gisdPage.createTube(arr);
+    const obj = gisdPage.createTube({ points: arr });
 
     let jp = gisdPage.createJoin(obj.userData.points[0].clone());
     obj.userData.joins.push(jp);

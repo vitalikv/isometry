@@ -83,7 +83,7 @@ export class DeleteObj {
       if (index > -1) joints[1].userData.tubes.splice(index, 1);
     });
 
-    const line = scheme.createTube([joints[0].position, joints[1].position]);
+    const line = scheme.createTube({ points: [joints[0].position, joints[1].position] });
     line.userData.joins.push(joints[0], joints[1]);
     joints[0].userData.tubes.push({ obj: line, id: 0 });
     joints[1].userData.tubes.push({ obj: line, id: 1 });

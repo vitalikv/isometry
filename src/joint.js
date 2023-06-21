@@ -55,8 +55,8 @@ export class Joint {
     index = joints[1].userData.tubes.findIndex((item) => item.obj === obj);
     if (index > -1) joints[1].userData.tubes.splice(index, 1);
 
-    const line1 = scheme.createTube([joints[0].position, intersection.point]);
-    const line2 = scheme.createTube([joints[1].position, intersection.point]);
+    const line1 = scheme.createTube({ points: [joints[0].position, intersection.point] });
+    const line2 = scheme.createTube({ points: [joints[1].position, intersection.point] });
 
     const jp = scheme.createJoin(intersection.point);
 

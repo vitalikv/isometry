@@ -93,8 +93,8 @@ export class IsometricLineStyle {
     this.modelsContainerInit.control.add(curve);
   }
 
-  setTypeLine(type) {
-    let obj = isometricModeService.actObj;
+  setTypeLine(type, obj = null) {
+    if (!obj) obj = isometricModeService.actObj;
 
     if (!obj) return;
     if (!obj.userData.isTube) return;
@@ -113,5 +113,7 @@ export class IsometricLineStyle {
       obj.material.dashed = true;
       obj.material.linewidth = 1;
     }
+
+    obj.userData.lineStyle = type;
   }
 }

@@ -30,7 +30,13 @@ export class CalcIsometry {
   }
 
   getTubes(meshes) {
-    return this.convertTubes.getData({ meshes });
+    let lines = this.convertTubes.getData({ meshes });
+
+    lines = lines.map((p) => {
+      return { points: p, lineStyle: 'basic' };
+    });
+
+    return lines;
   }
 
   getValves(meshes) {
