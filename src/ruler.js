@@ -33,16 +33,44 @@ export class IsometricRulerService {
 
   // есть 2 точки, создаем линейку
   createRuler() {
-    const points = this.pointsTool.map((p) => p.position);
+    let points = this.pointsTool.map((p) => p.position);
 
+    const startPosCenter = points[1].clone().sub(points[0]);
+    startPosCenter.divideScalar(2).add(points[0]);
+
+    const dashes = this.createSideLine({ points });
+    const pos1 = this.getPosPointLine({ line: dashes[0], id: 1 });
+    const pos2 = this.getPosPointLine({ line: dashes[1], id: 1 });
+
+    points = [pos1, pos2];
+
+    const lineG = this.createArrow({ points });
+    const cone1 = this.createCone({ points, id: 0 });
+    const cone2 = this.createCone({ points, id: 1 });
+    const objDiv = this.createDiv({ obj: lineG, points });
+
+    lineG.userData.startPosCenter = startPosCenter;
+    lineG.userData.cones = [cone1, cone2];
+    lineG.userData.line2 = dashes;
+    lineG.userData.objDiv = objDiv;
+    lineG.userData.dir = startPosCenter.clone().sub(this.getPosCenter(lineG)).normalize();
+    this.setRotLabel(lineG);
+    this.setPosObjDiv(lineG);
+
+    this.pointsTool.forEach((pointO) => {
+      pointO.removeFromParent();
+      pointO.geometry.dispose();
+    });
+
+    this.rulerObjs.push(lineG);
+
+    this.pointsTool = [];
+  }
+
+  // создание основной стрелки
+  createArrow({ points }) {
     const line = this.createLine({ points });
-
-    const line2 = [];
-    line2[0] = this.createLine({ points: [points[0].clone(), points[0].clone()] });
-    line2[1] = this.createLine({ points: [points[1].clone(), points[1].clone()] });
-
-    line2[0].userData.points = [points[0].clone(), points[0].clone()];
-    line2[1].userData.points = [points[1].clone(), points[1].clone()];
+    line.material.color.set(0x000000);
 
     const pipeSpline = new THREE.CatmullRomCurve3(points);
     pipeSpline['curveType'] = 'catmullrom';
@@ -52,26 +80,125 @@ export class IsometricRulerService {
     lineG.material.visible = false;
     lineG.userData = {};
     lineG.userData.isRuler = true;
+    lineG.userData.startPosCenter = new THREE.Vector3();
+    lineG.userData.dir = new THREE.Vector3();
     lineG.userData.line = line;
-    lineG.userData.line2 = line2;
-    lineG.userData.pointObjs = this.pointsTool;
-    lineG.userData.labelPoint = null;
+    lineG.userData.cones = [];
+    lineG.userData.line2 = [];
+    lineG.userData.objDiv = null;
     lineG.userData.label = null;
 
-    this.modelsContainerInit.control.add(line, lineG, ...line2);
+    this.modelsContainerInit.control.add(line, lineG);
 
-    lineG.userData.pointObjs.forEach((pointO) => {
-      pointO.userData.isRuler = true;
-      pointO.userData.line = [];
-      pointO.userData.line.push(line);
+    return lineG;
+  }
+
+  // наконечник стрелки
+  createCone({ points, id }) {
+    const geometry = new THREE.ConeGeometry(0.1, 0.25, 32);
+    geometry.translate(0, -0.25 / 2, 0);
+    geometry.rotateX(-Math.PI / 2);
+    const obj = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: 0x333333, side: THREE.DoubleSide }));
+
+    const id2 = id === 0 ? 1 : 0;
+
+    obj.position.copy(points[id]);
+    obj.lookAt(points[id2]);
+
+    this.modelsContainerInit.control.add(obj);
+
+    return obj;
+  }
+
+  // создание боковых линий
+  createSideLine({ points }) {
+    const line2 = [];
+
+    const dir = points[0].clone().sub(points[1]).normalize();
+    const dir2 = new THREE.Vector3(-dir.z, 0, dir.x).normalize();
+    const dir1 = new THREE.Vector3(dir2.x * 0.2, 0, dir2.z * 0.2);
+
+    line2[0] = this.createLine({ points: [points[0].clone().add(dir1), points[0].clone().add(dir2)] });
+    line2[1] = this.createLine({ points: [points[1].clone().add(dir1), points[1].clone().add(dir2)] });
+
+    line2[0].userData.startPos = points[0];
+    line2[1].userData.startPos = points[1];
+
+    line2.forEach((line) => {
+      line.material.color.set(0x000000);
     });
 
-    //this.rulerObjs.push(lineG, ...this.pointsTool);
-    this.rulerObjs.push(lineG);
+    this.modelsContainerInit.control.add(...line2);
 
-    this.pointsTool = [];
+    return line2;
+  }
 
-    this.createLabel({ obj: lineG, points });
+  createDiv({ obj, points }) {
+    const posC = points[1].clone().sub(points[0]);
+    posC.divideScalar(2).add(points[0]);
+
+    const point = this.helperSphere({ pos: posC, size: 0.075, color: 0x00ff00 });
+    point.visible = false;
+
+    const container = document.createElement('div');
+
+    const elem = document.createElement('div');
+    elem.textContent = 'размер';
+    //elem.style.background = 'rgb(255, 255, 255)';
+    //elem.style.border = '1px solid rgb(204, 204, 204)';
+    elem.style.fontSize = '20px';
+    elem.style.fontFamily = 'arial,sans-serif';
+    //elem.style.borderRadius = '4px';
+    elem.style.cursor = 'pointer';
+    elem.style.padding = '10px';
+    //elem.style.transform = 'rotate(30deg)';
+    container.append(elem);
+
+    const label = new CSS2DObject(container);
+
+    label.position.set(0, 0, 0);
+    point.add(label);
+
+    obj.userData.label = label;
+
+    this.initEventLabel(label);
+
+    return point;
+  }
+
+  initEventLabel(label) {
+    const container = label.element;
+    const elem = container.children[0];
+
+    elem.onpointerdown = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const elem2 = document.createElement('input');
+      elem2.textContent = '';
+      elem2.style.background = 'rgb(255, 255, 255)';
+      elem2.style.border = '1px solid rgb(204, 204, 204)';
+      elem2.style.width = '100px';
+      elem2.style.fontSize = '20px';
+      elem.style.fontFamily = 'arial,sans-serif';
+      elem2.style.borderRadius = '4px';
+      elem2.style.padding = '10px';
+      container.append(elem2);
+
+      elem2.focus();
+
+      elem2.onkeydown = (e2) => {
+        if (e2.code === 'Enter') {
+          const txt = elem2.value;
+          container.children[1].remove();
+
+          if (txt !== '') elem.textContent = txt;
+          elem.style.display = '';
+        }
+      };
+
+      elem.style.display = 'none';
+    };
   }
 
   // отображение линий по точкам
@@ -158,28 +285,52 @@ export class IsometricRulerService {
     const intersects = this.rayIntersect(event, plane, 'one');
     if (intersects.length == 0) return;
 
-    const offset = new THREE.Vector3().subVectors(intersects[0].point, this.offset);
+    let offset = new THREE.Vector3().subVectors(intersects[0].point, this.offset);
     this.offset = intersects[0].point;
+
+    // const pos1 = this.getPosPointLine({ line: this.obj.userData.line2[0], id: 1 });
+    // const pos2 = this.getPosPointLine({ line: this.obj.userData.line2[1], id: 1 });
+    // const posCenter = pos1.clone().sub(pos2);
+    // posCenter.divideScalar(2).add(pos2);
+
+    const startPosCenter = this.obj.userData.startPosCenter;
+
+    // let dir = posCenter.clone().sub(startPosCenter).normalize();
+    // let dir = new THREE.Vector3(0, 0, 1);
+    // let dist = dir.dot(new THREE.Vector3().subVectors(intersects[0].point, offset));
+    // let pos = offset.clone().add(new THREE.Vector3().addScaledVector(dir, dist));
+    // offset = new THREE.Vector3().subVectors(pos, offset);
 
     this.obj.position.add(offset);
 
-    this.obj.userData.pointObjs.forEach((pointO) => {
-      pointO.position.add(offset);
-    });
-
     this.obj.userData.line.position.add(offset);
 
-    this.obj.userData.line2.forEach((line2) => {
-      line2.userData.points[1].add(offset);
+    this.obj.userData.cones.forEach((cone) => {
+      cone.position.add(offset);
+    });
 
-      const geometry = new THREE.BufferGeometry().setFromPoints(line2.userData.points);
+    this.obj.userData.line2.forEach((line2) => {
+      const pos = line2.userData.startPos.clone();
+      const dir1 = this.obj.userData.dir;
+      const pos1 = pos.sub(new THREE.Vector3().addScaledVector(dir1, 0.2));
+
+      //const pos1 = this.getPosPointLine({ line: line2, id: 0 });
+      const pos2 = this.getPosPointLine({ line: line2, id: 1 });
+      pos2.add(offset);
+
+      const geometry = new THREE.BufferGeometry().setFromPoints([pos1, pos2]);
       line2.geometry.dispose();
       line2.geometry = geometry;
     });
 
-    if (this.obj.userData.labelPoint && this.obj.userData.label) {
-      this.obj.userData.labelPoint.position.add(offset);
+    if (this.obj.userData.objDiv && this.obj.userData.label) {
+      this.obj.userData.objDiv.position.add(offset);
+      this.setPosObjDiv(this.obj);
       this.setRotLabel(this.obj);
+
+      const dir2 = startPosCenter.clone().sub(this.obj.userData.objDiv.position).normalize();
+      let dot = this.obj.userData.dir.dot(dir2);
+      this.obj.userData.dir = dir2;
     }
   };
 
@@ -191,74 +342,12 @@ export class IsometricRulerService {
     this.isMove = false;
   };
 
-  createLabel({ obj, points }) {
-    const posC = points[1].clone().sub(points[0]);
-    posC.divideScalar(2).add(points[0]);
-
-    const point = this.helperSphere({ pos: posC, size: 0.075, color: 0x00ff00 });
-    point.visible = false;
-    obj.userData.labelPoint = point;
-
-    const container = document.createElement('div');
-
-    const elem = document.createElement('div');
-    elem.textContent = 'размер';
-    elem.style.background = 'rgb(255, 255, 255)';
-    elem.style.border = '1px solid rgb(204, 204, 204)';
-    elem.style.fontSize = '20px';
-    elem.style.borderRadius = '4px';
-    elem.style.cursor = 'pointer';
-    elem.style.padding = '10px';
-    elem.style.transform = 'rotate(30deg)';
-    container.append(elem);
-
-    const label = new CSS2DObject(container);
-    console.log(label);
-    label.position.set(0, 0, 0);
-    point.add(label);
-
-    obj.userData.label = label;
-    this.setRotLabel(obj);
-    this.initEventLabel(label);
-  }
-
-  initEventLabel(label) {
-    const container = label.element;
-    const elem = container.children[0];
-
-    elem.onpointerdown = (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      const elem2 = document.createElement('input');
-      elem2.textContent = '';
-      elem2.style.background = 'rgb(255, 255, 255)';
-      elem2.style.border = '1px solid rgb(204, 204, 204)';
-      elem2.style.width = '100px';
-      elem2.style.fontSize = '20px';
-      elem2.style.borderRadius = '4px';
-      elem2.style.padding = '10px';
-      container.append(elem2);
-
-      elem2.focus();
-
-      elem2.onkeydown = (e2) => {
-        if (e2.code === 'Enter') {
-          const txt = elem2.value;
-          container.children[1].remove();
-
-          if (txt !== '') elem.textContent = txt;
-          elem.style.display = '';
-        }
-      };
-
-      elem.style.display = 'none';
-    };
-  }
-
   setRotLabel(obj) {
-    const p1 = this.getPosition2D(obj.userData.pointObjs[0].position);
-    const p2 = this.getPosition2D(obj.userData.pointObjs[1].position);
+    const pos1 = this.getPosPointLine({ line: obj.userData.line2[0], id: 1 });
+    const pos2 = this.getPosPointLine({ line: obj.userData.line2[1], id: 1 });
+
+    const p1 = this.getPosition2D(pos1);
+    const p2 = this.getPosition2D(pos2);
 
     const dir = new THREE.Vector2().subVectors(p2, p1);
     let rotY = Math.atan2(dir.x, dir.y);
@@ -290,5 +379,37 @@ export class IsometricRulerService {
     const y = (tempV.y * -0.5 + 0.5) * canvas.clientHeight;
 
     return new THREE.Vector2(x, y);
+  }
+
+  // получаем pos для начала или конца линии
+  getPosPointLine({ line, id }) {
+    const arrPos = line.geometry.getAttribute('position').array;
+    const pos1 = new THREE.Vector3(arrPos[0], arrPos[1], arrPos[2]);
+    const pos2 = new THREE.Vector3(arrPos[3], arrPos[4], arrPos[5]);
+
+    return id === 0 ? pos1 : pos2;
+  }
+
+  // устанавливаем Div со внутренней стороны
+  setPosObjDiv(obj) {
+    const posCenter = this.getPosCenter(obj);
+
+    const startPosCenter = obj.userData.startPosCenter;
+
+    let dir = posCenter.clone().sub(startPosCenter).normalize();
+    dir = new THREE.Vector3().addScaledVector(dir, 0.5);
+    const pos = posCenter.clone().sub(dir);
+
+    obj.userData.objDiv.position.copy(pos);
+  }
+
+  getPosCenter(obj) {
+    const pos1 = this.getPosPointLine({ line: obj.userData.line2[0], id: 1 });
+    const pos2 = this.getPosPointLine({ line: obj.userData.line2[1], id: 1 });
+
+    const posCenter = pos1.clone().sub(pos2);
+    posCenter.divideScalar(2).add(pos2);
+
+    return posCenter;
   }
 }
