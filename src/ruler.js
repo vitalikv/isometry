@@ -49,7 +49,7 @@ export class IsometricRulerService {
     pipeSpline['tension'] = 0;
     const geometry = new THREE.TubeGeometry(pipeSpline, points.length, 0.05, 12, false);
     const lineG = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: 0x0000ff, depthTest: false, transparent: true }));
-    //lineG.material.visible = false;
+    lineG.material.visible = false;
     lineG.userData = {};
     lineG.userData.isRuler = true;
     lineG.userData.line = line;

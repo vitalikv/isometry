@@ -88,7 +88,6 @@ export class Gis {
 
   // создание труб
   createTube(data) {
-    console.log(data);
     const points = data.points.map((p) => new THREE.Vector3(p.x, p.y, p.z));
     const lineStyle = data.lineStyle;
 
@@ -106,6 +105,7 @@ export class Gis {
     const obj = this.createLine({ points, lineStyle });
     obj.userData = {};
     obj.userData.isLine = true;
+    obj.userData.nameTxt = points.length === 2 ? 'труба' : 'угол';
     obj.userData.points = [points[0], points[points.length - 1]];
     obj.userData.line = points.map((p) => p.clone());
     obj.userData.lineStyle = lineStyle;
@@ -153,6 +153,7 @@ export class Gis {
     obj.userData.isIsometry = true;
     obj.userData.isObj = true;
     obj.userData.isValve = true;
+    obj.userData.nameTxt = 'кран';
     obj.userData.shapes = [];
     obj.userData.boundBox = data.boundBox;
     obj.userData.joins = [];
@@ -201,6 +202,7 @@ export class Gis {
     obj.userData.isIsometry = true;
     obj.userData.isObj = true;
     obj.userData.isTee = true;
+    obj.userData.nameTxt = 'тройник';
     obj.userData.shapes = [];
     obj.userData.boundBox = data.boundBox;
     obj.userData.joins = [];
@@ -247,6 +249,7 @@ export class Gis {
     const jp = this.helperSphere({ pos, size: 0.075, color: 0x222222 });
     jp.userData.isIsometry = true;
     jp.userData.isJoint = true;
+    jp.userData.nameTxt = 'стык';
     jp.userData.tubes = [];
     jp.userData.objs = [];
     jp.userData.labels = [];

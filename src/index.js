@@ -21,7 +21,7 @@ import { IsometricLineStyle } from './lineStyle';
 
 import { PanelRp } from './ui/panelRp';
 
-export let renderer, labelRenderer, camera, scene, controls, modelsContainerInit, mapControlInit, clock, gui, stats;
+export let renderer, labelRenderer, camera, scene, controls, modelsContainerInit, mapControlInit, clock, gridHelper;
 let cameraP, cameraO;
 export let loaderModel, gisdPage, selectObj, ruler, moving, joint, isometricLabels, isometricLabelList, deleteObj, addObj, axes, catchObj, isometricLineStyle;
 let isomety;
@@ -70,7 +70,7 @@ function init() {
   const size = 30;
   const divisions = 30;
 
-  const gridHelper = new THREE.GridHelper(size, divisions);
+  gridHelper = new THREE.GridHelper(size, divisions);
   scene.add(gridHelper);
 
   scene.add(light);
@@ -212,7 +212,12 @@ function onKeyDown(event) {
   controls.object = camera;
   mapControlInit.control.object = camera;
 
-  if (camera === cameraO) isometricLabelList.init();
+  if (camera === cameraO) {
+    isometricLabelList.init();
+    gridHelper.visible = false;
+  } else {
+    gridHelper.visible = true;
+  }
 }
 
 function render() {
