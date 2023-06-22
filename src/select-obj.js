@@ -150,9 +150,10 @@ export class IsometricModeService {
     // режим перетаскивания
     if (this.mode === 'move') {
       this.actObj = obj;
-      if (obj.userData.isIsometry) moving.onmousedown({ obj, event, plane: this.plane });
 
       if (obj.userData.isLabel) isometricLabels.clickObj({ event, obj, plane: this.plane });
+      else if (obj.userData.isRuler) ruler.clickRuler({ event, obj, plane: this.plane });
+      else if (obj.userData.isIsometry) moving.onmousedown({ obj, event, plane: this.plane });
     }
 
     // режим добавления стыка
@@ -166,7 +167,10 @@ export class IsometricModeService {
 
     // режим линейки
     if (this.mode === 'ruler') {
-      ruler.onmousedown({ intersection, event, plane: this.plane });
+      const result = ruler.onmousedown({ intersection, event, plane: this.plane });
+      if (result) {
+        this.changeMode('move');
+      }
     }
 
     // режим выноски для объектов
@@ -191,6 +195,7 @@ export class IsometricModeService {
     if (this.mode === 'move') {
       moving.onmousemove(event, this.plane);
       isometricLabels.onmousemove(event, this.plane);
+      ruler.onmousemove(event, this.plane);
     }
 
     if (this.mode === 'addJoint') {
@@ -214,6 +219,7 @@ export class IsometricModeService {
     if (this.mode === 'move') {
       moving.onmouseup(event);
       isometricLabels.onmouseup(event);
+      ruler.onmouseup(event);
       this.activateObj();
     }
 

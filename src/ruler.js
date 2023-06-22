@@ -21,6 +21,7 @@ export class IsometricRulerService {
 
   // кликнули на изометрию, создаем точку для линейки
   createPoint(intersection) {
+    let create = false;
     const pos = intersection.point;
 
     const point = this.helperSphere({ pos: pos, size: 0.075, color: 0xff0000 });
@@ -28,7 +29,10 @@ export class IsometricRulerService {
 
     if (this.pointsTool.length === 2) {
       this.createRuler();
+      create = true;
     }
+
+    return create;
   }
 
   // есть 2 точки, создаем линейку
@@ -257,10 +261,12 @@ export class IsometricRulerService {
   }
 
   onmousedown({ intersection, event, plane }) {
-    const obj = intersection.object;
+    //const obj = intersection.object;
+    //if (obj.userData.isRuler) this.clickRuler({ event, obj, plane });
 
-    if (obj.userData.isIsometry) this.createPoint(intersection);
-    if (obj.userData.isRuler) this.clickRuler({ event, obj, plane });
+    const create = this.createPoint(intersection);
+
+    return create;
   }
 
   // кликнули на линейку, готовимся ее перемещению
