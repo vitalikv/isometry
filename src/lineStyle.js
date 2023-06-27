@@ -12,8 +12,8 @@ export class IsometricLineStyle {
     this.mapControlInit = mapControlInit;
     this.modelsContainerInit = modelsContainerInit;
     this.initMat();
-    this.init();
-    this.init2();
+    //this.init();
+    //this.init2();
   }
 
   initMat() {

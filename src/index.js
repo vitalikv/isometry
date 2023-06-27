@@ -18,12 +18,26 @@ import { AddObj } from './addObj';
 import { Axes } from './axes';
 import { CatchObj } from './catchObj';
 import { IsometricLineStyle } from './lineStyle';
+import { IsometricSheetsService } from './sheets';
 
 import { PanelRp } from './ui/panelRp';
 
 export let renderer, labelRenderer, camera, scene, controls, modelsContainerInit, mapControlInit, clock, gridHelper;
 let cameraP, cameraO;
-export let loaderModel, gisdPage, selectObj, ruler, moving, joint, isometricLabels, isometricLabelList, deleteObj, addObj, axes, catchObj, isometricLineStyle;
+export let loaderModel,
+  gisdPage,
+  selectObj,
+  ruler,
+  moving,
+  joint,
+  isometricLabels,
+  isometricLabelList,
+  deleteObj,
+  addObj,
+  axes,
+  catchObj,
+  isometricLineStyle,
+  isometricSheetsService;
 let isomety;
 let meshes = [];
 
@@ -45,8 +59,12 @@ function init() {
 
   labelRenderer = new CSS2DRenderer();
   labelRenderer.setSize(window.innerWidth, window.innerHeight);
+  labelRenderer.domElement.id = 'labels-container-div';
   labelRenderer.domElement.style.position = 'absolute';
   labelRenderer.domElement.style.top = '0px';
+  labelRenderer.domElement.style.left = '0px';
+  labelRenderer.domElement.style.width = '100%';
+  labelRenderer.domElement.style.height = '100%';
   document.body.appendChild(labelRenderer.domElement);
 
   // scene setup
@@ -158,6 +176,7 @@ function includeClasses() {
   catchObj = new CatchObj();
   axes = new Axes();
   isometricLineStyle = new IsometricLineStyle();
+  isometricSheetsService = new IsometricSheetsService();
 
   selectObj = new IsometricModeService({ mapControlInit });
 

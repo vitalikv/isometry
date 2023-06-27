@@ -3,7 +3,16 @@ import { Line2 } from 'three/examples/jsm/lines/Line2.js';
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 
-import { controls, mapControlInit, modelsContainerInit, setMeshes, loaderModel, selectObj as isometricMode, isometricLineStyle } from './index';
+import {
+  controls,
+  mapControlInit,
+  modelsContainerInit,
+  setMeshes,
+  loaderModel,
+  selectObj as isometricMode,
+  isometricLineStyle,
+  isometricSheetsService,
+} from './index';
 
 import { CalcIsometry } from './back/calcIsometry';
 import { svgConverter } from './svg';
@@ -55,6 +64,7 @@ export class Gis {
   }
 
   enable() {
+    isometricSheetsService.createSvgSheet();
     controls.enableRotate = false;
     isometricMode.changeMode('move');
     setMeshes({ arr: [...this.tubes, ...this.valves, ...this.tees, ...this.joins] });
