@@ -190,6 +190,7 @@ function includeClasses() {
     joint,
     addObj,
     isometricLineStyle,
+    isometricSheetsService,
   });
 }
 

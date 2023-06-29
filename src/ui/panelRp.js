@@ -9,7 +9,17 @@ export class PanelRp {
   saveLoad;
   isometricLineStyle;
 
-  constructor({ isometricSchemeService, isometricScreenshot, isometricMode, isometricLabelList, saveLoad, joint, addObj, isometricLineStyle }) {
+  constructor({
+    isometricSchemeService,
+    isometricScreenshot,
+    isometricMode,
+    isometricLabelList,
+    saveLoad,
+    joint,
+    addObj,
+    isometricLineStyle,
+    isometricSheetsService,
+  }) {
     this.isometricSchemeService = isometricSchemeService;
     this.joint = joint;
     this.isometricScreenshot = isometricScreenshot;
@@ -18,6 +28,7 @@ export class PanelRp {
     this.saveLoad = saveLoad;
     this.addObj = addObj;
     this.isometricLineStyle = isometricLineStyle;
+    this.isometricSheetsService = isometricSheetsService;
 
     this.init();
   }
@@ -42,6 +53,8 @@ export class PanelRp {
     this.btns$[13] = this.crBtn({ txt: 'штриховая' });
 
     this.btns$[14] = this.crBtn({ txt: 'загрузка' });
+
+    this.btns$[15] = this.crBtn({ txt: 'лист А4' });
 
     this.initEvent();
   }
@@ -112,6 +125,10 @@ export class PanelRp {
 
     this.btns$[14].onmousedown = () => {
       this.saveLoad.load();
+    };
+
+    this.btns$[15].onmousedown = () => {
+      this.isometricSheetsService.showHideSheet();
     };
   }
 

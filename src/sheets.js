@@ -12,6 +12,11 @@ export class IsometricSheetsService {
     this.container = document.querySelector('#labels-container-div');
   }
 
+  showHideSheet() {
+    if (!this.elemSheet) this.createSvgSheet();
+    else this.delete();
+  }
+
   async createSvgSheet() {
     if (!this.container) this.getContainer();
 
@@ -157,4 +162,11 @@ export class IsometricSheetsService {
 
     this.offset = new THREE.Vector2();
   };
+
+  delete() {
+    if (!this.elemSheet) return;
+
+    this.elemSheet.remove();
+    this.elemSheet = null;
+  }
 }
