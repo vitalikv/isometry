@@ -133,7 +133,7 @@ export class PanelRp {
   }
 
   crPanel() {
-    const css = `position: absolute; top: 0; right: 0; width: 248px; height: 800px; background: #F0F0F0; border: 1px solid #D1D1D1; border-radius: 4px; font-family: arial,sans-serif; z-index: 1;`;
+    const css = `position: absolute; top: 0; right: 0; width: 248px; height: 800px; background: #F0F0F0; border: 1px solid #D1D1D1; border-radius: 4px; font-family: arial,sans-serif; z-index: 4;`;
 
     const html = `
     <div style="${css}">
