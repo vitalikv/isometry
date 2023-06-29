@@ -1,6 +1,19 @@
 import * as THREE from 'three';
 
-import { modelsContainerInit, mapControlInit, ruler, moving, isometricLabels, isometricLabelList, gisdPage, joint, deleteObj, addObj, axes } from './index';
+import {
+  modelsContainerInit,
+  mapControlInit,
+  ruler,
+  moving,
+  isometricLabels,
+  isometricLabelList,
+  gisdPage,
+  joint,
+  deleteObj,
+  addObj,
+  axes,
+  isometricSheetsService,
+} from './index';
 
 export class IsometricModeService {
   mode = 'select';
@@ -57,12 +70,14 @@ export class IsometricModeService {
     if (event.code === 'Delete') deleteObj.delete(this.actObj);
     if (event.code === 'ControlLeft' && !event.repeat) {
       if (axes.enable({ obj: this.actObj })) this.changeMode('axes');
+      else this.changeMode('sheet');
     }
   };
 
   onKeyUp = (event) => {
     if (event.code === 'ControlLeft' && !event.repeat) {
-      if (axes.disable()) this.changeMode('move');
+      this.changeMode('move');
+      axes.disable();
     }
   };
 
@@ -116,6 +131,12 @@ export class IsometricModeService {
   }
 
   onmousedown = (event) => {
+    console.log('---', this.mode, mapControlInit);
+    if (this.mode === 'sheet') {
+      isometricSheetsService.onmousedown(event);
+      return;
+    }
+
     if (this.mode === 'axes') {
       axes.onmousedown();
       return;
@@ -188,8 +209,14 @@ export class IsometricModeService {
 
     isometricLabelList.setPosRot();
 
+    if (this.mode === 'sheet') {
+      isometricSheetsService.onmousemove(event);
+      return;
+    }
+
     if (this.mode === 'axes') {
       axes.onmousemove(event);
+      return;
     }
 
     if (this.mode === 'move') {
@@ -212,8 +239,14 @@ export class IsometricModeService {
   };
 
   onmouseup = (event) => {
+    if (this.mode === 'sheet') {
+      isometricSheetsService.onmouseup(event);
+      this.changeMode('move');
+    }
+
     if (this.mode === 'axes') {
       axes.onmouseup(event);
+      this.changeMode('move');
     }
 
     if (this.mode === 'move') {
