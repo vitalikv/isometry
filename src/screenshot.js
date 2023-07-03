@@ -34,14 +34,14 @@ export class IsometricScreenshot {
   svgToImg() {
     return new Promise((resolve, reject) => {
       let stop = true;
-      if (isometricSheetsService.elemSheet && isometricSheetsService.elemSheet.children.length > 0 && isometricSheetsService.elemSheet.children[4]) {
+      if (isometricSheetsService.elemWrap && isometricSheetsService.elemWrap.children.length > 0 && isometricSheetsService.elemWrap.children[4]) {
         stop = false;
       }
 
       if (stop) return resolve(null);
 
       const domElement = renderer.domElement;
-      const svgSheet = isometricSheetsService.elemSheet.children[4].children[0];
+      const svgSheet = isometricSheetsService.elemWrap.children[4].children[0];
       svgSheet.setAttribute('width', domElement.clientWidth);
       svgSheet.setAttribute('height', domElement.clientHeight);
       const svgString = new XMLSerializer().serializeToString(svgSheet);
@@ -81,7 +81,7 @@ export class IsometricScreenshot {
 
   // способ сохранения svg в изображение с data:image/svg+xml;base64
   testSvgToImg1() {
-    const svgSheet = isometricSheetsService.elemSheet.children[4].children[0];
+    const svgSheet = isometricSheetsService.elemWrap.children[4].children[0];
     svgSheet.setAttribute('width', svgSheet.clientWidth);
     svgSheet.setAttribute('height', svgSheet.clientHeight);
     const svgString = new XMLSerializer().serializeToString(svgSheet);
@@ -108,7 +108,7 @@ export class IsometricScreenshot {
 
   // способ сохранения svg в изображение с DOMURL и new Blob
   testSvgToImg2() {
-    const svgSheet = isometricSheetsService.elemSheet.children[4].children[0];
+    const svgSheet = isometricSheetsService.elemWrap.children[4].children[0];
     svgSheet.setAttribute('width', svgSheet.clientWidth);
     svgSheet.setAttribute('height', svgSheet.clientHeight);
     const svgString = new XMLSerializer().serializeToString(svgSheet);

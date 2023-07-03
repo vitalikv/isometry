@@ -4,7 +4,9 @@ import { mapControlInit, modelsContainerInit, gisdPage } from './index';
 
 export class IsometricSheetsService {
   container;
+  elemWrap;
   elemSheet;
+  formatSheet = '';
   isDown = false;
   offset = new THREE.Vector2();
 
@@ -12,59 +14,86 @@ export class IsometricSheetsService {
     this.container = document.querySelector('#labels-container-div');
   }
 
-  showHideSheet() {
-    if (!this.elemSheet) this.createSvgSheet();
-    else this.delete();
+  showHideSheet(formatSheet) {
+    if (formatSheet === this.formatSheet) {
+      this.delete();
+    } else {
+      this.delete();
+      this.createSvgSheet(formatSheet);
+    }
   }
 
-  async createSvgSheet() {
+  async createSvgSheet(formatSheet) {
     if (!this.container) this.getContainer();
+    this.formatSheet = formatSheet;
 
     const div = document.createElement('div');
-    div.innerHTML = `<div style="position: absolute; width: 420px; left: 0; top: 0; bottom: 0; background: #ccc; z-index: 2;"></div>`;
-    div.innerHTML += `<div style="position: absolute; height: 90px; left: 0; right: 0; bottom: 0; background: #ccc; z-index: 2;"></div>`;
-    div.innerHTML += `<div style="position: absolute; width: 365px; right: 0; top: 0; bottom: 0; background: #ccc; z-index: 2;"></div>`;
-    div.innerHTML += `<div style="position: absolute; height: 90px; left: 0; right: 0; top: 0; background: #ccc; z-index: 2;"></div>`;
-
+    div.innerHTML = `<div style="position: absolute; width: 420px; left: 0; top: 0; bottom: 0; background: #ccc; z-index: 2;"></div>`; // left
+    div.innerHTML += `<div style="position: absolute; height: 90px; left: 0; right: 0; bottom: 0; background: #ccc; z-index: 2;"></div>`; // bottom
+    div.innerHTML += `<div style="position: absolute; width: 365px; right: 0; top: 0; bottom: 0; background: #ccc; z-index: 2;"></div>`; // right
+    div.innerHTML += `<div style="position: absolute; height: 90px; left: 0; right: 0; top: 0; background: #ccc; z-index: 2;"></div>`; // top
     div.style.userSelect = 'none';
-    const data = await this.xhrImg_1('img/sheets/A4_2_1.svg');
 
-    div.innerHTML += `<div style="position: absolute; height: 100%; transform: translateX(50%); z-index: 2;">${data}</div>`;
+    let url = '';
+    if (this.formatSheet === 'A4_2') {
+      url = 'img/sheets/A4_2_1.svg';
+    }
+    if (this.formatSheet === 'A3_4') {
+      url = 'img/sheets/A3_4.svg';
+    }
 
+    const data = await this.xhrImg_1(url);
+
+    div.innerHTML += `<div style="position: absolute; width: 100%; height: 100%; z-index: 2;">${data}</div>`;
+    //translateX(50%);
     this.container.prepend(div);
 
-    div.children[4].children[0].attributes.width.value = '100%';
-    div.children[4].children[0].attributes.height.value = '100%';
+    this.elemWrap = div;
+    this.elemSheet = this.elemWrap.children[4].children[0];
 
-    const rectC = this.container.getBoundingClientRect();
-    const rect = div.children[4].getBoundingClientRect();
+    this.elemSheet.style.width = '100%';
+    this.elemSheet.style.height = '100%';
 
-    div.children[0].style.width = rect.left + 60 + 'px';
-    div.children[1].style.height = rect.height - rect.bottom + 90 + 'px';
-    div.children[2].style.width = rectC.width - rect.right + 5 + 'px';
-    div.children[3].style.height = rect.top + 5 + 'px';
-
-    this.elemSheet = div;
-
-    const svgLine = div.children[4].children[0].children[0];
-    const svgTxt1 = div.children[4].children[0].children[2];
-    const svgTxt2 = div.children[4].children[0].children[3];
-    const svgTxt3 = div.children[4].children[0].children[5];
+    const svgLine = this.elemSheet.children[0];
 
     const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     g.append(svgLine);
     g.setAttribute('fill', 'none');
-    div.children[4].children[0].prepend(g);
-    div.children[4].children[0].setAttribute('fill', '');
+    this.elemSheet.prepend(g);
+    this.elemSheet.setAttribute('fill', '');
+
+    const svgTxt1 = this.elemSheet.children[2];
+    const svgTxt2 = this.elemSheet.children[3];
+    const svgTxt3 = this.elemSheet.children[5];
 
     this.createLabel({ txt: 'название', fontSize: '10', delElem: svgTxt1 });
     this.createLabel({ txt: 'образец', fontSize: '8', delElem: svgTxt2, rotate: 0 });
     this.createLabel({ txt: '1', fontSize: '6', delElem: svgTxt3 });
+
+    this.setPosSheet();
   }
 
+  setPosSheet() {
+    const rectC = this.container.getBoundingClientRect();
+    const rect = this.elemSheet.children[0].getBoundingClientRect();
+
+    const offset = { el1: 60, el2: 73, el3: 5, el4: 5 };
+
+    if (this.formatSheet === 'A3_4') {
+      offset.el1 = 50;
+      offset.el2 = 3;
+    }
+
+    this.elemWrap.children[0]['style'].width = rect.left + offset.el1 + 'px';
+    this.elemWrap.children[1]['style'].height = rectC.bottom - rect.bottom + offset.el2 + 'px';
+    this.elemWrap.children[2]['style'].width = rectC.width - rect.right + offset.el3 + 'px';
+    this.elemWrap.children[3]['style'].height = -rectC.top + rect.top + offset.el4 + 'px';
+  }
+
+  // удаляем из svg листа текст и заменяем на свой и создаем событие при клике на свой текст
   createLabel({ txt, fontSize, delElem, rotate = 0 }) {
     const elem = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    this.elemSheet.children[4].children[0].appendChild(elem);
+    this.elemWrap.children[4].children[0].appendChild(elem);
 
     const bbox = delElem.getBBox();
     delElem.remove();
@@ -88,14 +117,14 @@ export class IsometricSheetsService {
       e.preventDefault();
       e.stopPropagation();
 
+      const rectC = this.container.getBoundingClientRect();
       const rect = elem.getBoundingClientRect();
 
       const elem2 = document.createElement('input');
       elem2.style.position = 'absolute';
-      elem2.style.top = rect.top + 'px';
+      elem2.style.top = rect.top - rectC.top + 'px';
       elem2.style.left = rect.left - 50 + rect.width / 2 + 'px';
-      //elem2.style.transform = 'translateX(50%)';
-      elem2.style.zIndex = 3;
+      elem2.style.zIndex = '3';
       elem2.style.background = 'rgb(255, 255, 255)';
       elem2.style.border = '1px solid rgb(204, 204, 204)';
       elem2.style.width = '100px';
@@ -210,29 +239,22 @@ export class IsometricSheetsService {
   onmousedown = (event) => {
     this.offset = new THREE.Vector2(event.clientX, event.clientY);
 
-    console.log(this.elemSheet);
     this.isDown = true;
   };
 
   // перемещение листа
   onmousemove = (event) => {
     if (!this.isDown) return;
-    if (!this.elemSheet) return;
+    if (!this.elemWrap) return;
 
-    for (var i = 0; i < this.elemSheet.children.length; i++) {
-      const elem = this.elemSheet.children[i];
+    for (var i = 0; i < this.elemWrap.children.length; i++) {
+      const elem = this.elemWrap.children[i];
 
       if (i !== 3) elem.style.top = elem.offsetTop + (event.clientY - this.offset.y) + 'px';
       if (i !== 0) elem.style.left = elem.offsetLeft + (event.clientX - this.offset.x) + 'px';
     }
 
-    const rectC = this.container.getBoundingClientRect();
-    const rect = this.elemSheet.children[4].getBoundingClientRect();
-
-    this.elemSheet.children[0].style.width = rect.left + 60 + 'px';
-    this.elemSheet.children[1].style.height = rect.height - rect.bottom + 90 + 'px';
-    this.elemSheet.children[2].style.width = rectC.width - rect.right + 5 + 'px';
-    this.elemSheet.children[3].style.height = rect.top + 5 + 'px';
+    this.setPosSheet();
 
     this.offset = new THREE.Vector2(event.clientX, event.clientY);
   };
@@ -244,9 +266,10 @@ export class IsometricSheetsService {
   };
 
   delete() {
-    if (!this.elemSheet) return;
+    if (!this.elemWrap) return;
 
-    this.elemSheet.remove();
-    this.elemSheet = null;
+    this.formatSheet = '';
+    this.elemWrap.remove();
+    this.elemWrap = null;
   }
 }

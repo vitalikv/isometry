@@ -55,6 +55,7 @@ export class PanelRp {
     this.btns$[14] = this.crBtn({ txt: 'загрузка' });
 
     this.btns$[15] = this.crBtn({ txt: 'лист А4' });
+    this.btns$[16] = this.crBtn({ txt: 'лист А3' });
 
     this.initEvent();
   }
@@ -128,12 +129,16 @@ export class PanelRp {
     };
 
     this.btns$[15].onmousedown = () => {
-      this.isometricSheetsService.showHideSheet();
+      this.isometricSheetsService.showHideSheet('A4_2');
+    };
+
+    this.btns$[16].onmousedown = () => {
+      this.isometricSheetsService.showHideSheet('A3_4');
     };
   }
 
   crPanel() {
-    const css = `position: absolute; top: 0; right: 0; width: 248px; height: 800px; background: #F0F0F0; border: 1px solid #D1D1D1; border-radius: 4px; font-family: arial,sans-serif; z-index: 4;`;
+    const css = `position: absolute; top: 0; right: 0; width: 248px; height: 900px; background: #F0F0F0; border: 1px solid #D1D1D1; border-radius: 4px; font-family: arial,sans-serif; z-index: 4;`;
 
     const html = `
     <div style="${css}">
