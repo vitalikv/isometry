@@ -17,8 +17,8 @@ export class IsometricLabels {
     this.modelsContainerInit = modelsContainerInit;
   }
 
-  createLabel({ intersection, text }) {
-    const pos = this.modelsContainerInit.control.worldToLocal(intersection.point.clone());
+  createLabel({ startPos = null, pos = new THREE.Vector3(), text = 'текст', targetObj = null }) {
+    pos = startPos ? startPos : this.modelsContainerInit.control.worldToLocal(pos);
 
     const objParent = new THREE.Object3D();
     objParent.userData = {};
@@ -41,6 +41,8 @@ export class IsometricLabels {
     const objDashHelper = this.createDashHelper(objDash);
     const objDiv = this.createDiv(objDash, text);
 
+    objParent.userData.isParent = true;
+    objParent.userData.startPos = pos;
     objParent.userData.objTxt = objTxt;
     objParent.userData.objPointer = objPointer;
     objParent.userData.objLine = line;
@@ -54,7 +56,9 @@ export class IsometricLabels {
     this.modelsContainerInit.control.add(objParent);
     this.labelObjs.push(objParent);
 
-    this.linkObj({ labelObj: objTxt, targetObj: intersection.object, pos });
+    this.linkObj({ labelObj: objTxt, targetObj, pos });
+
+    return objParent;
   }
 
   // указатель/стрелка
@@ -189,6 +193,8 @@ export class IsometricLabels {
 
   // создаем ссылку на сноску для объекта
   linkObj({ labelObj, targetObj, pos }) {
+    if (!targetObj) return;
+
     if (targetObj.userData.isTube) {
       targetObj = targetObj.userData.line;
       const points = targetObj.userData.line;
@@ -263,7 +269,7 @@ export class IsometricLabels {
         text = obj.userData.nameTxt;
       }
 
-      this.createLabel({ intersection, text });
+      this.createLabel({ pos: intersection.point.clone(), text, targetObj: obj });
 
       create = true;
     }
@@ -301,7 +307,16 @@ export class IsometricLabels {
     const offset = new THREE.Vector3().subVectors(intersects[0].point, this.offset);
     this.offset = intersects[0].point;
 
-    const objParent = this.obj.parent;
+    this.offsetLabel({ obj: this.obj, offset });
+  };
+
+  onmouseup = (event) => {
+    this.isDown = false;
+    this.isMove = false;
+  };
+
+  offsetLabel({ obj, offset }) {
+    const objParent = obj.userData.isParent ? obj : obj.parent;
 
     const objTxt = objParent.userData.objTxt;
     const objPointer = objParent.userData.objPointer;
@@ -309,11 +324,11 @@ export class IsometricLabels {
     const objDash = objParent.userData.objDash;
     const objDashHelper = objParent.userData.objDashHelper;
 
-    if (this.obj === objPointer || this.obj === objTxt) {
-      this.obj.position.add(offset);
+    if (obj === objPointer || obj === objTxt) {
+      obj.position.add(offset);
     }
 
-    if (this.obj === objDashHelper) {
+    if (obj === objDashHelper) {
       objTxt.position.add(offset);
     }
 
@@ -322,12 +337,7 @@ export class IsometricLabels {
     this.setPosDash(objParent, event);
     this.setPosDashHelper(objParent);
     this.setPosDiv(objParent);
-  };
-
-  onmouseup = (event) => {
-    this.isDown = false;
-    this.isMove = false;
-  };
+  }
 
   updataGeomLine(objParent) {
     const objLine = objParent.userData.objLine;

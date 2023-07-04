@@ -60,6 +60,7 @@ export class IsometricRulerService {
     lineG.userData.cones = [cone1, cone2];
     lineG.userData.line2 = dashes;
     lineG.userData.objDiv = objDiv;
+    lineG.userData.label = objDiv.children[0];
     lineG.userData.dir = startPosCenter.clone().sub(this.getPosCenter(lineG)).normalize();
     this.setRotLabel(lineG);
     this.setPosObjDiv(lineG);

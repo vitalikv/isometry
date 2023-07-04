@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { loaderModel, ruler as isometricRulerService } from '../index';
+import { loaderModel, ruler as isometricRulerService, isometricLabels as isometricLabelsService } from '../index';
 
 export class SaveLoad {
   isometricSchemeService;
@@ -14,7 +14,7 @@ export class SaveLoad {
     const valves = this.isometricSchemeService.valves;
     const tees = this.isometricSchemeService.tees;
 
-    const isometry = { tubes: [], valves: [], tees: [], rulerObjs: [] };
+    const isometry = { tubes: [], valves: [], tees: [], rulerObjs: [], labelObjs: [] };
 
     tubes.forEach((tube) => {
       const points = tube.userData.line.userData.line;
@@ -50,7 +50,18 @@ export class SaveLoad {
 
     rulerObjs.forEach((obj) => {
       const startPos = obj.userData.startPos;
-      isometry.rulerObjs.push({ startPoints: obj.userData.startPoints, startPos, pos: obj.position });
+      const dir = obj.userData.dir;
+      const textContent = obj.userData.label.element.children[0].textContent;
+      isometry.rulerObjs.push({ startPoints: obj.userData.startPoints, startPos, pos: obj.position, dir, textContent });
+    });
+
+    const labelObjs = isometricLabelsService.labelObjs;
+
+    labelObjs.forEach((obj) => {
+      const startPos = obj.userData.startPos;
+      const pos = obj.userData.objTxt.position;
+      const textContent = obj.userData.label.element.children[0].textContent;
+      isometry.labelObjs.push({ startPos, pos, textContent });
     });
 
     console.log(this.isometricSchemeService.jsonIsometry);
@@ -84,15 +95,33 @@ export class SaveLoad {
       const { tubes, valves, tees } = data;
       this.isometricSchemeService.init({ tubes, valves, tees, dataObjs: [] });
 
-      const rulerObjs = data.rulerObjs;
+      const rulerObjs = data.rulerObjs ? data.rulerObjs : [];
 
       rulerObjs.forEach((item) => {
         const points = item.startPoints.map((p) => new THREE.Vector3(p.x, p.y, p.z));
         const obj = isometricRulerService.createRuler(points);
+
+        obj.userData.label.element.children[0].textContent = item.textContent;
+
+        if (item.dir) obj.userData.dir = new THREE.Vector3(item.dir.x, item.dir.y, item.dir.z);
         const startPos = new THREE.Vector3(item.startPos.x, item.startPos.y, item.startPos.z);
         const pos = new THREE.Vector3(item.pos.x, item.pos.y, item.pos.z);
         const offset = pos.clone().sub(startPos);
+
         isometricRulerService.offsetLabel({ obj, offset });
+      });
+
+      const labelObjs = data.labelObjs ? data.labelObjs : [];
+
+      labelObjs.forEach((item) => {
+        const startPos = new THREE.Vector3(item.startPos.x, item.startPos.y, item.startPos.z);
+        const textContent = item.textContent;
+        const obj = isometricLabelsService.createLabel({ startPos, text: textContent, targetObj: null });
+
+        const pos = new THREE.Vector3(item.pos.x, item.pos.y, item.pos.z);
+        const offset = pos.clone().sub(startPos);
+
+        isometricLabelsService.offsetLabel({ obj: obj.userData.objTxt, offset });
       });
 
       this.isometricSchemeService.enable();
