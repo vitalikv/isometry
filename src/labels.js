@@ -47,6 +47,7 @@ export class IsometricLabels {
     objParent.userData.objDash = objDash;
     objParent.userData.objDashHelper = objDashHelper;
     objParent.userData.objDiv = objDiv;
+    objParent.userData.label = objDiv.children[0];
 
     objParent.add(objTxt, objPointer, line, objDash, objDashHelper, objDiv);
 

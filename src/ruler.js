@@ -36,8 +36,9 @@ export class IsometricRulerService {
   }
 
   // есть 2 точки, создаем линейку
-  createRuler() {
-    let points = this.pointsTool.map((p) => p.position);
+  createRuler(points = []) {
+    if (points.length === 0) points = this.pointsTool.map((p) => p.position);
+    const startPoints = [...points];
 
     const startPosCenter = points[1].clone().sub(points[0]);
     startPosCenter.divideScalar(2).add(points[0]);
@@ -53,6 +54,8 @@ export class IsometricRulerService {
     const cone2 = this.createCone({ points, id: 1 });
     const objDiv = this.createDiv({ obj: lineG, points });
 
+    lineG.userData.startPoints = startPoints;
+    lineG.userData.startPos = lineG.position.clone();
     lineG.userData.startPosCenter = startPosCenter;
     lineG.userData.cones = [cone1, cone2];
     lineG.userData.line2 = dashes;
@@ -69,6 +72,8 @@ export class IsometricRulerService {
     this.rulerObjs.push(lineG);
 
     this.pointsTool = [];
+
+    return lineG;
   }
 
   // создание основной стрелки
@@ -299,7 +304,7 @@ export class IsometricRulerService {
     // const posCenter = pos1.clone().sub(pos2);
     // posCenter.divideScalar(2).add(pos2);
 
-    const startPosCenter = this.obj.userData.startPosCenter;
+    //const startPosCenter = this.obj.userData.startPosCenter;
 
     // let dir = posCenter.clone().sub(startPosCenter).normalize();
     // let dir = new THREE.Vector3(0, 0, 1);
@@ -307,17 +312,31 @@ export class IsometricRulerService {
     // let pos = offset.clone().add(new THREE.Vector3().addScaledVector(dir, dist));
     // offset = new THREE.Vector3().subVectors(pos, offset);
 
-    this.obj.position.add(offset);
+    this.offsetLabel({ obj: this.obj, offset });
+  };
 
-    this.obj.userData.line.position.add(offset);
+  onmouseup = (event) => {
+    if (!this.isDown) return;
+    if (!this.isMove) return;
 
-    this.obj.userData.cones.forEach((cone) => {
+    this.isDown = false;
+    this.isMove = false;
+  };
+
+  offsetLabel({ obj, offset }) {
+    const startPosCenter = obj.userData.startPosCenter;
+
+    obj.position.add(offset);
+
+    obj.userData.line.position.add(offset);
+
+    obj.userData.cones.forEach((cone) => {
       cone.position.add(offset);
     });
 
-    this.obj.userData.line2.forEach((line2) => {
+    obj.userData.line2.forEach((line2) => {
       const pos = line2.userData.startPos.clone();
-      const dir1 = this.obj.userData.dir;
+      const dir1 = obj.userData.dir;
       const pos1 = pos.sub(new THREE.Vector3().addScaledVector(dir1, 0.2));
 
       //const pos1 = this.getPosPointLine({ line: line2, id: 0 });
@@ -329,24 +348,16 @@ export class IsometricRulerService {
       line2.geometry = geometry;
     });
 
-    if (this.obj.userData.objDiv && this.obj.userData.label) {
-      this.obj.userData.objDiv.position.add(offset);
-      this.setPosObjDiv(this.obj);
-      this.setRotLabel(this.obj);
+    if (obj.userData.objDiv && obj.userData.label) {
+      obj.userData.objDiv.position.add(offset);
+      this.setPosObjDiv(obj);
+      this.setRotLabel(obj);
 
-      const dir2 = startPosCenter.clone().sub(this.obj.userData.objDiv.position).normalize();
-      let dot = this.obj.userData.dir.dot(dir2);
-      this.obj.userData.dir = dir2;
+      const dir2 = startPosCenter.clone().sub(obj.userData.objDiv.position).normalize();
+      let dot = obj.userData.dir.dot(dir2);
+      obj.userData.dir = dir2;
     }
-  };
-
-  onmouseup = (event) => {
-    if (!this.isDown) return;
-    if (!this.isMove) return;
-
-    this.isDown = false;
-    this.isMove = false;
-  };
+  }
 
   setRotLabel(obj) {
     const pos1 = this.getPosPointLine({ line: obj.userData.line2[0], id: 1 });
@@ -418,4 +429,6 @@ export class IsometricRulerService {
 
     return posCenter;
   }
+
+  deleteRuler(obj) {}
 }

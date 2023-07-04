@@ -5,11 +5,13 @@ import { gisdPage as scheme } from './index';
 export class DeleteObj {
   delete(obj) {
     if (!obj) return;
-    if (!obj.userData.isIsometry) return;
+    //if (!obj.userData.isIsometry) return;
 
     if (obj.userData.isTube) this.deleteTube(obj);
     if (obj.userData.isJoint) this.deleteJoint(obj);
     if (obj.userData.isObj) this.deleteObj(obj);
+    if (obj.userData.isRuler) this.deleteRuler(obj);
+    if (obj.userData.isLabel) this.deleteLabel(obj);
   }
 
   deleteTube(obj) {
@@ -118,14 +120,42 @@ export class DeleteObj {
 
   deleteLabels(obj) {
     obj.userData.labels.forEach((label) => {
-      this.clearMesh(label.userData.lineObj);
-      this.clearMesh(label.userData.pointerObj);
-      this.clearMesh(label);
+      this.deleteLabel(label);
     });
+  }
+
+  deleteLabel(obj) {
+    const objParent = obj.parent;
+
+    objParent.userData.label.removeFromParent();
+
+    this.clearMesh(objParent.userData.objTxt);
+    this.clearMesh(objParent.userData.objPointer);
+    this.clearMesh(objParent.userData.objLine);
+    this.clearMesh(objParent.userData.objDash);
+    this.clearMesh(objParent.userData.objDashHelper);
+    this.clearMesh(objParent.userData.objDiv);
+  }
+
+  deleteRuler(obj) {
+    obj.userData.cones.forEach((o) => {
+      this.clearMesh(o);
+    });
+
+    obj.userData.line2.forEach((o) => {
+      this.clearMesh(o);
+    });
+
+    obj.userData.label.removeFromParent();
+
+    this.clearMesh(obj.userData.line);
+    this.clearMesh(obj.userData.objDiv);
+    this.clearMesh(obj);
   }
 
   clearMesh(mesh) {
     mesh.removeFromParent();
+    if (!mesh.geometry) return;
     mesh.geometry.dispose();
 
     const materials = [];

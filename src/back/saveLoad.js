@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { loaderModel } from '../index';
+import { loaderModel, ruler as isometricRulerService } from '../index';
 
 export class SaveLoad {
   isometricSchemeService;
@@ -14,7 +14,7 @@ export class SaveLoad {
     const valves = this.isometricSchemeService.valves;
     const tees = this.isometricSchemeService.tees;
 
-    const isometry = { tubes: [], valves: [], tees: [] };
+    const isometry = { tubes: [], valves: [], tees: [], rulerObjs: [] };
 
     tubes.forEach((tube) => {
       const points = tube.userData.line.userData.line;
@@ -46,6 +46,13 @@ export class SaveLoad {
       isometry.tees.push({ pos, rot, shapes, boundBox, joins });
     });
 
+    const rulerObjs = isometricRulerService.rulerObjs;
+
+    rulerObjs.forEach((obj) => {
+      const startPos = obj.userData.startPos;
+      isometry.rulerObjs.push({ startPoints: obj.userData.startPoints, startPos, pos: obj.position });
+    });
+
     console.log(this.isometricSchemeService.jsonIsometry);
     console.log('isometry2', isometry);
     const str = JSON.stringify(isometry);
@@ -64,6 +71,8 @@ export class SaveLoad {
   load() {
     const p = this.xhrPromise_1({ url: 'img/isometry.json' });
     p.then((data) => {
+      this.isometricSchemeService.deleteObjs();
+
       const meshesTube = loaderModel.getMeshesTube();
       const meshesValve = loaderModel.getMeshesValve();
       const meshesTee = loaderModel.getMeshesTee();
@@ -74,6 +83,18 @@ export class SaveLoad {
 
       const { tubes, valves, tees } = data;
       this.isometricSchemeService.init({ tubes, valves, tees, dataObjs: [] });
+
+      const rulerObjs = data.rulerObjs;
+
+      rulerObjs.forEach((item) => {
+        const points = item.startPoints.map((p) => new THREE.Vector3(p.x, p.y, p.z));
+        const obj = isometricRulerService.createRuler(points);
+        const startPos = new THREE.Vector3(item.startPos.x, item.startPos.y, item.startPos.z);
+        const pos = new THREE.Vector3(item.pos.x, item.pos.y, item.pos.z);
+        const offset = pos.clone().sub(startPos);
+        isometricRulerService.offsetLabel({ obj, offset });
+      });
+
       this.isometricSchemeService.enable();
     }).catch((err) => {
       console.log('err', err);

@@ -12,6 +12,8 @@ import {
   selectObj as isometricMode,
   isometricLineStyle,
   isometricSheetsService,
+  ruler as isometricRulerService,
+  deleteObj,
 } from './index';
 
 import { CalcIsometry } from './back/calcIsometry';
@@ -370,6 +372,14 @@ export class Gis {
     this.tees = [];
     this.joins = [];
     this.joinsPos = new Map();
+
+    const rulerObjs = isometricRulerService.rulerObjs;
+
+    rulerObjs.forEach((obj) => {
+      deleteObj.deleteRuler(obj);
+    });
+
+    isometricRulerService.rulerObjs = [];
   }
 
   clearMesh(mesh) {
