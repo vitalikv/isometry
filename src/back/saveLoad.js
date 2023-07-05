@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { loaderModel, ruler as isometricRulerService, isometricLabels as isometricLabelsService } from '../index';
+import { mapControlInit, loaderModel, ruler as isometricRulerService, isometricLabels as isometricLabelsService } from '../index';
 
 export class SaveLoad {
   isometricSchemeService;
@@ -14,7 +14,7 @@ export class SaveLoad {
     const valves = this.isometricSchemeService.valves;
     const tees = this.isometricSchemeService.tees;
 
-    const isometry = { tubes: [], valves: [], tees: [], rulerObjs: [], labelObjs: [] };
+    const isometry = { camera: null, tubes: [], valves: [], tees: [], rulerObjs: [], labelObjs: [] };
 
     tubes.forEach((tube) => {
       const points = tube.userData.line.userData.line;
@@ -64,6 +64,13 @@ export class SaveLoad {
       isometry.labelObjs.push({ startPos, pos, textContent });
     });
 
+    const camera = mapControlInit.control.object;
+    isometry.camera = {};
+    isometry.camera.pos = camera.position;
+    isometry.camera.rot = new THREE.Vector3(camera.rotation.x, camera.rotation.y, camera.rotation.z);
+    isometry.camera.zoom = camera.zoom;
+    isometry.camera.target = mapControlInit.control.target;
+
     console.log(this.isometricSchemeService.jsonIsometry);
     console.log('isometry2', isometry);
     const str = JSON.stringify(isometry);
@@ -83,6 +90,23 @@ export class SaveLoad {
     const p = this.xhrPromise_1({ url: 'img/isometry.json' });
     p.then((data) => {
       this.isometricSchemeService.deleteObjs();
+
+      if (data.camera) {
+        const camera = mapControlInit.control.object;
+
+        const pos = new THREE.Vector3(data.camera.pos.x, data.camera.pos.y, data.camera.pos.z);
+        const rot = new THREE.Vector3(data.camera.rot.x, data.camera.rot.y, data.camera.rot.z);
+        const zoom = data.camera.zoom;
+        const target = new THREE.Vector3(data.camera.target.x, data.camera.target.y, data.camera.target.z);
+
+        camera.position.set(pos.x, pos.y, pos.z);
+        camera.rotation.set(rot.x, rot.y, rot.z);
+        camera.zoom = zoom;
+        mapControlInit.control.target.set(target.x, target.y, target.z);
+        camera.updateMatrixWorld();
+        camera.updateProjectionMatrix();
+        mapControlInit.control.update();
+      }
 
       const meshesTube = loaderModel.getMeshesTube();
       const meshesValve = loaderModel.getMeshesValve();
