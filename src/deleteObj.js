@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { gisdPage as scheme } from './index';
+import { gisdPage as scheme, ruler as isometricRulerService, isometricLabels as isometricLabelsService } from './index';
 
 export class DeleteObj {
   delete(obj) {
@@ -142,8 +142,13 @@ export class DeleteObj {
     });
   }
 
-  deleteLabel(obj) {
-    const objParent = obj.parent;
+  deleteLabel(obj, clearArr = true) {
+    const objParent = obj.userData.isParent ? obj : obj.parent;
+
+    if (clearArr) {
+      const index = isometricLabelsService.labelObjs.indexOf(objParent);
+      if (index > -1) isometricLabelsService.labelObjs.splice(index, 1);
+    }
 
     objParent.userData.label.removeFromParent();
 
@@ -155,7 +160,12 @@ export class DeleteObj {
     this.clearMesh(objParent.userData.objDiv);
   }
 
-  deleteRuler(obj) {
+  deleteRuler(obj, clearArr = true) {
+    if (clearArr) {
+      const index = isometricRulerService.rulerObjs.indexOf(obj);
+      if (index > -1) isometricRulerService.rulerObjs.splice(index, 1);
+    }
+
     obj.userData.cones.forEach((o) => {
       this.clearMesh(o);
     });

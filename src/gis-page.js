@@ -13,6 +13,7 @@ import {
   isometricLineStyle,
   isometricSheetsService,
   ruler as isometricRulerService,
+  isometricLabels as isometricLabelsService,
   deleteObj,
 } from './index';
 
@@ -376,10 +377,16 @@ export class Gis {
     const rulerObjs = isometricRulerService.rulerObjs;
 
     rulerObjs.forEach((obj) => {
-      deleteObj.deleteRuler(obj);
+      deleteObj.deleteRuler(obj, false);
     });
 
     isometricRulerService.rulerObjs = [];
+
+    const labelObjs = isometricLabelsService.labelObjs;
+    labelObjs.forEach((obj) => {
+      deleteObj.deleteLabel(obj, false);
+    });
+    isometricLabelsService.labelObjs = [];
   }
 
   clearMesh(mesh) {
