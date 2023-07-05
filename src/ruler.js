@@ -431,5 +431,18 @@ export class IsometricRulerService {
     return posCenter;
   }
 
+  // меняем цвет при выделении/снятии выдиления
+  setColor({ obj, color }) {
+    obj.userData.cones.forEach((o) => {
+      o.material.color.set(color);
+    });
+
+    obj.userData.line2.forEach((o) => {
+      o.material.color.set(color);
+    });
+
+    obj.userData.line.material.color.set(color);
+  }
+
   deleteRuler(obj) {}
 }

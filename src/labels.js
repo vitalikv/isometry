@@ -516,4 +516,13 @@ export class IsometricLabels {
 
     return pos;
   }
+
+  // меняем цвет при выделении/снятии выдиления
+  setColor({ obj, color }) {
+    const objParent = obj.userData.isParent ? obj : obj.parent;
+
+    objParent.userData.objPointer.material.color.set(color);
+    objParent.userData.objLine.material.color.set(color);
+    objParent.userData.objDash.material.color.set(color);
+  }
 }

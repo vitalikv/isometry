@@ -67,7 +67,10 @@ export class IsometricModeService {
 
     // if (event.code === 'KeyR') this.changeMode('ruler');
     // if (event.code === 'KeyM') this.changeMode('move');
-    if (event.code === 'Delete') deleteObj.delete(this.actObj);
+    if (event.code === 'Delete') {
+      const done = deleteObj.delete(this.actObj);
+      if (done) this.clearActivateObj();
+    }
     if (event.code === 'ControlLeft' && !event.repeat) {
       if (axes.enable({ obj: this.actObj })) this.changeMode('axes');
       else this.changeMode('sheet');
@@ -272,11 +275,15 @@ export class IsometricModeService {
     isometricLabelList.setPosRot();
   };
 
+  clearActivateObj() {
+    this.actObj = null;
+  }
+
   deActivateObj() {
     const obj = this.actObj;
-    this.actObj = null;
+    this.clearActivateObj();
     if (!obj) return;
-    if (!obj.userData.isIsometry) return;
+    //if (!obj.userData.isIsometry) return;
 
     if (obj.userData.isTube) {
       obj.userData.line.material.color.set(this.colorDef);
@@ -291,6 +298,14 @@ export class IsometricModeService {
     if (obj.userData.isJoint) {
       obj.material.color.set(this.colorDef);
     }
+
+    if (obj.userData.isLabel) {
+      isometricLabels.setColor({ obj, color: this.colorDef });
+    }
+
+    if (obj.userData.isRuler) {
+      ruler.setColor({ obj, color: this.colorDef });
+    }
   }
 
   activateObj() {
@@ -302,7 +317,7 @@ export class IsometricModeService {
     }
 
     if (!obj) return;
-    if (!obj.userData.isIsometry) return;
+    //if (!obj.userData.isIsometry) return;
 
     if (obj.userData.isTube) {
       obj.userData.line.material.color.set(this.colorAct);
@@ -316,6 +331,14 @@ export class IsometricModeService {
 
     if (obj.userData.isJoint) {
       obj.material.color.set(this.colorAct);
+    }
+
+    if (obj.userData.isLabel) {
+      isometricLabels.setColor({ obj, color: this.colorAct });
+    }
+
+    if (obj.userData.isRuler) {
+      ruler.setColor({ obj, color: this.colorAct });
     }
   }
 

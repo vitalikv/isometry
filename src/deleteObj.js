@@ -6,12 +6,30 @@ export class DeleteObj {
   delete(obj) {
     if (!obj) return;
     //if (!obj.userData.isIsometry) return;
+    let done = false;
 
-    if (obj.userData.isTube) this.deleteTube(obj);
-    if (obj.userData.isJoint) this.deleteJoint(obj);
-    if (obj.userData.isObj) this.deleteObj(obj);
-    if (obj.userData.isRuler) this.deleteRuler(obj);
-    if (obj.userData.isLabel) this.deleteLabel(obj);
+    if (obj.userData.isTube) {
+      this.deleteTube(obj);
+      done = true;
+    }
+    if (obj.userData.isJoint) {
+      this.deleteJoint(obj);
+      done = true;
+    }
+    if (obj.userData.isObj) {
+      this.deleteObj(obj);
+      done = true;
+    }
+    if (obj.userData.isRuler) {
+      this.deleteRuler(obj);
+      done = true;
+    }
+    if (obj.userData.isLabel) {
+      this.deleteLabel(obj);
+      done = true;
+    }
+
+    return done;
   }
 
   deleteTube(obj) {
