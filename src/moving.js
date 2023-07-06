@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js';
 
-import { scene, mapControlInit, isometricLabels, addObj, gisdPage, catchObj } from './index';
+import { scene, mapControlInit, isometricLabels, addObj, gisdPage, catchObj, ruler as isometricRulerService } from './index';
 
 export class IsometricMovingObjs {
   isDown = false;
@@ -255,6 +255,8 @@ export class IsometricMovingObjs {
 
     // перемещение стыка
     obj.position.add(offset);
+
+    isometricRulerService.updataPos({ obj, offset });
 
     // перемещение труб привязанные к стыку
     obj.userData.tubes.forEach((data) => {

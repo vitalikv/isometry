@@ -190,7 +190,7 @@ export class IsometricModeService {
     }
 
     // режим линейки
-    if (this.mode === 'ruler') {
+    if (this.mode === 'ruler' && obj.userData.isJoint) {
       const result = ruler.onmousedown({ intersection, event, plane: this.plane });
       if (result) {
         this.changeMode('move');

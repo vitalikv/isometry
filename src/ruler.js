@@ -22,9 +22,11 @@ export class IsometricRulerService {
   // кликнули на изометрию, создаем точку для линейки
   createPoint(intersection) {
     let create = false;
-    const pos = intersection.point;
+    const pos = intersection.object.position;
+    //const pos = intersection.point;
 
     const point = this.helperSphere({ pos: pos, size: 0.075, color: 0xff0000 });
+    point.userData.jp = intersection.object;
     this.pointsTool.push(point);
 
     if (this.pointsTool.length === 2) {
@@ -37,7 +39,25 @@ export class IsometricRulerService {
 
   // есть 2 точки, создаем линейку
   createRuler(points = []) {
-    if (points.length === 0) points = this.pointsTool.map((p) => p.position);
+    let pointsO = [];
+    if (points.length === 0) {
+      points = this.pointsTool.map((p) => p.position);
+
+      this.pointsTool.forEach((obj, ind) => {
+        const jp = obj.userData.jp;
+        delete obj.userData.jp;
+
+        const pointO = obj.clone();
+        pointO.material = pointO.material.clone();
+        pointO.material.color.set(0x000000);
+        obj.parent.add(pointO);
+
+        pointO.userData.jp = jp;
+        jp.userData.rulerPoints.push({ obj: pointO, id: ind });
+        pointsO.push(pointO);
+        pointO.visible = false;
+      });
+    }
     const startPoints = [...points];
 
     const startPosCenter = points[1].clone().sub(points[0]);
@@ -57,6 +77,7 @@ export class IsometricRulerService {
     lineG.userData.startPoints = startPoints;
     lineG.userData.startPos = lineG.position.clone();
     lineG.userData.startPosCenter = startPosCenter;
+    lineG.userData.pointsO = pointsO;
     lineG.userData.cones = [cone1, cone2];
     lineG.userData.line2 = dashes;
     lineG.userData.objDiv = objDiv;
@@ -68,6 +89,10 @@ export class IsometricRulerService {
     this.pointsTool.forEach((pointO) => {
       pointO.removeFromParent();
       pointO.geometry.dispose();
+    });
+
+    pointsO.forEach((obj) => {
+      obj.userData.parent = lineG;
     });
 
     this.rulerObjs.push(lineG);
@@ -384,6 +409,93 @@ export class IsometricRulerService {
     // container.style.top = offset.y * 30 + 'px';
     // container.style.left = offset.x * 30 + 'px';
     // console.log(rotY, elem.children[0], offset);
+  }
+
+  // двигаем рулетку вслед за привязанным стыком
+  updataPos({ obj, offset }) {
+    obj.userData.rulerPoints.forEach((item) => {
+      const o = item.obj;
+      const id = item.id;
+
+      const lineG = o.userData.parent;
+      const pointsO = lineG.userData.pointsO;
+      pointsO[id].position.add(offset);
+
+      let points = [pointsO[0].position.clone(), pointsO[1].position.clone()];
+      const startPoints = [pointsO[0].position.clone(), pointsO[1].position.clone()];
+
+      const startPosCenter = points[1].clone().sub(points[0]);
+      startPosCenter.divideScalar(2).add(points[0]);
+
+      this.updataGeomDashe({ lineG, points });
+      const dashes = lineG.userData.line2;
+
+      const pos1 = this.getPosPointLine({ line: dashes[0], id: 1 });
+      const pos2 = this.getPosPointLine({ line: dashes[1], id: 1 });
+
+      points = [pos1, pos2];
+
+      this.updataGeomLine({ objParent: lineG, points });
+      this.updataPosCone({ obj: lineG.userData.cones[0], points, id: 0 });
+      this.updataPosCone({ obj: lineG.userData.cones[1], points, id: 1 });
+
+      lineG.userData.startPoints = startPoints;
+      lineG.userData.startPos = lineG.position.clone();
+      lineG.userData.startPosCenter = startPosCenter;
+      lineG.userData.dir = startPosCenter.clone().sub(this.getPosCenter(lineG)).normalize();
+      this.setRotLabel(lineG);
+      this.setPosObjDiv(lineG);
+    });
+  }
+
+  updataGeomDashe({ lineG, points }) {
+    const line2 = lineG.userData.line2;
+    const cones = lineG.userData.cones;
+    const dir3 = lineG.userData.dir;
+    const dir1 = new THREE.Vector3(dir3.x * 0.2, dir3.y * 0.2, dir3.z * 0.2);
+
+    const posC = cones[1].position.clone().sub(cones[0].position);
+    posC.divideScalar(2).add(cones[0].position);
+    const dist = posC.distanceTo(lineG.userData.startPosCenter);
+
+    const dir = new THREE.Vector3(dir3.x * dist, dir3.y * dist, dir3.z * dist);
+
+    line2.forEach((line, ind) => {
+      const points2 = [points[ind].clone().sub(dir1), points[ind].clone().sub(dir)];
+      const geometry = new THREE.BufferGeometry().setFromPoints(points2);
+      line.geometry.dispose();
+      line.geometry = geometry;
+
+      line.userData.startPos = points[ind];
+    });
+  }
+
+  updataGeomLine({ objParent, points }) {
+    objParent.position.set(0, 0, 0);
+    const line = objParent.userData.line;
+    line.position.set(0, 0, 0);
+
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    line.geometry.dispose();
+    line.geometry = geometry;
+
+    this.updataTubeGeom({ obj: objParent, points });
+  }
+
+  updataTubeGeom({ obj, points }) {
+    const pipeSpline = new THREE.CatmullRomCurve3(points);
+    pipeSpline['curveType'] = 'catmullrom';
+    pipeSpline['tension'] = 0;
+
+    const tubeGeometry = new THREE.TubeGeometry(pipeSpline, points.length, 0.05, 12, false);
+    obj.geometry.dispose();
+    obj.geometry = tubeGeometry;
+  }
+
+  updataPosCone({ obj, points, id }) {
+    const id2 = id === 0 ? 1 : 0;
+    obj.position.copy(points[id]);
+    obj.lookAt(points[id2]);
   }
 
   // положение объекта на 2D экране

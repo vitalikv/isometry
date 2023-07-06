@@ -266,6 +266,7 @@ export class Gis {
     jp.userData.tubes = [];
     jp.userData.objs = [];
     jp.userData.labels = [];
+    jp.userData.rulerPoints = [];
     this.joins.push(jp);
 
     return jp;
