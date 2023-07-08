@@ -205,6 +205,10 @@ export function setMeshes({ arr }) {
 function onKeyDown(event) {
   if (event.code !== 'KeyC') return;
 
+  changeCamera();
+}
+
+export function changeCamera() {
   let pos = new THREE.Vector3();
   let rot = camera.rotation.clone();
 
