@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import './style/main.css';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
@@ -192,6 +193,8 @@ function includeClasses() {
     isometricLineStyle,
     isometricSheetsService,
   });
+
+  //isometricSheetsService.createSvgSheet('A4_2');
 }
 
 // подписка событие - обновление массива объектов для расчета стыков
