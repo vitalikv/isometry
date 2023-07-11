@@ -7,6 +7,7 @@ export class IsometricSheetsService {
   elemWrap;
   elemSheet;
   arrSvgCircle = [];
+  boxsInput = [];
   formatSheet = '';
   isDown = false;
   offset = new THREE.Vector2();
@@ -24,7 +25,7 @@ export class IsometricSheetsService {
     }
   }
 
-  async createSvgSheet(formatSheet) {
+  async createSvgSheet(formatSheet, boxsInput = []) {
     if (!this.container) this.getContainer();
     this.formatSheet = formatSheet;
 
@@ -41,6 +42,9 @@ export class IsometricSheetsService {
     }
     if (this.formatSheet === 'A3_4') {
       url = 'img/sheets/A3_4.svg';
+    }
+    if (this.formatSheet === 'A1_2') {
+      url = 'img/sheets/A1_2.svg';
     }
 
     const data = await this.xhrImg_1(url);
@@ -68,15 +72,16 @@ export class IsometricSheetsService {
     const svgTxt2 = this.elemSheet.children[3];
     const svgTxt3 = this.elemSheet.children[5];
 
-    this.createLabel({ txt: 'название', fontSize: '10', delElem: svgTxt1 });
-    this.createLabel({ txt: 'образец', fontSize: '8', delElem: svgTxt2, rotate: 0 });
-    this.createLabel({ txt: '1', fontSize: '6', delElem: svgTxt3 });
+    this.createLabel({ txt: '', fontSize: '10', delElem: svgTxt1 });
+    this.createLabel({ txt: '', fontSize: '8', delElem: svgTxt2, rotate: 0 });
+    this.createLabel({ txt: '', fontSize: '6', delElem: svgTxt3 });
 
     this.sheetSetup({
       format: this.formatSheet,
       containerWr: this.container,
       container: this.elemSheet,
       path: svgLine.attributes.d.value,
+      boxsInput,
     });
 
     this.setPosSheet();
@@ -90,6 +95,9 @@ export class IsometricSheetsService {
     let idPoints = [12, 1];
 
     if (this.formatSheet === 'A3_4') {
+      idPoints = [0, 42];
+    }
+    if (this.formatSheet === 'A1_2') {
       idPoints = [0, 42];
     }
 
@@ -138,11 +146,12 @@ export class IsometricSheetsService {
     const bbox = delElem.getBBox();
     delElem.remove();
 
+    return;
     elem.setAttribute('x', bbox.x + bbox.width / 2);
     elem.setAttribute('y', bbox.y + bbox.height / 2);
     //elem.setAttribute('transform-origin', 'center');
     //elem.setAttribute('transform-box', ' fill-box');
-    elem.setAttribute('transform', 'rotate(' + rotate + ', ' + (bbox.x + bbox.width / 2) + ',' + (bbox.y + bbox.height) + ')');
+    elem.setAttribute('transform', 'rotate(' + rotate + ', ' + (bbox.x + bbox.width / 2) + ',' + (bbox.y + bbox.height / 2) + ')');
 
     elem.setAttribute('dominant-baseline', 'middle');
     elem.setAttribute('text-anchor', 'middle');
@@ -169,7 +178,7 @@ export class IsometricSheetsService {
       elem2.style.border = '1px solid rgb(204, 204, 204)';
       elem2.style.width = '100px';
       elem2.style.fontSize = '20px';
-      elem.style.fontFamily = 'arial,sans-serif';
+      //elem.style.fontFamily = 'arial,sans-serif';
       elem2.style.borderRadius = '4px';
       elem2.style.padding = '10px';
       elem2.textContent = '';
@@ -239,40 +248,66 @@ export class IsometricSheetsService {
 
     this.formatSheet = '';
     this.arrSvgCircle = [];
+    this.boxsInput = [];
     this.elemWrap.remove();
     this.elemWrap = null;
   }
 
   // настройка листа(создание точек, боксов и с текстами)
-  sheetSetup({ format, containerWr, container, path }) {
+  sheetSetup({ format, containerWr, container, path, boxsInput }) {
     const arrCoord = this.getPosPointsFromPath({ path });
 
     this.createGroupSvgCircle({ container, arrCoord });
 
     let boxs = [];
-    let boxsInput = [];
+    let boxsInputDef = [];
+
     if (format === 'A4_2') {
       boxs = [{ ids: [41, 42, 2, 43] }, { ids: [12, 13, 0, 45] }, { ids: [26, 38, 40, 12] }];
 
-      boxsInput = [
-        { fontSize: 3.65, rot: -90, ids: [12, 17, 27, 30] },
-        { fontSize: 3.65, rot: -90, ids: [27, 29, 32, 30] },
-        { fontSize: 3.65, rot: -90, ids: [29, 33, 34, 32] },
-        { fontSize: 3.65, rot: -90, ids: [33, 36, 37, 34] },
-        { fontSize: 3.65, rot: -90, ids: [36, 39, 40, 37] },
+      boxsInputDef = [
+        { fontSize: 3.65, rot: -90, ids: [12, 17, 27, 30], txt: '' },
+        { fontSize: 3.65, rot: -90, ids: [27, 29, 32, 30], txt: '' },
+        { fontSize: 3.65, rot: -90, ids: [29, 33, 34, 32], txt: '' },
+        { fontSize: 3.65, rot: -90, ids: [33, 36, 37, 34], txt: '' },
+        { fontSize: 3.65, rot: -90, ids: [36, 39, 40, 37], txt: '' },
+        { fontSize: '10', rot: 0, ids: [9, 5, 3, 15], txt: 'Название' },
+        { fontSize: '8', rot: 0, ids: [41, 42, 2, 43], txt: 'Образец' },
+        { fontSize: '6', rot: 0, ids: [15, 44, 4, 45], txt: '1' },
       ];
     }
+
     if (format === 'A3_4') {
       boxs = [{ ids: [38, 39, 40, 41] }, { ids: [3, 11, 43, 47] }, { ids: [24, 35, 37, 0] }];
 
-      boxsInput = [
-        { fontSize: 3.65, rot: -90, ids: [2, 25, 1, 0] },
-        { fontSize: 3.65, rot: -90, ids: [25, 28, 27, 1] },
-        { fontSize: 3.65, rot: -90, ids: [28, 30, 31, 27] },
-        { fontSize: 3.65, rot: -90, ids: [30, 33, 34, 31] },
-        { fontSize: 3.65, rot: -90, ids: [33, 36, 37, 34] },
+      boxsInputDef = [
+        { fontSize: 3.65, rot: -90, ids: [2, 25, 1, 0], txt: '' },
+        { fontSize: 3.65, rot: -90, ids: [25, 28, 27, 1], txt: '' },
+        { fontSize: 3.65, rot: -90, ids: [28, 30, 31, 27], txt: '' },
+        { fontSize: 3.65, rot: -90, ids: [30, 33, 34, 31], txt: '' },
+        { fontSize: 3.65, rot: -90, ids: [33, 36, 37, 34], txt: '' },
+        { fontSize: '10', rot: 0, ids: [5, 8, 44, 14], txt: 'Название' },
+        { fontSize: '8', rot: 0, ids: [38, 39, 40, 41], txt: 'Образец' },
+        { fontSize: '6', rot: 0, ids: [14, 46, 45, 47], txt: '1' },
       ];
     }
+
+    if (format === 'A1_2') {
+      boxs = [{ ids: [38, 39, 40, 41] }, { ids: [3, 11, 43, 47] }, { ids: [24, 35, 37, 0] }];
+
+      boxsInputDef = [
+        { fontSize: 3.65, rot: -90, ids: [2, 25, 1, 0], txt: '' },
+        { fontSize: 3.65, rot: -90, ids: [25, 28, 27, 1], txt: '' },
+        { fontSize: 3.65, rot: -90, ids: [28, 30, 31, 27], txt: '' },
+        { fontSize: 3.65, rot: -90, ids: [30, 33, 34, 31], txt: '' },
+        { fontSize: 3.65, rot: -90, ids: [33, 36, 37, 34], txt: '' },
+        { fontSize: '10', rot: 0, ids: [5, 8, 44, 14], txt: 'Название' },
+        { fontSize: '8', rot: 0, ids: [38, 39, 40, 41], txt: 'Образец' },
+        { fontSize: '6', rot: 0, ids: [14, 46, 45, 47], txt: '1' },
+      ];
+    }
+
+    if (boxsInput.length === 0) boxsInput = boxsInputDef;
 
     this.createGroupSvgBoxInput({ containerWr, container, arrCoord, boxs: boxsInput });
 
@@ -423,11 +458,14 @@ export class IsometricSheetsService {
 
       g.append(svg);
       svg.style.cursor = 'pointer';
-      const svgTxt = this.createSvgBoxText({ svgBox: svg, rot: box.rot, fontSize: box.fontSize });
+      const svgTxt = this.createSvgBoxText({ svgBox: svg, rot: box.rot, fontSize: box.fontSize, txt: box.txt });
       g.prepend(svgTxt);
 
+      box.svgTxt = svgTxt;
       this.initEventSvgBoxInput({ containerWr, container, svg, svgTxt });
     });
+
+    this.boxsInput = boxs;
   }
 
   createSvgBox({ points, color = '#ffffff', fillOpacity = null }) {
@@ -451,7 +489,7 @@ export class IsometricSheetsService {
   }
 
   // добавляем text в box
-  createSvgBoxText({ svgBox, rot = 0, fontSize = '3.65' }) {
+  createSvgBoxText({ svgBox, rot = 0, fontSize = '3.65', txt = '' }) {
     const elem = document.createElementNS('http://www.w3.org/2000/svg', 'text');
 
     const bbox = svgBox.getBBox();
@@ -469,7 +507,7 @@ export class IsometricSheetsService {
 
     //elem.style.cursor = 'pointer';
 
-    elem.textContent = '';
+    elem.textContent = txt;
 
     return elem;
   }
@@ -525,5 +563,16 @@ export class IsometricSheetsService {
 
   getArrSvgCircle() {
     return this.arrSvgCircle;
+  }
+
+  getArrBoxsInput() {
+    let boxs = [];
+
+    this.boxsInput.forEach((box) => {
+      let item = { fontSize: box.fontSize, rot: box.rot, ids: box.ids, txt: box.svgTxt.textContent };
+      boxs.push(item);
+    });
+
+    return boxs;
   }
 }

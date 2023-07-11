@@ -56,6 +56,7 @@ export class PanelRp {
 
     this.btns$[15] = this.crBtn({ txt: 'лист А4' });
     this.btns$[16] = this.crBtn({ txt: 'лист А3' });
+    this.btns$[17] = this.crBtn({ txt: 'лист А1' });
 
     this.initEvent();
   }
@@ -134,6 +135,10 @@ export class PanelRp {
 
     this.btns$[16].onmousedown = () => {
       this.isometricSheetsService.showHideSheet('A3_4');
+    };
+
+    this.btns$[17].onmousedown = () => {
+      this.isometricSheetsService.showHideSheet('A1_2');
     };
   }
 

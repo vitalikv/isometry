@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { mapControlInit, loaderModel, ruler as isometricRulerService, isometricLabels as isometricLabelsService } from '../index';
+import { mapControlInit, loaderModel, ruler as isometricRulerService, isometricLabels as isometricLabelsService, isometricSheetsService } from '../index';
 
 export class SaveLoad {
   isometricSchemeService;
@@ -14,7 +14,7 @@ export class SaveLoad {
     const valves = this.isometricSchemeService.valves;
     const tees = this.isometricSchemeService.tees;
 
-    const isometry = { camera: null, tubes: [], valves: [], tees: [], rulerObjs: [], labelObjs: [] };
+    const isometry = { camera: null, sheet: null, tubes: [], valves: [], tees: [], rulerObjs: [], labelObjs: [] };
 
     tubes.forEach((tube) => {
       const points = tube.userData.line.userData.line;
@@ -71,6 +71,10 @@ export class SaveLoad {
     isometry.camera.zoom = camera.zoom;
     isometry.camera.target = mapControlInit.control.target;
 
+    isometry.sheet = {};
+    isometry.sheet.format = isometricSheetsService.formatSheet;
+    isometry.sheet.boxsInput = isometricSheetsService.getArrBoxsInput();
+
     console.log(this.isometricSchemeService.jsonIsometry);
     console.log('isometry2', isometry);
     const str = JSON.stringify(isometry);
@@ -90,6 +94,9 @@ export class SaveLoad {
     const p = this.xhrPromise_1({ url: 'img/isometry.json' });
     p.then((data) => {
       this.isometricSchemeService.deleteObjs();
+      isometricSheetsService.delete();
+
+      console.log('data = ', data);
 
       if (data.camera) {
         const camera = mapControlInit.control.object;
@@ -106,6 +113,10 @@ export class SaveLoad {
         camera.updateMatrixWorld();
         camera.updateProjectionMatrix();
         mapControlInit.control.update();
+      }
+
+      if (data.sheet && data.sheet.format !== '') {
+        isometricSheetsService.createSvgSheet(data.sheet.format, data.sheet.boxsInput);
       }
 
       const meshesTube = loaderModel.getMeshesTube();

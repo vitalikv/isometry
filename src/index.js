@@ -205,13 +205,55 @@ export function setMeshes({ arr }) {
   selectObj.updateMesh(meshes);
 }
 
+const targetP = new THREE.Vector3();
 function onKeyDown(event) {
   if (event.code !== 'KeyC') return;
 
   changeCamera();
 }
 
+// новый метод, без сохранения pos, rot, scale предидущей камеры
 export function changeCamera() {
+  let pos = new THREE.Vector3();
+  let rot = camera.rotation.clone();
+
+  if (camera === cameraP) targetP.copy(controls.target);
+  camera = camera === cameraP ? cameraO : cameraP;
+
+  if (camera === cameraO) {
+    const dist = controls.target.distanceTo(cameraP.position);
+
+    cameraO.zoom = 10 / dist;
+
+    const dir = cameraP.position.clone().sub(controls.target).normalize();
+    const offset = new THREE.Vector3().addScaledVector(dir, 1000);
+    pos = cameraP.position.clone().add(offset);
+
+    camera.position.copy(pos);
+    camera.rotation.copy(rot);
+  } else {
+    // const dir = cameraO.position.clone().sub(targetP).normalize();
+    // const offset = new THREE.Vector3().addScaledVector(dir, 1000);
+    // pos = cameraO.position.clone().sub(offset);
+  }
+
+  camera.updateMatrixWorld();
+  camera.updateProjectionMatrix();
+
+  controls.object = camera;
+  mapControlInit.control.target.set(targetP.x, targetP.y, targetP.z);
+  mapControlInit.control.object = camera;
+
+  if (camera === cameraO) {
+    //isometricLabelList.init();
+    gridHelper.visible = false;
+  } else {
+    gridHelper.visible = true;
+  }
+}
+
+// старый метод изменения камеры (после добавления ф-ции обхвата камеры, этот метод с точки зрения логики работает не верно)
+export function changeCamera2() {
   let pos = new THREE.Vector3();
   let rot = camera.rotation.clone();
 
@@ -240,7 +282,7 @@ export function changeCamera() {
   mapControlInit.control.object = camera;
 
   if (camera === cameraO) {
-    isometricLabelList.init();
+    //isometricLabelList.init();
     gridHelper.visible = false;
   } else {
     gridHelper.visible = true;

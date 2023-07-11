@@ -69,7 +69,7 @@ export class Gis {
 
   enable() {
     //isometricSheetsService.createSvgSheet();
-    //controls.enableRotate = false;
+    controls.enableRotate = false;
     //controls.enabled = false;
     isometricMode.changeMode('move');
     setMeshes({ arr: [...this.tubes, ...this.valves, ...this.tees, ...this.joins] });
@@ -117,14 +117,6 @@ export class Gis {
     points.push(new THREE.Vector2(bound.max.x, bound.max.z));
     points.push(new THREE.Vector2(bound.min.x, bound.max.z));
 
-    const shape = new THREE.Shape(points);
-    const material = new THREE.MeshStandardMaterial({ color: 0x00ff00, transparent: true, opacity: 0.5 });
-    const geometry = new THREE.ExtrudeGeometry(shape, { bevelEnabled: false, depth: -(bound.max.y - bound.min.y) });
-    geometry.rotateX(Math.PI / 2);
-    const cube = new THREE.Mesh(geometry, material);
-    cube.position.y = bound.min.y;
-    this.modelsContainerInit.control.add(cube);
-
     const camera = this.mapControlInit.control.object;
     let aspect = (bound.max.x - bound.min.x) / (bound.max.z - bound.min.z);
 
@@ -147,11 +139,23 @@ export class Gis {
     camera.updateProjectionMatrix();
     this.mapControlInit.control.update();
 
-    const geometry2 = new THREE.BoxGeometry(1, 1, 1);
-    const material2 = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-    const cube2 = new THREE.Mesh(geometry2, material2);
-    cube2.position.copy(center);
-    this.modelsContainerInit.control.add(cube2);
+    // визуализация boundBox изометрии
+    const helpVisual = false;
+    if (helpVisual) {
+      const shape = new THREE.Shape(points);
+      const material = new THREE.MeshStandardMaterial({ color: 0x00ff00, transparent: true, opacity: 0.5 });
+      const geometry = new THREE.ExtrudeGeometry(shape, { bevelEnabled: false, depth: -(bound.max.y - bound.min.y) });
+      geometry.rotateX(Math.PI / 2);
+      const cube = new THREE.Mesh(geometry, material);
+      cube.position.y = bound.min.y;
+      this.modelsContainerInit.control.add(cube);
+
+      const geometry2 = new THREE.BoxGeometry(1, 1, 1);
+      const material2 = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+      const cube2 = new THREE.Mesh(geometry2, material2);
+      cube2.position.copy(center);
+      this.modelsContainerInit.control.add(cube2);
+    }
   }
 
   // собираем изометрию из полученных данных
