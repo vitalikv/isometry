@@ -13,6 +13,7 @@ import {
   addObj,
   axes,
   isometricSheetsService,
+  isometricStampService,
 } from './index';
 
 export class IsometricModeService {
@@ -37,9 +38,9 @@ export class IsometricModeService {
     this.isometricSchemeService = gisdPage;
     this.plane = this.initPlane();
 
-    document.body.addEventListener('mousedown', this.onmousedown);
-    document.body.addEventListener('mousemove', this.onmousemove);
-    document.body.addEventListener('mouseup', this.onmouseup);
+    mapControlInit.control.domElement.addEventListener('mousedown', this.onmousedown);
+    mapControlInit.control.domElement.addEventListener('mousemove', this.onmousemove);
+    mapControlInit.control.domElement.addEventListener('mouseup', this.onmouseup);
     document.body.addEventListener('wheel', this.mouseWheel);
 
     document.addEventListener('keydown', this.onKeyDown);
@@ -68,6 +69,8 @@ export class IsometricModeService {
     // if (event.code === 'KeyR') this.changeMode('ruler');
     // if (event.code === 'KeyM') this.changeMode('move');
     if (event.code === 'Delete') {
+      isometricStampService.deleteDiv();
+
       const done = deleteObj.delete(this.actObj);
       if (done) this.clearActivateObj();
     }
@@ -135,6 +138,10 @@ export class IsometricModeService {
 
   onmousedown = (event) => {
     console.log('---', this.mode, mapControlInit);
+
+    let result = isometricStampService.onmousedown(event);
+    if (result) return;
+
     if (this.mode === 'sheet') {
       isometricSheetsService.onmousedown(event);
       return;
@@ -149,7 +156,7 @@ export class IsometricModeService {
     this.isDown = false;
     this.isMove = false;
 
-    const result = addObj.click({ event, plane: this.plane });
+    result = addObj.click({ event, plane: this.plane });
     if (result) return;
 
     const tubes = this.isometricSchemeService.tubes;
@@ -208,6 +215,8 @@ export class IsometricModeService {
   };
 
   onmousemove = (event) => {
+    isometricStampService.onmousemove(event);
+
     if (this.isDown) this.isMove = true;
 
     isometricLabelList.setPosRot();
@@ -242,6 +251,8 @@ export class IsometricModeService {
   };
 
   onmouseup = (event) => {
+    isometricStampService.onmouseup(event);
+
     if (this.mode === 'sheet') {
       isometricSheetsService.onmouseup(event);
       this.changeMode('move');

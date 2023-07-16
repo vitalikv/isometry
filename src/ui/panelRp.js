@@ -8,6 +8,7 @@ export class PanelRp {
   isometricLabelList;
   saveLoad;
   isometricLineStyle;
+  isometricStampService;
 
   constructor({
     isometricSchemeService,
@@ -19,6 +20,7 @@ export class PanelRp {
     addObj,
     isometricLineStyle,
     isometricSheetsService,
+    isometricStampService,
   }) {
     this.isometricSchemeService = isometricSchemeService;
     this.joint = joint;
@@ -29,6 +31,7 @@ export class PanelRp {
     this.addObj = addObj;
     this.isometricLineStyle = isometricLineStyle;
     this.isometricSheetsService = isometricSheetsService;
+    this.isometricStampService = isometricStampService;
 
     this.init();
   }
@@ -57,6 +60,9 @@ export class PanelRp {
     this.btns$[15] = this.crBtn({ txt: 'лист А4' });
     this.btns$[16] = this.crBtn({ txt: 'лист А3' });
     this.btns$[17] = this.crBtn({ txt: 'лист А1' });
+
+    this.btns$[18] = this.crBtn({ txt: 'штамп 1' });
+    this.btns$[19] = this.crBtn({ txt: 'штамп 2' });
 
     this.initEvent();
   }
@@ -140,10 +146,18 @@ export class PanelRp {
     this.btns$[17].onmousedown = () => {
       this.isometricSheetsService.showHideSheet('A1_2');
     };
+
+    this.btns$[18].onmousedown = () => {
+      this.isometricStampService.addStamp('1');
+    };
+
+    this.btns$[19].onmousedown = () => {
+      this.isometricStampService.addStamp('2');
+    };
   }
 
   crPanel() {
-    const css = `position: absolute; top: 0; right: 0; width: 248px; height: 900px; background: #F0F0F0; border: 1px solid #D1D1D1; border-radius: 4px; font-family: arial,sans-serif; z-index: 4;`;
+    const css = `position: absolute; top: 0; right: 0; width: 248px; height: 1200px; background: #F0F0F0; border: 1px solid #D1D1D1; border-radius: 4px; font-family: arial,sans-serif; z-index: 4;`;
 
     const html = `
     <div style="${css}">

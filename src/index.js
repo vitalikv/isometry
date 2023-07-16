@@ -20,6 +20,7 @@ import { Axes } from './axes';
 import { CatchObj } from './catchObj';
 import { IsometricLineStyle } from './lineStyle';
 import { IsometricSheetsService } from './sheets';
+import { IsometricStampService } from './stamp';
 
 import { PanelRp } from './ui/panelRp';
 
@@ -38,7 +39,8 @@ export let loaderModel,
   axes,
   catchObj,
   isometricLineStyle,
-  isometricSheetsService;
+  isometricSheetsService,
+  isometricStampService;
 let isomety;
 let meshes = [];
 
@@ -46,6 +48,11 @@ init();
 render();
 
 function init() {
+  const div = document.createElement('div');
+  div.innerHTML = `<div style="position: fixed; top: 20px; bottom:0; left: 0; right: 0;"></div>`;
+  const container = div.children[0];
+  document.body.append(container);
+
   const bgColor = 0x263238 / 2;
 
   // renderer setup
@@ -56,7 +63,7 @@ function init() {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.outputEncoding = THREE.sRGBEncoding;
-  document.body.appendChild(renderer.domElement);
+  container.appendChild(renderer.domElement);
 
   labelRenderer = new CSS2DRenderer();
   labelRenderer.setSize(window.innerWidth, window.innerHeight);
@@ -66,7 +73,7 @@ function init() {
   labelRenderer.domElement.style.left = '0px';
   labelRenderer.domElement.style.width = '100%';
   labelRenderer.domElement.style.height = '100%';
-  document.body.appendChild(labelRenderer.domElement);
+  container.prepend(labelRenderer.domElement);
 
   // scene setup
   scene = new THREE.Scene();
@@ -112,7 +119,7 @@ function init() {
 
   camera = cameraP;
 
-  controls = new OrbitControls(camera, document.body);
+  controls = new OrbitControls(camera, container);
   mapControlInit = { control: controls };
 
   console.log(333, controls);
@@ -178,6 +185,7 @@ function includeClasses() {
   axes = new Axes();
   isometricLineStyle = new IsometricLineStyle();
   isometricSheetsService = new IsometricSheetsService();
+  isometricStampService = new IsometricStampService();
 
   selectObj = new IsometricModeService({ mapControlInit });
 
@@ -192,6 +200,7 @@ function includeClasses() {
     addObj,
     isometricLineStyle,
     isometricSheetsService,
+    isometricStampService,
   });
 
   //isometricSheetsService.createSvgSheet('A4_2');
