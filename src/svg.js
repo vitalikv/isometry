@@ -7,7 +7,7 @@ class ConverterToSvg {
   arr = { line: [], circle: [] };
 
   constructor() {
-    this.container = this.createSvgContainer();
+    //this.container = this.createSvgContainer();
   }
 
   createSvgContainer() {

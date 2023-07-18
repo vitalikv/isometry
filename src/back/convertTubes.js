@@ -69,7 +69,7 @@ export class ConvertTubes {
       //origin.add(obj.position.clone());
       //origin.add(offset);
 
-      // this.helperArrow({ dir: dir, pos: origin, length: 1, color: 0x00ff00 });
+      //this.helperArrow({ dir: dir, pos: origin, length: 1, color: 0x00ff00 });
 
       let ind = -1;
       for (let i2 = 0; i2 < arrP.length; i2++) {
@@ -315,47 +315,72 @@ export class ConvertTubes {
     return sumPos;
   }
 
+  // получаем точку из массива
+  getPointFromList({ listId, typeId }) {
+    const lines = this.lines;
+
+    const numberPoint = typeId === 0 ? 0 : lines[listId].length - 1;
+
+    return lines[listId][numberPoint];
+  }
+
+  // получаем точку из массива
+  setPointFromList({ listId, typeId, pos }) {
+    const lines = this.lines;
+
+    const numberPoint = typeId === 0 ? 0 : lines[listId].length - 1;
+
+    return (lines[listId][numberPoint] = pos);
+  }
+
   // убираем разрывы между трубами (где стыки)
   joinLine() {
     const listDist = [];
     for (let i = 0; i < this.lines.length; i++) {
-      const points1 = this.lines[i];
+      const p1_1 = this.getPointFromList({ listId: i, typeId: 0 });
+      const p1_2 = this.getPointFromList({ listId: i, typeId: 1 });
 
       for (let i2 = 0; i2 < this.lines.length; i2++) {
         if (i === i2) continue;
-        const points2 = this.lines[i2];
-        //console.log(i2, points2);
-        const dist1 = points1[0].distanceTo(points2[0]);
-        const dist2 = points1[0].distanceTo(points2[points2.length - 1]);
 
-        if (dist1 < 0.4 && dist1 > 0.01) listDist.push({ dist: dist1, lid1: i, lid2: i2, pid1: 0, pid2: 0 });
-        if (dist2 < 0.4 && dist2 > 0.01) listDist.push({ dist: dist2, lid1: i, lid2: i2, pid1: 0, pid2: points2.length - 1 });
-      }
+        const p2_1 = this.getPointFromList({ listId: i2, typeId: 0 });
+        const p2_2 = this.getPointFromList({ listId: i2, typeId: 1 });
 
-      for (let i2 = 0; i2 < this.lines.length; i2++) {
-        if (i === i2) continue;
-        const points2 = this.lines[i2];
+        const inf = { dist: Infinity, pid1: -1, pid2: -1 };
+        [p1_1, p1_2].forEach((p1, ind) => {
+          const dist1 = p1.distanceTo(p2_1);
+          const dist2 = p1.distanceTo(p2_2);
 
-        const pid1 = points1.length - 1;
-        const dist1 = points1[pid1].distanceTo(points2[0]);
-        const dist2 = points1[pid1].distanceTo(points2[points2.length - 1]);
-
-        if (dist1 < 0.4 && dist1 > 0.01) listDist.push({ dist: dist1, lid1: i, lid2: i2, pid1, pid2: 0 });
-        if (dist2 < 0.4 && dist2 > 0.01) listDist.push({ dist: dist2, lid1: i, lid2: i2, pid1, pid2: points2.length - 1 });
+          if (dist1 < dist2 && dist1 < inf.dist) {
+            inf.dist = dist1;
+            inf.pid1 = ind;
+            inf.pid2 = 0;
+          } else if (dist2 < inf.dist) {
+            inf.dist = dist2;
+            inf.pid1 = ind;
+            inf.pid2 = 1;
+          }
+        });
+        // console.log(inf);
+        // const pos1 = this.getPointFromList({ listId: i2, typeId: inf.pid2 });
+        // this.helperSphere({ pos: pos1, size: 0.1, color: 0x0000ff });
+        if (inf.dist !== Infinity && inf.dist < 0.4 && inf.dist > 0.01) {
+          listDist.push({ dist: inf.dist, lid1: i, lid2: i2, pid1: inf.pid1, pid2: inf.pid2 });
+          // const pos1 = this.getPointFromList({ listId: i, typeId: inf.pid1 });
+          // this.helperSphere({ pos: pos1, size: 0.1, color: 0x0000ff });
+        }
       }
     }
-
-    console.log(listDist);
 
     const pointsHelp = [];
     const listIgnorLine = [];
     let count = 0;
     for (let i = 0; i < listDist.length; i++) {
-      const pid1 = listDist[i].pid1 === 0 ? 0 : this.lines[listDist[i].lid1].length - 1;
-      const pid2 = listDist[i].pid2 === 0 ? 0 : this.lines[listDist[i].lid2].length - 1;
+      const pid1 = listDist[i].pid1;
+      const pid2 = listDist[i].pid2;
 
-      const ui1 = listDist[i].lid1 + '' + (pid1 === 0 ? 0 : 1);
-      const ui2 = listDist[i].lid2 + '' + (pid2 === 0 ? 0 : 1);
+      const ui1 = listDist[i].lid1 + '' + pid1;
+      const ui2 = listDist[i].lid2 + '' + pid2;
 
       if (listIgnorLine.indexOf(ui1) > -1 && listIgnorLine.indexOf(ui2) > -1) {
         //console.log(ui1, listDist[i].lid1, listDist[i].pid1 === 0 ? 0 : 1);
@@ -364,8 +389,8 @@ export class ConvertTubes {
 
       listIgnorLine.push(ui1, ui2);
 
-      const pos1 = this.lines[listDist[i].lid1][pid1];
-      const pos2 = this.lines[listDist[i].lid2][pid2];
+      const pos1 = this.getPointFromList({ listId: listDist[i].lid1, typeId: pid1 });
+      const pos2 = this.getPointFromList({ listId: listDist[i].lid2, typeId: pid2 });
 
       const dist = pos1.distanceTo(pos2);
       //if (dist > 0.2) continue;
@@ -374,19 +399,16 @@ export class ConvertTubes {
       posC = new THREE.Vector3(posC.x / 2, posC.y / 2, posC.z / 2);
       posC.add(pos1);
 
-      //pointsHelp.push(this.helperSphere({ pos: posC, size: 0.1, color: 0x0000ff }));
-
+      //pointsHelp.push(this.helperSphere({ pos: pos1, size: 0.1, color: 0x0000ff }));
+      //pointsHelp.push(this.helperSphere({ pos: pos2, size: 0.1, color: 0xff0000 }));
       // if (pid1 === 0) this.lines[listDist[i].lid1].unshift(posC);
       // else this.lines[listDist[i].lid1].push(posC);
 
       // if (pid2 === 0) this.lines[listDist[i].lid2].unshift(posC);
       // else this.lines[listDist[i].lid2].push(posC);
 
-      if (pid1 === 0) this.lines[listDist[i].lid1][0] = posC;
-      else this.lines[listDist[i].lid1][this.lines[listDist[i].lid1].length - 1] = posC;
-
-      if (pid2 === 0) this.lines[listDist[i].lid2][0] = posC;
-      else this.lines[listDist[i].lid2][this.lines[listDist[i].lid2].length - 1] = posC;
+      this.setPointFromList({ listId: listDist[i].lid1, typeId: pid1, pos: posC });
+      this.setPointFromList({ listId: listDist[i].lid2, typeId: pid2, pos: posC });
 
       count++;
     }

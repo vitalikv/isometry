@@ -258,6 +258,8 @@ export class IsometricStampService {
   }
 
   hideSvgCircle() {
+    if (!this.containerSvg) return;
+
     this.containerSvg.children[0].childNodes.forEach((svg, ind) => {
       svg.setAttribute('display', 'none');
     });

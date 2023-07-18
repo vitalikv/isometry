@@ -110,7 +110,7 @@ function init() {
 
   let aspect = renderer.domElement.clientWidth / renderer.domElement.clientHeight;
   const d = 5;
-  cameraO = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 10000);
+  cameraO = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 100000);
   cameraO.position.copy(cameraP.position.clone());
   cameraO.updateMatrixWorld();
   cameraO.updateProjectionMatrix();
@@ -232,10 +232,10 @@ export function changeCamera() {
   if (camera === cameraO) {
     const dist = controls.target.distanceTo(cameraP.position);
 
-    cameraO.zoom = 10 / dist;
+    cameraO.zoom = 1 / dist;
 
     const dir = cameraP.position.clone().sub(controls.target).normalize();
-    const offset = new THREE.Vector3().addScaledVector(dir, 1000);
+    const offset = new THREE.Vector3().addScaledVector(dir, 10000);
     pos = cameraP.position.clone().add(offset);
 
     camera.position.copy(pos);
