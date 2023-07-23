@@ -1,5 +1,6 @@
 export class PanelRp {
   container$;
+  elemBtnView;
   btns$ = [];
 
   isometricSchemeService;
@@ -65,6 +66,7 @@ export class PanelRp {
     this.btns$[19] = this.crBtn({ txt: 'штамп 2' });
 
     this.initEvent();
+    this.createBtnView();
   }
 
   initEvent() {
@@ -190,5 +192,31 @@ export class PanelRp {
   changeBackground(elem$) {
     console.log(elem$.style.background);
     elem$.style.background = elem$.style.background === 'rgb(204, 204, 204)' ? 'rgb(255, 255, 255)' : 'rgb(204, 204, 204)';
+  }
+
+  getContainer() {}
+
+  createBtnView() {
+    const containerDiv = document.querySelector('#labels-container-div');
+
+    const css = `position: absolute; bottom: 0; left: 50%; background: #F0F0F0; border: 1px solid #D1D1D1; border-radius: 4px; font-family: arial,sans-serif; z-index: 4; transform: translateX(-50%) translateY(-50%); cursor: pointer;`;
+
+    const html = `
+    <div style="${css}">
+      <div style="margin: 15px;">Зафиксировать вид</div>
+    </div>`;
+
+    let div = document.createElement('div');
+    div.innerHTML = html;
+    this.elemBtnView = div.children[0];
+    containerDiv.append(this.elemBtnView);
+
+    this.elemBtnView.onmousedown = (e) => {
+      this.deleteBtnView();
+    };
+  }
+
+  deleteBtnView() {
+    if (this.elemBtnView) this.elemBtnView.remove();
   }
 }
