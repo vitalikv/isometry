@@ -23,10 +23,21 @@ export class ConvertTees {
       const q = meshes[i].getWorldQuaternion(new THREE.Quaternion());
       obj.position.copy(position);
       obj.quaternion.copy(q);
-      //this.scene.add(obj);
 
       const dist = 0.5;
       obj.scale.set(dist / 2, dist / 2, dist / 2);
+
+      // const obj2 = obj.clone();
+      // obj2.children[0].material.color = new THREE.Color(0xff0000);
+      // obj2.children[1].material.color = new THREE.Color(0xff0000);
+      // const dirA = new THREE.Vector3(0, 0, 1);
+      // const dirB = new THREE.Vector3(-1, 0, 0);
+      // const dir = new THREE.Vector3().crossVectors(dirA, dirB).normalize();
+      // this.helperArrow({ dir, pos: obj.position, length: 1, color: 0x0000ff });
+      // const m = new THREE.Matrix4().lookAt(new THREE.Vector3(), dir, new THREE.Vector3(dirB.x, -dirB.y, dirB.z));
+      // const rot = new THREE.Euler().setFromRotationMatrix(m);
+      // obj2.rotation.copy(rot);
+      // this.scene.add(obj2);
 
       this.upObjUserData({ obj });
       this.getBoundObject({ obj });
@@ -41,44 +52,89 @@ export class ConvertTees {
 
       for (let i2 = 0; i2 < lines.length; i2++) {
         const points = lines[i2].points;
+        const pos1 = points[0];
+        const pos2 = points[points.length - 1];
 
-        const dist1 = obj.position.distanceTo(points[0]);
-        const dist2 = obj.position.distanceTo(points[points.length - 1]);
+        const dist1 = obj.position.distanceTo(pos1);
+        const dist2 = obj.position.distanceTo(pos2);
 
-        listDist.push({ dist: dist1, lid: i2, pos: points[0], points, id: 0 });
-        listDist.push({ dist: dist2, lid: i2, pos: points[points.length - 1], points, id: points.length - 1 });
+        // напрвление трубы
+        const dir = pos1.clone().sub(pos2).normalize();
+
+        listDist.push({ dist: dist1, pos: pos1, dir, points, lid: i2, id: 0 });
+        listDist.push({ dist: dist2, pos: pos2, dir, points, lid: i2, id: points.length - 1 });
       }
 
       listDist.sort((a, b) => {
         return a.dist - b.dist;
       });
 
-      //const dist = listDist[0].pos.distanceTo(listDist[1].pos);
-
       if (listDist[0].dist > 1) continue;
 
-      let posC = listDist[1].pos.clone().sub(listDist[0].pos);
+      const listDist2 = [];
+
+      for (let i2 = 0; i2 < listDist.length; i2++) {
+        if (i2 > 2) break; // ножно считать dot только для первых 3 точек
+
+        const i3 = i2 < 2 ? i2 + 1 : 0;
+        const dot = listDist[i2].dir.dot(listDist[i3].dir);
+
+        listDist2[i2] = listDist[i2];
+        listDist2[i2].dot = {};
+        listDist2[i2].dot.ind1 = i2;
+        listDist2[i2].dot.ind2 = i3;
+        listDist2[i2].dot.value = Math.abs(dot);
+        //listDist2[i2].dot.line = [...listDist[i3]]; // id соседней линии, с которой считали результат dot
+      }
+
+      listDist2.sort((a, b) => {
+        return b.dot.value - a.dot.value;
+      });
+
+      const line1 = listDist2[0];
+
+      const line2 = listDist2.find((item, ind) => {
+        if (listDist2[0].dot.ind2 === item.dot.ind1) {
+          return item;
+        }
+      });
+      let line3 = listDist2[2];
+      if (line3 === line2) {
+        line3 = listDist2[1];
+      }
+
+      let posC = line2.pos.clone().sub(line1.pos);
       posC = new THREE.Vector3(posC.x / 2, posC.y / 2, posC.z / 2);
-      posC.add(listDist[0].pos);
+      posC.add(line1.pos);
       obj.position.copy(posC);
 
-      this.shapeObjs.setRot({ obj, pos1: listDist[0].pos, pos2: listDist[1].pos });
+      // this.helperSphere({ pos: line1.pos, size: 0.11, color: 0xff0000 });
+      // this.helperSphere({ pos: line2.pos, size: 0.11, color: 0xff0000 });
+      // this.helperSphere({ pos: line3.pos, size: 0.11, color: 0xff0000 });
+      // this.helperSphere({ pos: posC, size: 0.11, color: 0x0000ff });
 
-      let dir = listDist[1].pos.clone().sub(listDist[0].pos).normalize();
+      //this.shapeObjs.setRot({ obj, pos1: line1.pos, pos2: line2.pos });
+      this.shapeObjs.setRot2({ obj, posP: [line1.pos, line2.pos, line3.pos], posC });
+
+      let dir = line2.pos.clone().sub(line1.pos).normalize();
       dir.x *= obj.scale.x; // меняем размер
       dir.y *= obj.scale.x;
       dir.z *= obj.scale.x;
 
       const pos1 = posC.clone().sub(dir);
       const pos2 = posC.clone().add(dir);
+      const pos3 = line3.pos;
 
-      if (listDist[0].id === 0) listDist[0].points[0] = pos1;
-      else listDist[0].points[listDist[0].points.length - 1] = pos1;
+      if (line1.id === 0) line1.points[0] = pos1;
+      else line1.points[line1.points.length - 1] = pos1;
 
-      if (listDist[1].id === 0) listDist[1].points[0] = pos2;
-      else listDist[1].points[listDist[1].points.length - 1] = pos2;
+      if (line2.id === 0) line2.points[0] = pos2;
+      else line2.points[line2.points.length - 1] = pos2;
 
-      const pos3 = obj.userData.joins.points[2];
+      // if (line3.id === 0) line3.points[0] = pos2;
+      // else line3.points[line3.points.length - 1] = pos2;
+
+      //const pos3 = obj.userData.joins.points[2];
       obj.userData.joins.points = [];
       obj.userData.joins.points.push(pos1, pos2, pos3);
     }
@@ -164,5 +220,19 @@ export class ConvertTees {
     size.y *= obj.scale.x;
     size.z *= obj.scale.x;
     obj.userData.boundBox.push({ pos: center, size });
+  }
+
+  helperArrow({ dir, pos, length = 1, color = 0x0000ff }) {
+    const helper = new THREE.ArrowHelper(dir, pos, length, color);
+    helper.position.copy(pos);
+    this.scene.add(helper);
+  }
+
+  helperSphere({ pos, size, color = 0x0000ff }) {
+    const sphere = new THREE.Mesh(new THREE.SphereGeometry(size, 32, 16), new THREE.MeshStandardMaterial({ color, depthTest: false, transparent: true }));
+    sphere.position.copy(pos);
+    this.scene.add(sphere);
+
+    return sphere;
   }
 }

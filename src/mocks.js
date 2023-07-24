@@ -98,9 +98,7 @@ export class MocksIsometry {
       'c257df7d-61bd-418d-8eca-5eb7a4664a68',
       'ef974c57-f943-48a5-9033-275a1a2498f2',
       'ff0a0062-f363-46de-b0c1-eb0460de60ea',
-      '4e96d7f0-54d5-416e-85cb-7b7c7b80ef2f',
       'c07ec64d-e5c1-4df7-b016-b5a2411beff4',
-      '606f6cce-170f-4bc8-b27d-11ff6527a084',
       '8498cb7c-84fe-40d1-b866-04d19d2d9acf',
       '51f081b3-4371-4833-be5f-a03f6cb4db3a',
       'b7497c95-2648-4ae6-9f5b-f4dce9103e4e',
@@ -118,11 +116,9 @@ export class MocksIsometry {
       '565226dc-0992-4e49-8fdf-48125d3a5d75',
       '542d4f54-2528-4b27-b64b-04e885ef2c0d',
       'df3b818b-92c6-4eb4-ac45-1fe90efc065a',
-      'b4154e37-4b4a-4d4a-865e-bc1e092c1d50',
       '42a81380-6ad6-4f45-98bb-4509b425c496',
       'bc047861-fdc8-4c77-b4ea-cf2c36966740',
       '42458c45-2ee8-428d-a130-f3b9a5b785e7',
-      'cb0c9a44-e380-4f5f-a85a-584f11432198',
       '8b2a12f0-737e-41d1-a79a-dd7508206aa0',
       '3991a1e6-88a7-4572-b65b-2f6fd7ca1176',
       'ac7d5b3a-8e8c-48e4-b217-544721e43cb2',
@@ -302,7 +298,6 @@ export class MocksIsometry {
       'fcc53f89-4e34-4367-a7fc-259a85e79b3f',
       'f97542f9-cb9f-4d80-9363-8dd33047e1cb',
       '93256f26-8216-4dc1-af35-fa102f254d46',
-      '67220cc8-635c-4354-b950-41e1b032eeed',
       '63036df5-4660-402a-b427-55451a0e5862',
       '49bcbd57-5d1f-433d-9973-dbe76123736a',
       '12a1f31c-0e32-444b-990d-65ba81f0b9b0',
@@ -312,7 +307,6 @@ export class MocksIsometry {
       '081c906c-4468-4387-94e9-7001ba046cdb',
       '4ce9b5af-215f-4332-8c0d-fb5b00f74ee9',
       '5d417e37-3b30-49bc-a0ef-147ba2f9ef16',
-      '52070d43-25c8-4e4b-bbbd-96f6bbfb9960',
       '4d4ce5f1-20bf-4a0d-83dd-a63d6603c683',
       'f79caa2c-3962-4364-ab5f-f6de79f76b06',
       '5128815c-ef0a-48fb-8dc0-d2812bda596c',
@@ -320,7 +314,6 @@ export class MocksIsometry {
       'ed3c8020-16f8-40fe-8f14-49b61f4d99d8',
       '393634e1-04ec-4df9-8446-381a9862c2af',
       '8d81db68-dc97-440f-8615-6384628ed1ba',
-      '0e4e1e33-1935-4f31-a363-c9d0dd1cdc8f',
       '4d069ad2-6ae2-4208-93d9-d213d96ccc77',
       'a63da239-1cfa-459e-8c26-a9810de80719',
       '87d93976-b078-48dc-9c8a-5aa435bbace3',
@@ -331,7 +324,6 @@ export class MocksIsometry {
     );
 
     list.push(
-      'ca6fe792-9ae3-46ab-a27c-28689bfe5d8d',
       'd5fffdc0-21bf-4d47-a33d-3f76be59f6ee',
       'e2c6a6ac-dead-473f-b198-4ceadf0ec1a5',
       'bf28c05b-5d42-4b3c-801b-cd877ca0e685',
@@ -355,7 +347,6 @@ export class MocksIsometry {
       'aa92fde1-7783-4c01-ac01-a3761b5106f9',
       'd7e03a82-ca06-4877-9e46-7dfa4829bc29',
       '7978ebe6-319a-4e66-9e86-00cf627c7698',
-      '54b4c6b4-c005-4ef2-ba92-517bfdb088f6',
       '5c11622c-e520-43d1-906f-3e75e45083d6',
       '1e8177ef-a639-414c-a138-ccf26d6c1a89',
       'a111d141-a7bb-4825-83a1-ddc6fc3aa49d',
@@ -364,7 +355,6 @@ export class MocksIsometry {
 
     list.push(
       'aa18385d-5f22-42cf-83ee-37b0bc686921',
-      'a5d8f609-7944-46c8-83f7-8c20c3c1b009',
       '91fbd262-8d65-402e-90c6-aa2444a61228',
       'bd24e989-c6eb-49ec-a953-34b0ffcc4823',
       '4cfcd755-38d6-42c3-99d5-083b39c0dce5',
@@ -389,7 +379,6 @@ export class MocksIsometry {
       '5348625f-6583-4125-9ae7-f6978f7d307a',
       'f78115c8-f0e5-4f2d-ac8c-27f31c6fd450',
       '4451ac35-6098-4be2-94ad-551dbdc31521',
-      '611aa2f7-bf26-4dd0-8c19-7dc136fe770a',
       '731d9ade-ab52-486c-bf1e-66f2be2426c1',
       '2f187cef-81dc-40a6-a59a-421b7ad3f300'
     );
@@ -461,11 +450,66 @@ export class MocksIsometry {
       'c0299d3d-18ef-43cd-8f24-d3982a94e540'
     );
 
+    list.push(
+      '136a535a-9c9e-4788-8087-a832e798cac9',
+      '5a336dcd-7805-44fd-b398-af493efe0cab',
+      '7cf6796e-0304-419b-8ebe-fbd2e46b5abb',
+      '2717983c-c4c7-4c5e-987b-39ee01bf4030',
+      '99f7e4f9-0676-4013-83c4-2fabd7981cd4',
+      'da4a3b0a-707e-4dd7-b355-04042ace14c6',
+      '2ac7dd9e-9e0b-40a7-9c45-a3d788293db4'
+    );
+
+    list.push(
+      'd628f961-441f-4c27-8872-e5627d9d0dfa',
+      '410e671b-d4bb-4c5d-a31b-f4b7e5e95f18',
+      'd84eb2f4-e682-4dd8-9182-f204050010df',
+      '49f2966a-b1fe-4a7a-b5ff-d3eb0e2df716',
+      'd9b77d82-846c-4775-b543-ec0d56a14cd3',
+      'd9005110-6f4c-4393-93e6-9fe97d2d71c5',
+      '9b3e9c2b-a501-4050-8074-c03b6798df58',
+      'ff9ce816-afe1-4013-93d9-2fcf6c8a02ea',
+      '479f3bb1-b429-48fc-8a6a-1068739245ae',
+      'db0b8246-ce13-4a3a-87a7-98b8c1896062',
+      'e026588f-10ab-439f-b8ff-8bcce4f10ca1',
+      'c9fd4200-8588-4e9e-bfd9-76017f97865f',
+      'db8bbe53-e566-4174-b8f0-061baa7b13ba',
+      '6bb3e104-74d9-4ffd-b7e0-3cc5f0f8cb40',
+      '06e8cef4-e555-4874-a187-1071e4e09c77',
+      '10ac89a2-fe11-4b3b-b6ee-56820ab867bc',
+      'c3f996c1-2958-49a0-9c42-786fdca0a5a1',
+      'ab932b3a-4aed-4785-b684-5bc4abeb5d97',
+      '0ace4230-9694-46bf-a7da-dbbbd59f63ef',
+      '086e45ba-f8ac-4da7-a8b0-1309d44eb2c4',
+      'bb74fca7-4b27-49f3-b5b3-988e4833f4d9',
+      'caf9f852-be30-477d-bda9-38d15cec6e82',
+      'c4f38c75-e6a0-45d7-8371-3320a2a9e226',
+      'ec2c81e9-ed01-498a-957e-2e6981436722',
+      '70d4e45e-652d-4e98-bef9-5b59b0859419',
+      'ecf16c3d-8c75-4325-adde-ad4e867ed628',
+      '4361e322-409a-4aee-85d2-bccfbecd00fe'
+    );
+
+    // list = [
+    //   'f6faf3ee-0996-4454-8a05-db7fc6ab23c8',
+    //   '02af993c-812f-4720-b8be-942097c564cb',
+    //   '54a4bc37-977d-4e42-8d5e-6e72c5e9f8d3',
+    //   '364738d2-8799-41f4-920a-e76f8d8c5edc',
+    //   '7ba73ce1-4ed3-4359-a10e-7689c17fcf30',
+    //   '16ac5c90-f626-4141-b430-d18b08857d4e',
+    //   '338d9859-c158-41a2-aa3c-3cce66e8d15f',
+    // ];
+
     return list;
   }
 
   listTeeIfcId() {
     let list = ['285ec00f-42f1-4fb8-ad39-ee613d0c0cc6', '2b87c557-d077-49d2-9a50-f688537d54f0'];
+
+    list.push('e8d00ad6-6664-4dbc-ba9b-05f702096bca', '54b4c6b4-c005-4ef2-ba92-517bfdb088f6');
+    list.push('b4363d67-7dda-4639-9d8e-0c51807152a8', '611aa2f7-bf26-4dd0-8c19-7dc136fe770a');
+    list.push('0e4e1e33-1935-4f31-a363-c9d0dd1cdc8f', '52070d43-25c8-4e4b-bbbd-96f6bbfb9960');
+    list.push('b768d49c-db8d-405b-a871-6b532b7aee1d', '6bcfc1f7-b9b9-4b31-80b0-c4e6c1c30b36', '8e406bcc-c3d5-4fa7-9ad7-2de6a8b54c95');
 
     return list;
   }

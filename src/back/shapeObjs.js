@@ -151,4 +151,30 @@ export class ShapeObjs {
     obj.userData.rot = new THREE.Vector3(obj.rotation.x, obj.rotation.y, obj.rotation.z);
     obj.userData.scale = obj.scale.x;
   }
+
+  setRot2({ obj, posP, posC }) {
+    const dir2 = posC.clone().sub(posP[2]).normalize();
+    const dir1 = posP[0].clone().sub(posP[1]).normalize();
+    const dir3 = new THREE.Vector3().crossVectors(dir1, dir2).normalize();
+
+    let axis = new THREE.Vector3();
+    if (Math.abs(dir2.x) > 0.8) {
+      axis = dir2.x > 0 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(-1, 0, 0);
+    }
+    if (Math.abs(dir2.y) > 0.8) {
+      axis = dir2.y > 0 ? new THREE.Vector3(0, 1, 0) : new THREE.Vector3(0, -1, 0);
+    }
+    if (Math.abs(dir2.z) > 0.8) {
+      axis = dir2.z > 0 ? new THREE.Vector3(0, 0, 1) : new THREE.Vector3(0, 0, -1);
+    }
+    console.log(888, dir3, axis);
+    const m = new THREE.Matrix4().lookAt(new THREE.Vector3(), dir3, axis);
+    const rot = new THREE.Euler().setFromRotationMatrix(m);
+
+    obj.rotation.copy(rot);
+
+    obj.userData.pos = obj.position.clone();
+    obj.userData.rot = new THREE.Vector3(obj.rotation.x, obj.rotation.y, obj.rotation.z);
+    obj.userData.scale = obj.scale.x;
+  }
 }

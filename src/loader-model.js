@@ -21,46 +21,46 @@ export class LoaderModel {
   // список объектов по которым нужно считать изометрию
   getSelectedObjs() {
     let list = [
-      'ca6fe792-9ae3-46ab-a27c-28689bfe5d8d',
-      'd5fffdc0-21bf-4d47-a33d-3f76be59f6ee',
-      'e2c6a6ac-dead-473f-b198-4ceadf0ec1a5',
-      'bf28c05b-5d42-4b3c-801b-cd877ca0e685',
-      'e2a85d63-6909-41de-8979-ae595500adac',
-      '3d6ce9da-2497-4513-8633-bd2a5ff16a96',
-      'be7957d7-3d41-403c-a0e9-877b0ed31dc0',
-      'c7cf7786-f18b-4b37-b3fa-1aababdc2aca',
-      '3e195fb1-7bf7-4f27-a251-d627d95d22ed',
-      '86f91d2c-9909-4baf-9135-5c2b9130ddcd',
-      '92c0a722-c328-4406-9308-9d2ec0350dc8',
-      '14f2a7b6-be33-494c-9be6-1bf4bc27ae66',
-      'b36a8084-6e0c-4654-9df2-34df2ac9f81e',
-      '856aee35-3699-425b-b956-3f3289ab48ac',
-      'c596ac00-a3de-4e87-90b4-0fef9934c024',
-      'afda94bb-8862-436e-8505-7a576aa6f90c',
-      'a36243da-ca26-44a4-844d-aefcc735ecbc',
-      'f233fc42-9978-45c0-9766-41ee2582693c',
-      'a0e35bb3-6581-4e6e-b393-e824f9f7f8b7',
-      '8d01394e-d77f-4a4e-8156-7b20da553083',
-      'f7d16388-fbfd-48f2-a386-766bd7739c75',
-      'aa92fde1-7783-4c01-ac01-a3761b5106f9',
-      'd7e03a82-ca06-4877-9e46-7dfa4829bc29',
-      '7978ebe6-319a-4e66-9e86-00cf627c7698',
-      '54b4c6b4-c005-4ef2-ba92-517bfdb088f6',
-      '5c11622c-e520-43d1-906f-3e75e45083d6',
-      '1e8177ef-a639-414c-a138-ccf26d6c1a89',
-      'a111d141-a7bb-4825-83a1-ddc6fc3aa49d',
-      '3a9fac66-f7c6-420c-b6bf-789190977155',
+      '7de3ec3c-3105-479e-9e88-85ed8c925735',
+      '44e8df7c-2560-418e-b236-d4cb63295af7',
+      '6551fc32-a5c0-495e-90b3-25c4bf813c7a',
+      '5b098cf9-48a4-4605-9536-aad7442624f0',
+      '9572b527-b709-4e1e-93e2-3650b9cd8a92',
+      '96445ce0-f4e5-4148-9209-f601bdc30d96',
+      '99e148cb-2590-430e-9ddc-deca90a8f88c',
+      'd3b4ad7a-12b3-4390-ac34-f7fc9fe4b823',
+      '74aaa1ac-1a66-4651-8539-4b7f91575de7',
+      '69e76dfb-d41b-48f2-8550-f92bf35a25a0',
+      '32dff6b5-4613-4467-9736-93fe2f3a1a8e',
+      '04ac1803-99cf-4ebf-a652-eb8f6744ea03',
+      'd1c558f6-0239-4663-9789-845981251bfb',
+      '2183c8b5-0772-4b6e-aa09-b72efe2757bf',
+      '7d1add9a-0ecf-4553-b6a2-43f24d66be87',
+      '79b18808-0179-49f4-b029-5864fcddff6e',
+      '74ae18bd-41ad-4fc5-b834-3004afeac796',
+      '8a0c5017-3739-461b-9595-4fc6b2f40f84',
+      'c8dd8578-4584-4cbe-89a4-55c2ab3180a9',
+      '75cf4d5b-3c04-43fc-927c-6e8eec4aa604',
+      '086c730d-7434-433f-84bc-b830e7146f7b',
+      'e77bfaba-2634-4caf-b552-146f856ac382',
+      '10d36609-100c-48b3-b8ca-3ba683547c54',
+      '01dbabc4-5d58-411f-9408-d9f1fa92e093',
+      'ac59c9bd-8edb-49f6-8971-258e8cd6b43e',
+      'd625deb8-2cf2-4033-ad18-bcdc237098fd',
+      'ab10562a-e9ca-4db9-a570-86e09add9f94',
     ];
 
     list.push(
-      'c9ea24d2-dde3-4e8a-87f9-acfc5c87d3d8',
-      '20aad36a-da49-4cc7-ba1e-22f02441b1a5',
-      '2d0afe31-fe52-4487-8044-56f6cafd4494',
-      '1f4ee461-b89f-4af7-918a-75df1ae959a5',
-      '08d017e0-51b6-440a-ab9a-e19cee99b561',
-      '5eb39556-6448-4894-bb7c-3ffcbabefc35',
-      '0b744b37-e0c2-4ca3-84d2-27f6a9265c01'
+      'f6faf3ee-0996-4454-8a05-db7fc6ab23c8',
+      '02af993c-812f-4720-b8be-942097c564cb',
+      '54a4bc37-977d-4e42-8d5e-6e72c5e9f8d3',
+      '364738d2-8799-41f4-920a-e76f8d8c5edc',
+      '7ba73ce1-4ed3-4359-a10e-7689c17fcf30',
+      '16ac5c90-f626-4141-b430-d18b08857d4e',
+      '338d9859-c158-41a2-aa3c-3cce66e8d15f'
     );
+
+    list.push('285ec00f-42f1-4fb8-ad39-ee613d0c0cc6', '2b87c557-d077-49d2-9a50-f688537d54f0');
 
     list = [];
 
@@ -106,7 +106,10 @@ export class LoaderModel {
                   break;
                 }
               }
-              if (add) mesh.material.color.set(0xa129d9);
+              if (add) {
+                mesh.material.color.set(0xa129d9);
+                //arrValve.push(mesh);
+              }
 
               // краны
               if (!add) {
@@ -120,7 +123,7 @@ export class LoaderModel {
                 }
                 if (add) {
                   mesh.material.color.set(0xbfad04);
-                  arrValve.push(mesh);
+                  //arrValve.push(mesh);
                 }
               }
 
@@ -134,7 +137,10 @@ export class LoaderModel {
                     break;
                   }
                 }
-                if (add) mesh.material.color.set(0x02e8cd);
+                if (add) {
+                  mesh.material.color.set(0x02e8cd);
+                  arrValve.push(mesh);
+                }
               }
 
               if (type === 1) this.meshesModel.push(mesh);

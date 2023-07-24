@@ -73,8 +73,8 @@ export class Gis {
     //controls.enabled = false;
     isometricMode.changeMode('move');
     setMeshes({ arr: [...this.tubes, ...this.valves, ...this.tees, ...this.joins] });
-    changeCamera();
-    //this.fitCamera();
+    //changeCamera();
+    this.fitCamera();
   }
 
   fitCamera() {

@@ -199,7 +199,7 @@ export class PanelRp {
   createBtnView() {
     const containerDiv = document.querySelector('#labels-container-div');
 
-    const css = `position: absolute; bottom: 0; left: 50%; background: #F0F0F0; border: 1px solid #D1D1D1; border-radius: 4px; font-family: arial,sans-serif; z-index: 4; transform: translateX(-50%) translateY(-50%); cursor: pointer;`;
+    const css = `position: absolute; bottom: 0; left: 50%; background: #F0F0F0; border: 1px solid #D1D1D1; border-radius: 4px; font-family: arial,sans-serif; z-index: 4; transform: translateX(-50%) translateY(-50%); cursor: pointer; user-select: none;`;
 
     const html = `
     <div style="${css}">
