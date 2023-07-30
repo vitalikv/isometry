@@ -10,9 +10,13 @@ export class IsometricMovingObjs {
   scene;
   obj;
   offset;
+  axisX;
+  axisZ;
 
   constructor() {
     this.mapControlInit = mapControlInit;
+    this.axisX = this.createAxis();
+    this.axisZ = this.createAxis();
   }
 
   getParentObj({ obj }) {
@@ -49,6 +53,9 @@ export class IsometricMovingObjs {
 
       return new THREE.Vector2(x, y);
     }
+
+    this.mapControlInit.control.object.updateMatrixWorld();
+    this.mapControlInit.control.object.updateProjectionMatrix();
 
     const raycaster = new THREE.Raycaster();
     raycaster.setFromCamera(mouse, this.mapControlInit.control.object);
@@ -117,6 +124,7 @@ export class IsometricMovingObjs {
 
     // перетаскиваем стык
     if (this.obj.userData.isJoint) {
+      this.alignToAxis({ event });
       this.moveJoin({ obj: this.obj, offset, skipObj: null });
 
       this.connectJoints(event);
@@ -329,5 +337,165 @@ export class IsometricMovingObjs {
     const tubeGeometry = new THREE.TubeGeometry(pipeSpline, points.length, 0.05, 32, false);
     tubeObj.geometry.dispose();
     tubeObj.geometry = tubeGeometry;
+  }
+
+  createAxis(type = 'x') {
+    const material = new THREE.LineDashedMaterial({ color: 0x0000ff, dashSize: 1, gapSize: 0.5 });
+
+    const points = [];
+    if (type === 'x') {
+      points.push(new THREE.Vector3(-10, 0, 0));
+      points.push(new THREE.Vector3(10, 0, 0));
+    }
+    if (type === 'z') {
+      points.push(new THREE.Vector3(0, 0, -10));
+      points.push(new THREE.Vector3(0, 0, 10));
+    }
+
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+
+    const line = new THREE.Line(geometry, material);
+    line.computeLineDistances();
+    scene.add(line);
+
+    return line;
+  }
+
+  alignToAxis({ event }) {
+    const arr = gisdPage.joins;
+    //const v1 = this.getPosition2D({ camera, canvas, pos: this.obj.position });
+    //console.log(555, this.obj);
+
+    const canvas = this.mapControlInit.control.domElement;
+    const x1 = event.clientX - canvas.offsetLeft;
+    const y1 = event.clientY - canvas.offsetTop;
+    const v1 = new THREE.Vector2(x1, y1);
+
+    //this.axis.position.copy(this.obj.position);
+
+    // for (let i = 0; i < arr.length; i++) {
+    //   if (arr[i] === this.obj) continue;
+
+    //   const axis1 = this.createAxis();
+    //   const axis2 = this.createAxis('z');
+
+    //   axis1.position.copy(arr[i].position);
+    //   axis2.position.copy(arr[i].position);
+    // }
+
+    let pX = [];
+    let pZ = [];
+    const point = this.obj;
+    //const point2 = this.obj.userData.joins[0] === point ? this.obj.userData.joins[1] : this.obj.userData.joins[0];
+    const obj_point = gisdPage.joins;
+
+    for (let i = 0; i < obj_point.length; i++) {
+      if (obj_point[i] === point) {
+        continue;
+      }
+
+      var p1 = this.spPoint(obj_point[i].position, new THREE.Vector3().addVectors(obj_point[i].position, new THREE.Vector3(10, 0, 0)), point.position);
+      var p2 = this.spPoint(obj_point[i].position, new THREE.Vector3().addVectors(obj_point[i].position, new THREE.Vector3(0, 0, 10)), point.position);
+
+      var x = Math.abs(obj_point[i].position.x - p1.x);
+      var z = Math.abs(obj_point[i].position.z - p2.z);
+
+      if (x < 0.1) {
+        pX[pX.length] = i;
+      }
+      if (z < 0.1) {
+        pZ[pZ.length] = i;
+      }
+    }
+
+    if (pX.length > 0) {
+      var v = [];
+      for (var i = 0; i < pX.length; i++) {
+        v[i] = obj_point[pX[i]].position;
+      }
+      var n1 = pX[this.getMinDistanceVertex(v, point.position)];
+    }
+
+    if (pZ.length > 0) {
+      var v = [];
+      for (var i = 0; i < pZ.length; i++) {
+        v[i] = obj_point[pZ[i]].position;
+      }
+      var n2 = pZ[this.getMinDistanceVertex(v, point.position)];
+    }
+
+    // if (pX.length > 0 && pZ.length > 0) {
+    //   point.position.x = obj_point[n1].position.x;
+    //   point.position.y = obj_point[n2].position.y;
+    //   point.position.z = obj_point[n2].position.z;
+    //   this.dopFunct1(point, obj_point[n1].position, this.axisX, 'xz');
+    //   this.dopFunct1(point, obj_point[n2].position, this.axisZ, 'xz');
+    // } else {
+    //   pX.length > 0 ? this.dopFunct1(point, obj_point[n1].position, this.axisX, 'x') : (this.axisX.visible = false);
+    //   pZ.length > 0 ? this.dopFunct1(point, obj_point[n2].position, this.axisZ, 'z') : (this.axisZ.visible = false);
+    // }
+
+    this.axisX.visible = false;
+    this.axisZ.visible = false;
+    if (pX.length > 0) {
+      const dist = point.position.distanceTo(obj_point[n1].position);
+      this.dopFunct1(point, obj_point[n1].position, this.axisX, 'x');
+    } else if (pZ.length > 0) {
+      const dist = point.position.distanceTo(obj_point[n2].position);
+      this.dopFunct1(point, obj_point[n2].position, this.axisZ, 'z');
+    }
+  }
+
+  spPoint(A, B, C) {
+    var x1 = A.x,
+      y1 = A.z,
+      x2 = B.x,
+      y2 = B.z,
+      x3 = C.x,
+      y3 = C.z;
+    var px = x2 - x1,
+      py = y2 - y1,
+      dAB = px * px + py * py;
+    var u = ((x3 - x1) * px + (y3 - y1) * py) / dAB;
+    var x = x1 + u * px,
+      z = y1 + u * py;
+    return { x: x, y: 0, z: z };
+  }
+
+  // находим ближайшую точку к выброанной позиции
+  getMinDistanceVertex(v, pos) {
+    var minDist = 99999;
+    var hit = 0;
+
+    for (var i = 0; i < v.length; i++) {
+      var dist = pos.distanceTo(v[i]);
+      if (dist <= minDist) {
+        minDist = dist;
+        hit = i;
+      }
+    }
+
+    return hit;
+  }
+
+  // устанвливаем и показываем красные линии
+  dopFunct1(point, pos2, lineAxis, axis) {
+    //point.position.y = 0;
+    if (axis == 'x') {
+      point.position.x = pos2.x;
+      point.position.y = pos2.y;
+    }
+    if (axis == 'z') {
+      point.position.z = pos2.z;
+      point.position.y = pos2.y;
+    }
+
+    var pos2 = new THREE.Vector3(pos2.x, point.position.y, pos2.z);
+
+    var dir = new THREE.Vector3().subVectors(point.position, pos2).normalize();
+    var angleDeg = Math.atan2(dir.x, dir.z);
+    lineAxis.rotation.set(0, angleDeg + Math.PI / 2, 0);
+    lineAxis.position.copy(point.position);
+    lineAxis.visible = true;
   }
 }

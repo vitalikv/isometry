@@ -69,7 +69,7 @@ export class Gis {
 
   enable() {
     //isometricSheetsService.createSvgSheet();
-    //controls.enableRotate = false;
+    controls.enableRotate = false;
     //controls.enabled = false;
     isometricMode.changeMode('move');
     setMeshes({ arr: [...this.tubes, ...this.valves, ...this.tees, ...this.joins] });

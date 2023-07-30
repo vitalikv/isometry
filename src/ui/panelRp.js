@@ -3,6 +3,7 @@ export class PanelRp {
   elemBtnView;
   btns$ = [];
 
+  mapControlInit;
   isometricSchemeService;
   isometricScreenshot;
   isometricMode;
@@ -10,8 +11,10 @@ export class PanelRp {
   saveLoad;
   isometricLineStyle;
   isometricStampService;
+  isometricStampWorkersServiceж;
 
   constructor({
+    mapControlInit,
     isometricSchemeService,
     isometricScreenshot,
     isometricMode,
@@ -22,7 +25,9 @@ export class PanelRp {
     isometricLineStyle,
     isometricSheetsService,
     isometricStampService,
+    isometricStampWorkersService,
   }) {
+    this.mapControlInit = mapControlInit;
     this.isometricSchemeService = isometricSchemeService;
     this.joint = joint;
     this.isometricScreenshot = isometricScreenshot;
@@ -33,6 +38,7 @@ export class PanelRp {
     this.isometricLineStyle = isometricLineStyle;
     this.isometricSheetsService = isometricSheetsService;
     this.isometricStampService = isometricStampService;
+    this.isometricStampWorkersService = isometricStampWorkersService;
 
     this.init();
   }
@@ -64,6 +70,8 @@ export class PanelRp {
 
     this.btns$[18] = this.crBtn({ txt: 'штамп 1' });
     this.btns$[19] = this.crBtn({ txt: 'штамп 2' });
+
+    this.btns$[20] = this.crBtn({ txt: 'печать' });
 
     this.initEvent();
     this.createBtnView();
@@ -156,6 +164,10 @@ export class PanelRp {
     this.btns$[19].onmousedown = () => {
       this.isometricStampService.addStamp('2');
     };
+
+    this.btns$[20].onmousedown = () => {
+      this.isometricStampWorkersService.addStamp({});
+    };
   }
 
   crPanel() {
@@ -213,6 +225,7 @@ export class PanelRp {
 
     this.elemBtnView.onmousedown = (e) => {
       this.deleteBtnView();
+      this.mapControlInit.control.enableRotate = false;
     };
   }
 

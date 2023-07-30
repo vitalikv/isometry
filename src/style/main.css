@@ -3,3 +3,10 @@
 	font-family: 'Gostcadkk';
 	src: url('../font/gostcadkk.ttf') format('truetype');
 }
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('../font/Roboto-Light.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+}

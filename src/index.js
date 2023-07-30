@@ -21,6 +21,7 @@ import { CatchObj } from './catchObj';
 import { IsometricLineStyle } from './lineStyle';
 import { IsometricSheetsService } from './sheets';
 import { IsometricStampService } from './stamp';
+import { IsometricStampWorkersService } from './stampWorkers';
 
 import { PanelRp } from './ui/panelRp';
 
@@ -40,7 +41,9 @@ export let loaderModel,
   catchObj,
   isometricLineStyle,
   isometricSheetsService,
-  isometricStampService;
+  isometricStampService,
+  isometricStampWorkersService;
+
 let isomety;
 let meshes = [];
 
@@ -49,7 +52,7 @@ render();
 
 function init() {
   const div = document.createElement('div');
-  div.innerHTML = `<div style="position: fixed; top: 20px; bottom:0; left: 0; right: 0;"></div>`;
+  div.innerHTML = `<div style="position: fixed; top: 0px; bottom:0; left: 0; right: 0;"></div>`;
   const container = div.children[0];
   document.body.append(container);
 
@@ -186,10 +189,12 @@ function includeClasses() {
   isometricLineStyle = new IsometricLineStyle();
   isometricSheetsService = new IsometricSheetsService();
   isometricStampService = new IsometricStampService();
+  isometricStampWorkersService = new IsometricStampWorkersService();
 
   selectObj = new IsometricModeService({ mapControlInit });
 
   new PanelRp({
+    mapControlInit,
     isometricSchemeService: gisdPage,
     isometricScreenshot,
     ruler,
@@ -201,6 +206,7 @@ function includeClasses() {
     isometricLineStyle,
     isometricSheetsService,
     isometricStampService,
+    isometricStampWorkersService,
   });
 
   //isometricSheetsService.createSvgSheet('A4_2');
