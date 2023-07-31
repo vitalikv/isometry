@@ -14,6 +14,7 @@ import {
   isometricSheetsService,
   ruler as isometricRulerService,
   isometricLabels as isometricLabelsService,
+  isometricStampLegendService,
   deleteObj,
   changeCamera,
 } from './index';

@@ -15,6 +15,7 @@ import {
   isometricSheetsService,
   isometricStampService,
   isometricStampWorkersService,
+  isometricStampLegendService,
 } from './index';
 
 export class IsometricModeService {
@@ -72,6 +73,7 @@ export class IsometricModeService {
     if (event.code === 'Delete') {
       isometricStampService.deleteDiv();
       isometricStampWorkersService.deleteDiv();
+      isometricStampLegendService.deleteDiv();
 
       const done = deleteObj.delete(this.actObj);
       if (done) this.clearActivateObj();
@@ -145,6 +147,9 @@ export class IsometricModeService {
     if (result) return;
 
     isometricStampWorkersService.onmousedown(event);
+    if (result) return;
+
+    isometricStampLegendService.onmousedown(event);
     if (result) return;
 
     if (this.mode === 'sheet') {
@@ -222,6 +227,7 @@ export class IsometricModeService {
   onmousemove = (event) => {
     isometricStampService.onmousemove(event);
     isometricStampWorkersService.onmousemove(event);
+    isometricStampLegendService.onmousemove(event);
 
     if (this.isDown) this.isMove = true;
 
@@ -259,6 +265,7 @@ export class IsometricModeService {
   onmouseup = (event) => {
     isometricStampService.onmouseup(event);
     isometricStampWorkersService.onmouseup(event);
+    isometricStampLegendService.onmouseup(event);
 
     if (this.mode === 'sheet') {
       isometricSheetsService.onmouseup(event);

@@ -22,6 +22,7 @@ import { IsometricLineStyle } from './lineStyle';
 import { IsometricSheetsService } from './sheets';
 import { IsometricStampService } from './stamp';
 import { IsometricStampWorkersService } from './stampWorkers';
+import { IsometricStampLegendService } from './stampLegend';
 
 import { PanelRp } from './ui/panelRp';
 
@@ -42,7 +43,8 @@ export let loaderModel,
   isometricLineStyle,
   isometricSheetsService,
   isometricStampService,
-  isometricStampWorkersService;
+  isometricStampWorkersService,
+  isometricStampLegendService;
 
 let isomety;
 let meshes = [];
@@ -190,6 +192,7 @@ function includeClasses() {
   isometricSheetsService = new IsometricSheetsService();
   isometricStampService = new IsometricStampService();
   isometricStampWorkersService = new IsometricStampWorkersService();
+  isometricStampLegendService = new IsometricStampLegendService();
 
   selectObj = new IsometricModeService({ mapControlInit });
 
@@ -207,6 +210,7 @@ function includeClasses() {
     isometricSheetsService,
     isometricStampService,
     isometricStampWorkersService,
+    isometricStampLegendService,
   });
 
   //isometricSheetsService.createSvgSheet('A4_2');

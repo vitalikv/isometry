@@ -26,6 +26,7 @@ export class PanelRp {
     isometricSheetsService,
     isometricStampService,
     isometricStampWorkersService,
+    isometricStampLegendService,
   }) {
     this.mapControlInit = mapControlInit;
     this.isometricSchemeService = isometricSchemeService;
@@ -39,6 +40,7 @@ export class PanelRp {
     this.isometricSheetsService = isometricSheetsService;
     this.isometricStampService = isometricStampService;
     this.isometricStampWorkersService = isometricStampWorkersService;
+    this.isometricStampLegendService = isometricStampLegendService;
 
     this.init();
   }
@@ -72,6 +74,7 @@ export class PanelRp {
     this.btns$[19] = this.crBtn({ txt: 'штамп 2' });
 
     this.btns$[20] = this.crBtn({ txt: 'печать' });
+    this.btns$[21] = this.crBtn({ txt: 'легенда' });
 
     this.initEvent();
     this.createBtnView();
@@ -167,6 +170,10 @@ export class PanelRp {
 
     this.btns$[20].onmousedown = () => {
       this.isometricStampWorkersService.addStamp({});
+    };
+
+    this.btns$[21].onmousedown = () => {
+      this.isometricStampLegendService.addStamp();
     };
   }
 
